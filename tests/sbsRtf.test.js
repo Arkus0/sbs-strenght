@@ -180,17 +180,21 @@ test('manual training max overrides apply to the selected week', () => {
   assert.equal(squat.weight, 375)
 })
 
-test('specimen assistance is deterministic and deload-aware', () => {
+test('specimen assistance is deterministic and sourced from training montage', () => {
   const normal = specimenForPlan(3, 1, 1)
   const repeat = specimenForPlan(3, 1, 1)
   const deload = specimenForPlan(3, 7, 1)
 
   assert.deepEqual(normal, repeat)
-  assert.match(`${normal.upperBack.title} ${normal.upperBack.prescription}`, /remo|row|jalon|dominada|pull/i)
-  assert.ok(['carry', 'conditioning', 'odd_object', 'assistance'].includes(normal.assistance.type))
-  assert.equal(deload.assistance.type, 'deload')
-  assert.equal(deload.upperBack.title, 'Remo ligero')
-  assert.equal(timerFromSpecimen(normal).seconds > 0, true)
+  assert.equal(normal.sourcePolicy, 'training-montage')
+  assert.equal(normal.upperBackOptions.length, 3)
+  assert.equal(normal.assistanceOptions.length, 5)
+  assert.match(`${normal.upperBack.title} ${normal.upperBack.prescription}`, /row|pull|chin/i)
+  assert.ok(['carry', 'conditioning', 'assistance'].includes(normal.assistance.type))
+  assert.ok(normal.assistanceOptions.some((option) => option.tags.includes('calisthenics')))
+  assert.equal(deload.sourcePolicy, 'training-montage')
+  assert.ok(deload.assistance.source.program)
+  assert.equal(timerFromSpecimen(normal).seconds >= 0, true)
 })
 
 test('specimen template is contextual to the SBS day and cycle phase', () => {
@@ -199,14 +203,15 @@ test('specimen template is contextual to the SBS day and cycle phase', () => {
   const deadliftPeak = specimenForPlan(4, 15, 3)
 
   assert.equal(squatHingeDay.profile.focusList.includes('hinge'), true)
-  assert.equal(squatHingeDay.upperBack.title, 'Remo pecho apoyado')
-  assert.doesNotMatch(squatHingeDay.assistance.title, /sandbag to shoulder|zercher|posterior/i)
+  assert.ok(squatHingeDay.upperBack.source.program)
+  assert.ok(squatHingeDay.assistanceOptions.some((option) => option.tags.includes('legs')))
 
   assert.equal(pressDay.profile.focusList.includes('press'), true)
-  assert.match(pressDay.upperBack.title, /Face pull|Remo|Dominada|Jalon|Seal|Kroc/)
+  assert.ok(pressDay.upperBackOptions.some((option) => option.tags.includes('pull')))
+  assert.ok(pressDay.assistanceOptions.some((option) => option.tags.includes('press')))
 
   assert.equal(deadliftPeak.phase, 'peak')
-  assert.doesNotMatch(deadliftPeak.assistance.title, /sandbag|zercher|posterior/i)
+  assert.equal(deadliftPeak.sourcePolicy, 'training-montage')
 })
 
 test('specimen template keeps broad no-sled variety across the 21 week cycle', () => {
@@ -225,11 +230,14 @@ test('specimen template keeps broad no-sled variety across the 21 week cycle', (
     }
   }
 
-  const upperBackTitles = new Set(sessions.map((session) => session.upperBack.title))
-  const assistanceTitles = new Set(sessions.map((session) => session.assistance.title))
-  const allText = sessions.map((session) => `${session.upperBack.title} ${session.assistance.title} ${session.assistance.prescription}`).join(' ')
+  const upperBackTitles = new Set(sessions.flatMap((session) => session.upperBackOptions.map((option) => option.title)))
+  const assistanceTitles = new Set(sessions.flatMap((session) => session.assistanceOptions.map((option) => option.title)))
+  const allOptions = sessions.flatMap((session) => [...session.upperBackOptions, ...session.assistanceOptions])
+  const allText = allOptions.map((option) => `${option.title} ${option.prescription}`).join(' ')
 
   assert.ok(upperBackTitles.size >= 7)
-  assert.ok(assistanceTitles.size >= 8)
+  assert.ok(assistanceTitles.size >= 12)
+  assert.ok(allOptions.every((option) => option.source?.program && option.source?.week && option.source?.day))
+  assert.match(allText, /Push-Ups|Dips|Squats|Pull-Ups/)
   assert.doesNotMatch(allText, /sled|trineo/i)
 })

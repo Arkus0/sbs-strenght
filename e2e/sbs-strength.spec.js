@@ -50,8 +50,8 @@ test('autosaves an in-progress session and applies single @8 live', async ({ pag
   await page.getByLabel('Peso serie actual Squat').fill('460')
   await expect(page.getByText('357.5')).toBeVisible()
   await page.getByLabel('Reps Serie 5 AMRAP Squat').fill('12')
-  await page.getByRole('button', { name: 'Usar template specimen' }).click()
-  await expect(page.locator('section[aria-labelledby="upper-back-title"] select')).toHaveValue(/Remo pecho apoyado/)
+  await page.getByRole('button', { name: 'Aplicar templates elegidos' }).click()
+  await expect(page.locator('section[aria-labelledby="upper-back-title"] select')).toHaveValue(/Rows|Pull|Chin/)
 
   await page.reload()
   await expect(page.getByRole('heading', { name: 'Semana 1 Dia 1' })).toBeVisible()

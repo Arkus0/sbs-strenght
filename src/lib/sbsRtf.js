@@ -271,7 +271,12 @@ export function normalizeSessionLogForPlan(plan, log = {}) {
       ...(base.accessories?.[index] || {})
     })),
     notes: base.notes || '',
-    specimenAccepted: Boolean(base.specimenAccepted)
+    specimenAccepted: Boolean(base.specimenAccepted),
+    specimenSelection: {
+      upperBackId: '',
+      assistanceId: '',
+      ...(base.specimenSelection || {})
+    }
   }
 }
 

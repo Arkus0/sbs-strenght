@@ -370,6 +370,68 @@ td input {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.template-picker {
+  display: grid;
+  gap: 12px;
+}
+
+.template-column {
+  display: grid;
+  gap: 8px;
+}
+
+.template-option {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #cfd8cf;
+  background: rgba(255, 253, 247, 0.7);
+  padding: 10px;
+  text-align: left;
+}
+
+.template-option.active {
+  border-color: #1d6b54;
+  background: #edf6ef;
+  box-shadow: inset 4px 0 0 #1d6b54;
+}
+
+.template-option strong,
+.template-option span,
+.template-option small {
+  min-width: 0;
+}
+
+.template-option span {
+  color: #3e474d;
+  font-size: 0.9rem;
+}
+
+.template-option small {
+  color: #687178;
+  font-weight: 850;
+}
+
+.source-raw {
+  border-top: 1px solid #cfd8cf;
+  padding-top: 10px;
+}
+
+.source-raw summary {
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.source-raw pre {
+  white-space: pre-wrap;
+  overflow-x: auto;
+  margin: 10px 0 0;
+  padding: 10px;
+  border: 1px solid #d1c8b7;
+  background: #fffdf7;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
 .analytics-hero {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   padding: 14px;
@@ -423,6 +485,10 @@ td input {
 .accessory-list {
   display: grid;
   gap: 12px;
+}
+
+.accessory-notes {
+  margin-top: 8px;
 }
 
 .set-flow {
@@ -779,6 +845,11 @@ summary {
 
   .dashboard-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .template-picker {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: start;
   }
 }
 

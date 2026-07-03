@@ -238,6 +238,8 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
     }),
     [plan.day, plan.deload, plan.frequency, plan.lifts, plan.week]
   )
+  const [selectedUpperBackId, setSelectedUpperBackId] = useState('')
+  const [selectedAssistanceId, setSelectedAssistanceId] = useState('')
   const latestAccessory = useMemo(() => {
     const entries = Object.values(logs)
       .filter((log) => log.id !== plan.id)
@@ -255,6 +257,8 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
   useEffect(() => {
     setActiveLiftIndex(0)
     setActiveSetIndex(0)
+    setSelectedUpperBackId(currentLog.specimenSelection?.upperBackId || specimen.upperBack.id)
+    setSelectedAssistanceId(currentLog.specimenSelection?.assistanceId || specimen.assistance.id)
   }, [plan.id])
 
   const activeLift = plan.lifts[activeLiftIndex] || plan.lifts[0]
@@ -264,6 +268,8 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
   const activeSetDone = Boolean(activeSet?.done)
   const activeSetNeedsReps = activeSet?.kind === 'amrap'
   const activeSetHasRequiredReps = !activeSetNeedsReps || Number(displaySetReps(activeSet)) > 0
+  const selectedUpperBack = specimen.upperBackOptions.find((option) => option.id === selectedUpperBackId) || specimen.upperBack
+  const selectedAssistance = specimen.assistanceOptions.find((option) => option.id === selectedAssistanceId) || specimen.assistance
 
   useEffect(() => {
     if (activeSetIndex >= activeSets.length) setActiveSetIndex(Math.max(0, activeSets.length - 1))
@@ -354,19 +360,24 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
     const accessories = [...currentLog.accessories]
     accessories[0] = {
       ...(accessories[0] || {}),
-      name: specimen.assistance.title,
-      reps: specimen.assistance.prescription,
-      notes: `${specimen.assistance.notes} Fuente: ${specimen.assistance.source}`
+      name: selectedAssistance.title,
+      sets: selectedAssistance.timer?.rounds ? `${selectedAssistance.timer.rounds}` : accessories[0]?.sets || '',
+      reps: selectedAssistance.shortPrescription,
+      notes: `${selectedAssistance.prescription}\n\n${selectedAssistance.notes}`
     }
     onLogChange({
       ...currentLog,
       updatedAt: new Date().toISOString(),
       specimenAccepted: true,
+      specimenSelection: {
+        upperBackId: selectedUpperBack.id,
+        assistanceId: selectedAssistance.id
+      },
       upperBack: {
         ...currentLog.upperBack,
-        exercise: specimen.upperBack.title,
-        reps: specimen.upperBack.prescription,
-        notes: `${specimen.upperBack.fallback} Fuente: ${specimen.upperBack.source}`
+        exercise: selectedUpperBack.title,
+        reps: selectedUpperBack.shortPrescription,
+        notes: `${selectedUpperBack.prescription}\n\n${selectedUpperBack.notes}`
       },
       accessories
     })
@@ -593,23 +604,43 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
           </div>
           <span className="status-pill">Dosis {specimen.density}</span>
         </div>
-        <div className="specimen-grid">
-          <article>
+        <div className="template-picker">
+          <div className="template-column">
             <span className="muted">Upper back</span>
-            <h3>{specimen.upperBack.title}</h3>
-            <p>{specimen.upperBack.prescription}</p>
-            <small>{specimen.upperBack.emphasis}</small>
-          </article>
-          <article>
-            <span className="muted">Asistencia</span>
-            <h3>{specimen.assistance.title}</h3>
-            <p>{specimen.assistance.prescription}</p>
-            <small>{specimen.assistance.emphasis}</small>
-          </article>
+            {specimen.upperBackOptions.map((option) => (
+              <button
+                className={`template-option ${option.id === selectedUpperBack.id ? 'active' : ''}`}
+                key={option.id}
+                onClick={() => setSelectedUpperBackId(option.id)}
+              >
+                <strong>{option.title}</strong>
+                <span>{option.shortPrescription}</span>
+                <small>{option.sourceLabel}</small>
+              </button>
+            ))}
+          </div>
+          <div className="template-column">
+            <span className="muted">Asistencia / conditioning</span>
+            {specimen.assistanceOptions.map((option) => (
+              <button
+                className={`template-option ${option.id === selectedAssistance.id ? 'active' : ''}`}
+                key={option.id}
+                onClick={() => setSelectedAssistanceId(option.id)}
+              >
+                <strong>{option.title}</strong>
+                <span>{option.shortPrescription}</span>
+                <small>{option.sourceLabel}</small>
+              </button>
+            ))}
+          </div>
         </div>
+        <details className="source-raw">
+          <summary>Prescripcion completa seleccionada</summary>
+          <pre>{selectedAssistance.prescription}</pre>
+        </details>
         <p className="delta-note">{specimen.rationale.join(' ')}</p>
         <button className="primary" onClick={applySpecimenTemplate}>
-          Usar template specimen
+          Aplicar templates elegidos
         </button>
       </section>
 
@@ -659,7 +690,8 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
           </label>
           <label>
             Notas
-            <input
+            <textarea
+              rows="3"
               value={currentLog.upperBack?.notes || ''}
               onChange={(event) =>
                 onLogChange({ ...currentLog, upperBack: { ...currentLog.upperBack, notes: event.target.value } })
@@ -695,6 +727,14 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
                   <input value={item.reps || ''} onChange={(event) => updateAccessory(index, { reps: event.target.value })} />
                 </label>
               </div>
+              <label className="accessory-notes">
+                Notas
+                <textarea
+                  rows="3"
+                  value={item.notes || ''}
+                  onChange={(event) => updateAccessory(index, { notes: event.target.value })}
+                />
+              </label>
             </div>
           ))}
         </div>

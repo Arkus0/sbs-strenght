@@ -11,440 +11,435 @@ const SLOT_FOCUS = {
   aux_6: 'overhead'
 }
 
-const UPPER_BACK_POOL = [
-  {
-    id: 'weighted-pull-up',
-    title: 'Dominada pesada',
-    prescription: '4-5 series de 4-6 dominadas lastradas o 6-8 estrictas. Descanso completo.',
-    fallback: 'Jalon neutro pesado 4x8 si no hay dominada solida.',
-    emphasis: 'Traccion vertical pesada sin convertir la sesion en otra biserie.',
-    tags: ['vertical_pull', 'grip', 'heavy'],
-    prefer: ['press', 'overhead'],
-    avoid: [],
-    phase: ['base', 'build'],
-    fatigue: 'moderate',
-    source: 'EDC/Powerbuilder: weighted pull-ups, chin-ups.'
-  },
-  {
-    id: 'chest-supported-row',
-    title: 'Remo pecho apoyado',
-    prescription: '4 series de 8-12 reps pesado y estricto.',
-    fallback: 'Seal row, remo en maquina o remo con mancuerna apoyado.',
-    emphasis: 'Espalda alta y lats sin cargar erectores tras sentadilla/deadlift.',
-    tags: ['horizontal_pull', 'supported', 'upper_back'],
-    prefer: ['hinge', 'squat', 'press'],
-    avoid: [],
-    phase: ['base', 'build', 'peak'],
-    fatigue: 'low',
-    source: 'Powerbuilder: chest supported rows, seal rows.'
-  },
-  {
-    id: 'kroc-row',
-    title: 'Kroc row controlado',
-    prescription: '3 series de 12-20 reps por lado, pesado pero sin straps si puedes.',
-    fallback: 'Landmine row unilateral o chest-supported DB row.',
-    emphasis: 'Agarre, dorsales y upper back con transferencia a carries.',
-    tags: ['horizontal_pull', 'grip', 'unilateral'],
-    prefer: ['press', 'overhead'],
-    avoid: ['hinge'],
-    phase: ['base', 'build'],
-    fatigue: 'moderate',
-    source: 'EDC/Powerbuilder: single-arm DB/KB rows, Kroc rows, landmine rows.'
-  },
-  {
-    id: 'dead-hang',
-    title: 'Dead hang',
-    prescription: '5-7 minutos acumulados de dead hang. Descansa lo necesario.',
-    fallback: 'Towel hang o farmer hold si no hay barra.',
-    emphasis: 'Agarre, hombro sano y tolerancia mental.',
-    tags: ['grip', 'shoulder_health', 'low_eccentric'],
-    prefer: ['hinge', 'peak'],
-    avoid: [],
-    phase: ['base', 'build', 'peak'],
-    fatigue: 'low',
-    source: 'EDC: 7 minute dead hang with burpee penalty.'
-  },
-  {
-    id: 'pendlay-row',
-    title: 'Pendlay row',
-    prescription: '5 series de 5-8 reps explosivas desde el suelo, dejando 1-2 reps en recamara.',
-    fallback: 'Barbell row desde bloques si el suelo no encaja.',
-    emphasis: 'Upper back fuerte y transferencia a tirar objetos pesados.',
-    tags: ['horizontal_pull', 'barbell', 'lumbar'],
-    prefer: ['press'],
-    avoid: ['hinge', 'squat', 'peak'],
-    phase: ['base'],
-    fatigue: 'high',
-    source: 'Powerbuilder: Pendlay rows.'
-  },
-  {
-    id: 'lat-pulldown-volume',
-    title: 'Jalon neutro',
-    prescription: '4 series de 10-15 reps con pausa abajo.',
-    fallback: 'Band lat pulldown arrodillado o dominada asistida.',
-    emphasis: 'Dorsal y depresion escapular con baja fatiga sistemica.',
-    tags: ['vertical_pull', 'supported', 'low_eccentric'],
-    prefer: ['hinge', 'squat', 'peak'],
-    avoid: [],
-    phase: ['base', 'build', 'peak'],
-    fatigue: 'low',
-    source: 'Powerbuilder: pull-downs and pull-up variations.'
-  },
-  {
-    id: 'inverted-row',
-    title: 'Inverted row pies elevados',
-    prescription: '5 series de 8-15 reps estrictas, pecho a la barra.',
-    fallback: 'Ring row o TRX row con tempo 3s bajada.',
-    emphasis: 'Escapulas, romboides y control corporal.',
-    tags: ['horizontal_pull', 'calisthenics', 'upper_back'],
-    prefer: ['press', 'overhead'],
-    avoid: [],
-    phase: ['base', 'build'],
-    fatigue: 'low',
-    source: 'EDC/Powerbuilder: inverted rows, bodyweight rows.'
-  },
-  {
-    id: 'landmine-row',
-    title: 'Landmine row unilateral',
-    prescription: '4 series de 8-12 reps por lado.',
-    fallback: 'Remo mancuerna a una mano o cable row unilateral.',
-    emphasis: 'Lats, oblicuos y agarre con carga asimetrica.',
-    tags: ['horizontal_pull', 'unilateral', 'core'],
-    prefer: ['press', 'overhead'],
-    avoid: ['hinge'],
-    phase: ['base', 'build'],
-    fatigue: 'moderate',
-    source: 'EDC/Powerbuilder: landmine rows, unilateral rows.'
-  },
-  {
-    id: 'seal-row',
-    title: 'Seal row',
-    prescription: '4 series de 8-10 reps con pausa contra el banco.',
-    fallback: 'Remo pecho apoyado con mancuernas.',
-    emphasis: 'Espalda alta pesada sin hacer trampa con lumbar.',
-    tags: ['horizontal_pull', 'supported', 'heavy'],
-    prefer: ['hinge', 'squat'],
-    avoid: [],
-    phase: ['base', 'build'],
-    fatigue: 'low',
-    source: 'Powerbuilder: seal rows.'
-  },
-  {
-    id: 'straight-arm-pulldown',
-    title: 'Straight-arm pull-down',
-    prescription: '3-4 series de 15-20 reps, bombeo fuerte sin fallo.',
-    fallback: 'Pullover con banda, cable o mancuerna.',
-    emphasis: 'Dorsales y extension de hombro con fatiga baja.',
-    tags: ['lat_isolation', 'low_eccentric'],
-    prefer: ['hinge', 'peak'],
-    avoid: [],
-    phase: ['build', 'peak'],
-    fatigue: 'low',
-    source: 'Powerbuilder: band/cable pull-downs.'
-  },
-  {
-    id: 'face-pull-rear-delt',
-    title: 'Face pull',
-    prescription: '4 series de 15-25 reps, pausa 1s con escapulas atras.',
-    fallback: 'Band pull-aparts o rear-delt row ligero.',
-    emphasis: 'Deltoide posterior, manguito y salud de hombro para tanto pressing.',
-    tags: ['rear_delt', 'shoulder_health', 'low_eccentric'],
-    prefer: ['press', 'overhead', 'peak'],
-    avoid: [],
-    phase: ['base', 'build', 'peak'],
-    fatigue: 'low',
-    source: 'Powerbuilder: face pulls, band pull-aparts.'
-  },
-  {
-    id: 'two-step-back',
-    title: 'Remo + jalon separados',
-    prescription: 'Remo maquina 3x10-12. Descansa. Despues jalon recto 2x15-20.',
-    fallback: 'Cualquier remo apoyado + pullover con banda.',
-    emphasis: 'Dos angulos de espalda sin formato biserie ni densidad agresiva.',
-    tags: ['horizontal_pull', 'lat_isolation', 'supported'],
-    prefer: ['press'],
-    avoid: ['hinge'],
-    phase: ['base', 'build'],
-    fatigue: 'moderate',
-    source: 'Powerbuilder: row plus lat isolation as assistance.'
+function sourceBlock(block) {
+  const title = block.raw.split('\n').find(Boolean) || block.id
+  return {
+    ...block,
+    title,
+    role: block.source.role,
+    sourceLabel: `${block.source.label} W${block.source.week}D${block.source.day} ${block.source.role}`,
+    prescription: block.raw,
+    shortPrescription: shortPrescription(block.raw),
+    notes: `Fuente real: ${block.source.label} W${block.source.week}D${block.source.day}, ${block.source.role}.`
   }
-]
-
-const ASSISTANCE_POOL = [
-  {
-    id: 'farmer-emom',
-    title: 'Farmer carry EMOM',
-    type: 'carry',
-    prescription: '10 minutos EMOM: 50 ft farmer carry pesado. Resto del minuto descanso.',
-    notes: 'Empieza moderado; sube carga si completas todas las rondas sin drops.',
-    timer: { mode: 'emom', minutes: 10, intervalSec: 60 },
-    emphasis: 'Agarre, traps, core y fuerza bruta transportando carga.',
-    tags: ['carry', 'grip', 'core', 'low_eccentric'],
-    prefer: ['press', 'overhead', 'base'],
-    avoid: ['hinge'],
-    fatigue: 'moderate',
-    source: 'EDC/Powerbuilder: 50-150 ft farmer walk EMOM.'
-  },
-  {
-    id: 'sandbag-bearhug',
-    title: 'Sandbag bear-hug carry',
-    type: 'odd_object',
-    prescription: '8 rondas: 50 ft bear-hug sandbag carry o march in place pesado.',
-    notes: 'Si no hay sandbag: Zercher carry, plate hug carry o keg/odd object.',
-    timer: { mode: 'emom', minutes: 8, intervalSec: 60 },
-    emphasis: 'Upper back isometrico, brace y objeto raro.',
-    tags: ['odd_object', 'carry', 'brace', 'upper_back'],
-    prefer: ['press', 'base'],
-    avoid: ['hinge', 'squat', 'peak'],
-    fatigue: 'high',
-    source: 'EDC: sandbag carry, odd object front carry, bear hug position.'
-  },
-  {
-    id: 'pull-push-squat-ladder',
-    title: 'Ladder calistenico',
-    type: 'conditioning',
-    prescription: '10 minutos: 1 pull-up, 2 burpees, 3 push-ups, 4 squats. Sube 1/2/3/4 cada minuto hasta fallar tecnico.',
-    notes: 'Usa inverted rows si las dominadas rompen el ritmo. Para semanas pesadas, corta en RPE 8.',
-    timer: { mode: 'amrap', minutes: 10 },
-    emphasis: 'Motor, calistenia y espalda sin interferir demasiado con SBS.',
-    tags: ['conditioning', 'calisthenics', 'mixed'],
-    prefer: ['squat', 'base'],
-    avoid: ['overhead', 'peak'],
-    fatigue: 'moderate',
-    source: 'EDC/Powerbuilder: pull-up/burpee/push-up/squat running-clock ladders.'
-  },
-  {
-    id: 'bodyweight-density',
-    title: 'Density cada 30 segundos',
-    type: 'conditioning',
-    prescription: '10 minutos: cada 30s completa 3 pull-ups, 7 push-ups, 12 squats.',
-    notes: 'Escala a 2/5/8 o inverted rows. El objetivo es no perder el reloj.',
-    timer: { mode: 'interval', minutes: 10, workSec: 30, restSec: 0 },
-    emphasis: 'Capacidad de trabajo tipo Alsruhe sin material.',
-    tags: ['conditioning', 'calisthenics', 'mixed'],
-    prefer: ['base'],
-    avoid: ['peak'],
-    fatigue: 'moderate',
-    source: 'EDC: every 30 seconds, pull-ups/push-ups/squats.'
-  },
-  {
-    id: 'waiter-farmer',
-    title: 'Waiter + farmer walk unilateral',
-    type: 'carry',
-    prescription: '4 rondas: 100 ft waiter walk izq, 100 ft farmer walk der, cambia lados y repite.',
-    notes: 'Manten costillas abajo y bloquea overhead. Descansa 90s entre rondas.',
-    timer: { mode: 'rounds', rounds: 4, restSec: 90 },
-    emphasis: 'Estabilidad overhead, oblicuos, agarre y anti-flexion.',
-    tags: ['carry', 'overhead_stability', 'grip', 'unilateral'],
-    prefer: ['squat', 'press'],
-    avoid: ['overhead'],
-    fatigue: 'moderate',
-    source: 'EDC: waiter walk/farmer walk unilateral AMRAP.'
-  },
-  {
-    id: 'odd-object-medley',
-    title: 'Medley objeto raro',
-    type: 'odd_object',
-    prescription: '4 rondas: 50 ft single-arm farmer izq, 50 ft sandbag bear-hug, 50 ft single-arm farmer der.',
-    notes: 'Descansa 90-120s. Anade peso solo si no se degrada la postura.',
-    timer: { mode: 'rounds', rounds: 4, restSec: 120 },
-    emphasis: 'Fuerza bruta, conditioning y grip bajo fatiga.',
-    tags: ['odd_object', 'carry', 'conditioning', 'grip'],
-    prefer: ['base'],
-    avoid: ['hinge', 'squat', 'peak'],
-    fatigue: 'high',
-    source: 'EDC: farmer/sandbag/farmer medley.'
-  },
-  {
-    id: 'hinge-row-core',
-    title: 'Posterior + row + core',
-    type: 'assistance',
-    prescription: '10-12 minutos AMRAP: 8 RDL ligero/moderado, 12 rows, 10 hanging knee raises.',
-    notes: 'Evita hacerlo pesado en semanas de deadlift duro; debe sentirse atletico.',
-    timer: { mode: 'amrap', minutes: 12 },
-    emphasis: 'Cadena posterior, lats y trunk sin competir con el lift principal.',
-    tags: ['hinge', 'row', 'core'],
-    prefer: ['press'],
-    avoid: ['hinge', 'squat', 'peak'],
-    fatigue: 'high',
-    source: 'Powerbuilder: RDL/rows/hanging raises AMRAP patterns.'
-  },
-  {
-    id: 'pushup-crawl',
-    title: 'Push-up + locomotion',
-    type: 'conditioning',
-    prescription: '3 rondas: 45-60s max push-ups, 100 ft bear walk, 100 ft gator walk, 100 ft crab walk.',
-    notes: 'Descanso minimo, pero manten hombros estables. Reduce push-ups si hubo mucho bench.',
-    timer: { mode: 'rounds', rounds: 3, restSec: 60 },
-    emphasis: 'Calistenia, hombros, core y acondicionamiento raro.',
-    tags: ['conditioning', 'calisthenics', 'locomotion', 'pressing'],
-    prefer: ['squat', 'hinge'],
-    avoid: ['press', 'overhead', 'peak'],
-    fatigue: 'moderate',
-    source: 'EDC: push-ups, bear/gator/crab walks.'
-  },
-  {
-    id: 'backward-walk-stepup',
-    title: 'Backward walk + step-up',
-    type: 'conditioning',
-    prescription: '8 rondas: 45s caminata atras en cuesta o cinta inclinada, 10 step-ups por pierna, descanso 60-75s.',
-    notes: 'Sin impacto y sin trineo. Usa chaleco o mancuernas ligeras solo si no cambia la mecanica.',
-    timer: { mode: 'rounds', rounds: 8, restSec: 75 },
-    emphasis: 'Piernas, pulmones y rodillas felices sin eccentric brutal.',
-    tags: ['conditioning', 'legs', 'low_eccentric'],
-    prefer: ['press', 'overhead', 'peak'],
-    avoid: [],
-    fatigue: 'low',
-    source: 'Adaptacion sin sled de patrones EDC/Powerbuilder de drag/push.'
-  },
-  {
-    id: 'zercher-carry',
-    title: 'Zercher carry',
-    type: 'odd_object',
-    prescription: '6 rondas: 30-50m Zercher carry pesado.',
-    notes: 'Usa sandbag/front carry si los codos protestan. Brace brutal, pasos cortos.',
-    timer: { mode: 'rounds', rounds: 6, restSec: 90 },
-    emphasis: 'Core, upper back y fuerza de objeto incomodo.',
-    tags: ['odd_object', 'carry', 'brace', 'upper_back'],
-    prefer: ['press', 'base'],
-    avoid: ['hinge', 'squat', 'peak'],
-    fatigue: 'high',
-    source: 'EDC: front carry, bear-hug and odd-object loading.'
-  },
-  {
-    id: 'burpee-pullup-emom',
-    title: 'Burpee pull-up EMOM',
-    type: 'conditioning',
-    prescription: '10 minutos EMOM: 3 burpee pull-ups o 5 burpees + 3 inverted rows.',
-    notes: 'Debe ser sostenible; no lo conviertas en fallo desde el minuto 3.',
-    timer: { mode: 'emom', minutes: 10, intervalSec: 60 },
-    emphasis: 'Motor, calistenia y traccion bajo fatiga.',
-    tags: ['conditioning', 'calisthenics', 'vertical_pull'],
-    prefer: ['squat', 'base'],
-    avoid: ['overhead', 'peak'],
-    fatigue: 'moderate',
-    source: 'EDC: burpees, pull-ups and running-clock conditioning.'
-  },
-  {
-    id: 'suitcase-carry',
-    title: 'Suitcase carry pesado',
-    type: 'carry',
-    prescription: '5 rondas por lado: 40-60m suitcase carry pesado.',
-    notes: 'Cadera nivelada, costillas abajo. Cambia de mano despues de cada tramo.',
-    timer: { mode: 'rounds', rounds: 5, restSec: 75 },
-    emphasis: 'Agarre, oblicuos y anti-inclinacion.',
-    tags: ['carry', 'grip', 'core', 'unilateral'],
-    prefer: ['press', 'overhead', 'build'],
-    avoid: ['hinge'],
-    fatigue: 'moderate',
-    source: 'EDC: unilateral loaded carries.'
-  },
-  {
-    id: 'sandbag-to-shoulder',
-    title: 'Sandbag to shoulder',
-    type: 'odd_object',
-    prescription: '10 minutos: 2 sandbag to shoulder por lado al inicio de cada minuto.',
-    notes: 'Carga moderada. Si no hay saco: DB/KB clean alterno pesado.',
-    timer: { mode: 'emom', minutes: 10, intervalSec: 60 },
-    emphasis: 'Triple extension, brace y objeto raro.',
-    tags: ['odd_object', 'power', 'hinge'],
-    prefer: ['press', 'base'],
-    avoid: ['hinge', 'squat', 'peak'],
-    fatigue: 'high',
-    source: 'EDC: sandbag loading and odd-object clean patterns.'
-  },
-  {
-    id: 'chinup-dip-density',
-    title: 'Chin-up + dip density',
-    type: 'assistance',
-    prescription: '10-12 minutos alternando: 4-6 chin-ups y 6-10 dips o push-ups.',
-    notes: 'No falles. Mantiene volumen de torso con reloj, pero controlado.',
-    timer: { mode: 'amrap', minutes: 12 },
-    emphasis: 'Calistenia pesada, dorsales y empuje sin mucho montaje.',
-    tags: ['calisthenics', 'vertical_pull', 'pressing'],
-    prefer: ['squat', 'hinge', 'base'],
-    avoid: ['press', 'overhead', 'peak'],
-    fatigue: 'moderate',
-    source: 'Powerbuilder: chin-ups, dips, density blocks.'
-  },
-  {
-    id: 'bike-sprint-carry',
-    title: 'Bike sprint + carry',
-    type: 'conditioning',
-    prescription: '8 rondas: 20s bike sprint, 40m farmer carry moderado, descanso 80s.',
-    notes: 'Sin bici: assault runner, remo o shuttle sprint corto.',
-    timer: { mode: 'rounds', rounds: 8, restSec: 80 },
-    emphasis: 'Motor alactico, agarre y recuperacion entre esfuerzos.',
-    tags: ['conditioning', 'carry', 'grip', 'low_eccentric'],
-    prefer: ['build', 'peak'],
-    avoid: ['hinge'],
-    fatigue: 'low',
-    source: 'EDC: sprint intervals and loaded carry pairing.'
-  },
-  {
-    id: 'empty-bar-bench-emom',
-    title: 'Bench vacio EMOM',
-    type: 'conditioning',
-    prescription: '8 minutos: 5 burpees al inicio de cada minuto, resto del minuto reps de bench con barra vacia.',
-    notes: 'Solo si el dia no tuvo press pesado. Corta si los hombros se degradan.',
-    timer: { mode: 'emom', minutes: 8, intervalSec: 60 },
-    emphasis: 'Conditioning de torso estilo Alsruhe con carga minima.',
-    tags: ['conditioning', 'pressing'],
-    prefer: ['squat', 'hinge', 'base'],
-    avoid: ['press', 'overhead', 'peak'],
-    fatigue: 'moderate',
-    source: 'Powerbuilder: burpee plus empty-bar bench minute work.'
-  },
-  {
-    id: 'odd-object-mile-lite',
-    title: 'Odd object carry largo',
-    type: 'carry',
-    prescription: '12-20 minutos continuo: carry incomodo moderado, cambia agarre cada 40-60m.',
-    notes: 'No busques maximo. Es motor, agarre y cabeza.',
-    timer: { mode: 'amrap', minutes: 16 },
-    emphasis: 'Base aerobica especifica con objeto raro.',
-    tags: ['carry', 'odd_object', 'zone2', 'grip'],
-    prefer: ['base'],
-    avoid: ['peak'],
-    fatigue: 'low',
-    source: 'Powerbuilder/EDC: mile odd-object carry concepts.'
-  },
-  {
-    id: 'core-brace-circuit',
-    title: 'Brace circuit',
-    type: 'assistance',
-    prescription: '3-4 rondas: 30s front rack hold, 10 hanging knee raises, 30s plank pesado.',
-    notes: 'Cero fallo. Que te deje mas estable, no destruido.',
-    timer: { mode: 'rounds', rounds: 4, restSec: 60 },
-    emphasis: 'Trunk, respiracion bajo carga y transferencia a squat/deadlift.',
-    tags: ['core', 'brace', 'low_eccentric'],
-    prefer: ['squat', 'hinge', 'peak'],
-    avoid: [],
-    fatigue: 'low',
-    source: 'EDC/Powerbuilder: loaded holds, hanging raises and trunk work.'
-  }
-]
-
-const DELOAD_UPPER_BACK = {
-  id: 'deload-back',
-  title: 'Remo ligero',
-  prescription: '2-3 series faciles de 12-15 reps, tempo limpio y sin fallo.',
-  fallback: 'Band row, face pull o jalon ligero.',
-  emphasis: 'Mantener sangre en espalda y hombros sin deuda de recuperacion.',
-  tags: ['supported', 'pump', 'recovery'],
-  source: 'SBS deload + upper-back pump ligero.'
 }
 
-const DELOAD_ASSISTANCE = {
-  id: 'deload-specimen',
-  title: 'Deload specimen',
-  type: 'deload',
-  prescription: '2-3 rondas faciles: 10 inverted rows, 10 push-ups, 20-30m carry ligero, 30s hollow hold.',
-  notes: 'Sin fallo, sin heroicidades. Mantener tejido y patron.',
-  timer: { mode: 'amrap', minutes: 8 },
-  emphasis: 'Movimiento, bombeo y grip sin deuda de recuperacion.',
-  tags: ['recovery', 'pump', 'carry'],
-  source: 'SBS deload + patrones ligeros de EDC.'
+// Curated only from C:/Users/Usuario/Documents/training-montage/src/data/*_program.json.
+// Keep source metadata with every block; no invented assistance prescriptions here.
+const UPPER_SOURCE_BLOCKS = [
+  sourceBlock({
+    id: 'rpm2-w1d2-assistance',
+    tags: ['pull', 'row'],
+    source: { program: 'rpm2', label: 'RPM2', week: 1, day: 2, sessionIndex: 1, mainLift: 'squat', role: 'assistance' },
+    timer: { type: 'emom', duration_sec: 600, interval_sec: 60, rounds: 10 },
+    raw: `Gorilla Rows (MEDIUM) Or Barbell Rows
+At the Top of Every Minute for 10 Minutes, Complete:
+5-6 Gorilla Rows (Each Side) @ 50-55% of Your 1RM
+Take the Remainder of the Minute to Rest
+or Add Floor Presses during the Remainder of the Minute`
+  }),
+  sourceBlock({
+    id: 'rpm2-w1d3-assistance',
+    tags: ['pull', 'vertical_pull', 'calisthenics'],
+    source: { program: 'rpm2', label: 'RPM2', week: 1, day: 3, sessionIndex: 2, mainLift: 'deadlift', role: 'assistance' },
+    timer: { type: 'emom', duration_sec: 600, interval_sec: 60, rounds: 10 },
+    raw: `Weighted Pull-Ups (HEAVY) (Pull-Downs if Necessary)
+At the Top of Every Minute for 10 Minutes, Complete:
+3-4 Weighted Pull-Ups @ 60-65% of Your 1RM
+Take the Remainder of the Minute to Rest
+or Add Push-Ups during the Remainder of the Minute`
+  }),
+  sourceBlock({
+    id: 'rpm2-w2d2-assistance',
+    tags: ['pull', 'row'],
+    source: { program: 'rpm2', label: 'RPM2', week: 2, day: 2, sessionIndex: 5, mainLift: 'squat', role: 'assistance' },
+    timer: { type: 'emom', duration_sec: 600, interval_sec: 60, rounds: 10 },
+    raw: `Deadlift Rows (HEAVY) or Barbell Rows
+At the Top of Every Minute for 10 Minutes, Complete:
+3-4 Deadlift Rows @ 60-65% of Your 1RM
+Take the Remainder of the Minute to Rest
+or Add Floor Presses/Push-Ups during the Remainder of the Minute`
+  }),
+  sourceBlock({
+    id: 'rpm2-w2d3-assistance',
+    tags: ['pull', 'vertical_pull', 'calisthenics'],
+    source: { program: 'rpm2', label: 'RPM2', week: 2, day: 3, sessionIndex: 6, mainLift: 'deadlift', role: 'assistance' },
+    timer: { type: 'emom', duration_sec: 600, interval_sec: 60, rounds: 10 },
+    raw: `Weighted Chin-Ups (LIGHT) (Pull-Downs [supinated grip] if Necessary)
+At the Top of Every Minute for 10 Minutes, Complete:
+5-6 Chin-Ups @ 40-45% Of Your 1RM
+Take the Remainder of the Minute to Rest
+or Add Push-Ups during the Remainder of the Minute`
+  }),
+  sourceBlock({
+    id: 'rpm2-w3d2-assistance',
+    tags: ['pull', 'row'],
+    source: { program: 'rpm2', label: 'RPM2', week: 3, day: 2, sessionIndex: 9, mainLift: 'squat', role: 'assistance' },
+    timer: { type: 'emom', duration_sec: 600, interval_sec: 60, rounds: 10 },
+    raw: `Meadows Rows (LIGHT) or Dumbbell Rows
+At the Top of Every Minute for 10 Minutes, Complete:
+:20 Seconds Meadows Rows (Left) 1 Second Pauses at the Top
+:20 Seconds Meadows Rows (Right) 1 Second Pauses at the Top
+:20 Seconds Rest
+@ 40-45% of Your 1RM`
+  }),
+  sourceBlock({
+    id: 'powerbuilder-w1d1-assistance',
+    tags: ['pull', 'row', 'core'],
+    source: { program: 'powerbuilder', label: 'Powerbuilder', week: 1, day: 1, sessionIndex: 0, mainLift: 'deadlift', role: 'assistance' },
+    timer: { type: 'rounds', rest_sec: 90, rounds: 3 },
+    raw: `3 Rounds of the Following Giant Set
+16 Rack Deadlifts (Just above the Knee - As Heavy As possible)
+14 Krock Rows (Each Side)
+10 Hanging Leg Raises
+***No Rest between exercises.  Take :90 Seconds Rest after you have finished all 3 and get right back to it.`
+  }),
+  sourceBlock({
+    id: 'powerbuilder-lite-w1d1-assistance',
+    tags: ['pull', 'row', 'hinge'],
+    source: { program: 'powerbuilder_lite', label: 'Powerbuilder Lite', week: 1, day: 1, sessionIndex: 0, mainLift: 'deadlift', role: 'assistance' },
+    timer: { type: 'amrap', duration_sec: 600 },
+    raw: `As many Rounds as Possible in 10 Minutes
+8 Single Arm Dumbbell Rows (each side)
+8 RDL's (Moderate Weight)
+8 Glute Ham Raises or Nordic Hamstring Curls`
+  }),
+  sourceBlock({
+    id: 'linear-w1d1-accessory',
+    tags: ['pull', 'row', 'core'],
+    source: { program: 'linear', label: 'Linear', week: 1, day: 1, sessionIndex: 0, mainLift: 'deadlift', role: 'accessory' },
+    timer: { type: 'rounds', rest_sec: 90, rounds: 3 },
+    raw: `Use 3-4 Rounds of the Secondary Giant Set (Warm-up Rounds do not Count) to Work up to your Heaviest set of 8 Reps on the Stiff Leg or Romanian Deadlift.
+B1. 8 Deadlift Rows (Tutorial on my Youtube Channel)
+B2. 8 Stiff Leg OR Romanian Deadlifts
+B3. :15-:60 Second RKC Plank (Depending on your level)
+90-120 Seconds to REST, ADD weight and get back after it.`
+  }),
+  sourceBlock({
+    id: 'edc-w6d1-assistance',
+    tags: ['pull', 'row', 'complex'],
+    source: { program: 'edc', label: 'EDC', week: 6, day: 1, sessionIndex: 20, mainLift: 'deadlift', role: 'assistance' },
+    timer: { type: 'rounds', rounds: 4 },
+    raw: `10 Minutes to Build up to Your Heaviest Row Complex - A COMPLEX means that you Complete ALL
+Reps of ALL exercise before Releasing the Bar.
+4 Rounds - Aiming for the Heaviest Round Possible - Add Weight Every Round You Can
+5 Strict Pendlay Rows
+5 Barbell Rows
+5 Deadlift Rows
+Rest as Long As you Think you need Between Rounds`
+  }),
+  sourceBlock({
+    id: 'edc-w8d2-assistance',
+    tags: ['pull', 'press', 'calisthenics'],
+    source: { program: 'edc', label: 'EDC', week: 8, day: 2, sessionIndex: 29, mainLift: 'ohp', role: 'assistance' },
+    timer: { type: 'amrap', duration_sec: 600 },
+    raw: `Complete As Many Rounds As possible in 10 Minutes
+4 Wide Grip Pull-Ups (Depending On Your Level)
+8 Neutral Grip Dumbbell Strict Presses
+10 Dips (15 push-Ups if Necessary)
+12 Face Pulls
+Rest as little as need to complete as Many Rounds as You Can.`
+  })
+]
+
+const ASSISTANCE_SOURCE_BLOCKS = [
+  sourceBlock({
+    id: 'edc-w1d1-conditioning',
+    tags: ['calisthenics', 'press', 'legs'],
+    source: { program: 'edc', label: 'EDC', week: 1, day: 1, sessionIndex: 0, mainLift: 'deadlift', role: 'conditioning' },
+    timer: { type: 'emom', duration_sec: 600, interval_sec: 60, rounds: 10 },
+    raw: `At the Top of Every Minute for 10-15 Minutes depending on your level
+5 Burpees
+5 Squats
+5 Push-Ups
+15 Mountain Climbers
+15 Jumping Jacks
+If you want more rest, move faster. Advanced athletes will get this done in 25-30 seconds. If you
+cannot fit all of this into the minute then drop the reps to 3/3/3/12/12 Respectively.`
+  }),
+  sourceBlock({
+    id: 'edc-w1d2-conditioning',
+    tags: ['calisthenics', 'pull', 'press', 'legs'],
+    source: { program: 'edc', label: 'EDC', week: 1, day: 2, sessionIndex: 1, mainLift: 'ohp', role: 'conditioning' },
+    timer: { type: 'amrap', duration_sec: 600 },
+    raw: `Get As Far As you Can in 10 Minutes
+1 Pull-Up
+2 Dips or Push-Ups
+3 Squats
+2 Pull-Ups
+4 Dips or Push-Ups
+6 Squats
+4 Pull-Up
+8 Dips or Push-Ups
+12 Squats
+5 Pull-Ups
+16 Dips or Push-Ups
+24 Squats...
+Continue to Double the Reps of Each Exercise, Each Round - Get as Far as you Can in 10 minutes.`
+  }),
+  sourceBlock({
+    id: 'edc-w1d4-conditioning',
+    tags: ['calisthenics', 'pull', 'press', 'legs'],
+    source: { program: 'edc', label: 'EDC', week: 1, day: 4, sessionIndex: 3, mainLift: 'bench', role: 'conditioning' },
+    timer: { type: 'emom', duration_sec: 1200, interval_sec: 30, rounds: 40 },
+    raw: `Every :30 Seconds for 10-15 Minutes Depending on your level
+3 Pull-Ups
+7 Push-Ups
+12 Squats`
+  }),
+  sourceBlock({
+    id: 'edc-w2d1-conditioning',
+    tags: ['calisthenics', 'pull', 'press', 'legs'],
+    source: { program: 'edc', label: 'EDC', week: 2, day: 1, sessionIndex: 4, mainLift: 'deadlift', role: 'conditioning' },
+    timer: { type: 'sequence', duration_sec: 300, rounds: 5 },
+    raw: `In Front of a Running Clock - Use Inverted Rows if You can't Do Pull-Ups
+Minute 1: 1 Pull-Up/2 Burpees/3 Push-Ups/4 Squats
+Minute 2: 2 Pull-Ups/3 Burpees/4 Push-Ups/5 Squats
+Minute 3: 3 Pull-Ups/4 Burpees/5 Push-Ups/6 Squats
+Minute 4: 4 Pull-Ups/5 Burpees/6 Push-Ups/7 Squats
+Minute 5: 5 Pull-Ups/6 Burpees/7 Push-Ups/8 Squats
+...Continue to add reps every minute until you can no longer keep up with the clock. If you aren't
+tired enough, work your way back down the ladder.
+MINUTES COMPLETED: _________________`
+  }),
+  sourceBlock({
+    id: 'edc-w2d4-conditioning',
+    tags: ['calisthenics', 'press', 'locomotion'],
+    source: { program: 'edc', label: 'EDC', week: 2, day: 4, sessionIndex: 7, mainLift: 'bench', role: 'conditioning' },
+    timer: { type: 'rounds', rounds: 3 },
+    raw: `3 Rounds with as Little rest as Possible
+:60 Seconds Max Reps Push-Ups - Full Out Effort!
+100 Foot Bear Walk
+100 Foot Gator Walk
+100 Foot Crab Walk
+Get Right back to your Push-Ups.`
+  }),
+  sourceBlock({
+    id: 'edc-w4d2-conditioning',
+    tags: ['calisthenics', 'pull', 'press', 'legs'],
+    source: { program: 'edc', label: 'EDC', week: 4, day: 2, sessionIndex: 13, mainLift: 'ohp', role: 'conditioning' },
+    timer: { type: 'for_time' },
+    raw: `As Fast As you Can
+15 Pull-Ups or 25 inverted Rows
+15 Dips or Bench Dips If Necessary
+15 Squat Jumps
+10 Pull-Ups or 20 inverted Rows
+10 Dips or Bench Dips If Necessary
+10 Squat Jumps
+5 Pull-Ups or 10 inverted Rows
+5 Dips or Bench Dips If Necessary
+5 Squat Jumps`
+  }),
+  sourceBlock({
+    id: 'edc-w7d2-conditioning',
+    tags: ['calisthenics', 'pull', 'press', 'core'],
+    source: { program: 'edc', label: 'EDC', week: 7, day: 2, sessionIndex: 25, mainLift: 'ohp', role: 'conditioning' },
+    timer: { type: 'rounds', rounds: 10 },
+    raw: `10 Rounds
+:10 Seconds Pull-Ups or Inverted Rows
+:20 Dips or Deficit Push-Ups
+:30 Seconds Plank`
+  }),
+  sourceBlock({
+    id: 'edc-w8d2-conditioning',
+    tags: ['calisthenics', 'pull', 'press'],
+    source: { program: 'edc', label: 'EDC', week: 8, day: 2, sessionIndex: 29, mainLift: 'ohp', role: 'conditioning' },
+    timer: { type: 'sequence', duration_sec: 600, rounds: 10 },
+    raw: `For 10 Rounds
+:20 Seconds Max Reps Pull-Ups or Inverted Rows
+:20 Seconds Max Reps Burpees or Hand Release Push-Ups
+:20 Seconds Rest`
+  }),
+  sourceBlock({
+    id: 'edc-w2d3-assistance',
+    tags: ['legs', 'pull', 'calisthenics'],
+    source: { program: 'edc', label: 'EDC', week: 2, day: 3, sessionIndex: 6, mainLift: 'squat', role: 'assistance' },
+    timer: { type: 'amrap', duration_sec: 300 },
+    raw: `Grab a Pair of Light(ish) Dumbbells
+For the next 5 Minutes You can choose between Lunges or Step-Ups. There are no sets - You just
+move for 5 Minutes.
+But Every time you need to stop, you owe 4 Pull-Ups or 8 Inverted Rows before you can return to the
+Lunges.
+A good Goal would be 40 (Total) Lunges per minute or 200 Total Reps.
+SCORE:__________________`
+  }),
+  sourceBlock({
+    id: 'edc-w2d1-carry',
+    tags: ['carry', 'calisthenics', 'grip'],
+    source: { program: 'edc', label: 'EDC', week: 2, day: 1, sessionIndex: 4, mainLift: 'deadlift', role: 'carry' },
+    timer: { type: 'emom', duration_sec: 600, interval_sec: 60, rounds: 10 },
+    raw: `At the Top of Every Minute for 10 minutes
+3 Burpees (Optional)
+100 Foot Farmer's Walk @ 70% of Your 1RM 50ft Walk without Drops
+Take the Remainder of the Minute to Rest`
+  }),
+  sourceBlock({
+    id: 'rpm2-w1d2-conditioning',
+    tags: ['calisthenics', 'pull', 'press', 'legs'],
+    source: { program: 'rpm2', label: 'RPM2', week: 1, day: 2, sessionIndex: 1, mainLift: 'squat', role: 'conditioning' },
+    timer: { type: 'emom', duration_sec: 600, interval_sec: 60, rounds: 10 },
+    raw: `Pull-Ups, Push-Ups & Lunges
+At the Top of Every Minute for 10 Minutes, Complete:
+5 Pull-Ups or Inverted Rows x2
+5 Push-Ups
+5 Lunges (Each Side)
+Take the Remainder of the Minute to Rest`
+  }),
+  sourceBlock({
+    id: 'rpm2-w3d1-conditioning',
+    tags: ['calisthenics', 'pull', 'press', 'legs'],
+    source: { program: 'rpm2', label: 'RPM2', week: 3, day: 1, sessionIndex: 8, mainLift: 'deadlift', role: 'conditioning' },
+    timer: { type: 'amrap', duration_sec: 600 },
+    raw: `Get as Far as You Can in 10 Minutes
+1 Pull-Up (or Inverted Row)
+2 Dips (or Bench Dips)
+3 Push-Ups
+4 Squats
+2 Pull-Ups (or Inverted Rows)
+3 Dips (or Bench Dips)
+4 Push-Ups
+5 Squats
+3 Pull-Up (or Inverted Row)
+4 Dips (or Bench Dips)
+5 Push-Ups
+6 Squats
+Continue to add 1 Rep per Exercise, per Round for the allotted 10 Minutes`
+  }),
+  sourceBlock({
+    id: 'rpm2-w5d4-conditioning',
+    tags: ['calisthenics', 'press', 'legs'],
+    source: { program: 'rpm2', label: 'RPM2', week: 5, day: 4, sessionIndex: 19, mainLift: 'squat', role: 'conditioning' },
+    timer: { type: 'for_time' },
+    raw: `Bring Sally Up
+Choose a Bodyweight Exercise such as Squats, Push-Ups, Dips, etc
+Then, search for the song "Flower" by Moby on youtube. Push play and follow the lyrics of the song.
+Every time the song says, "Bring Sally Down" - Drop into the bottom of your squat or push-up position (DON'T LET CHEST TOUCH!) and Stay there until you hear the song say, "Bring Sally up". At that time, return to starting position. It is only 30+ Reps but it is hard. If it is too Easy, Add Weight or choose a weighted exercise.`
+  }),
+  sourceBlock({
+    id: 'rpm2-w1d1-carry',
+    tags: ['carry', 'grip', 'calisthenics'],
+    source: { program: 'rpm2', label: 'RPM2', week: 1, day: 1, sessionIndex: 0, mainLift: 'deadlift', role: 'carry' },
+    timer: { type: 'emom', duration_sec: 600, interval_sec: 60, rounds: 10 },
+    raw: `Farmer's Walk (LIGHT)
+At the Top of Every Minute for 10 Minutes, Complete:
+150 Foot Farmer's Carry @ 40-45% of Your 50 ft Maximum Carry weight.
+Take the Remainder of the Minute to Rest
+or Add 3-5 Burpees during the Remainder of the Minute
+*If Carrying or Marching in place is Not Possible, Replace the Carry with your Favorite Deadlift or Row Variation but utilize the same reps & Intensity.`
+  }),
+  sourceBlock({
+    id: 'powerbuilder-w2d3-conditioning',
+    tags: ['calisthenics', 'pull', 'press'],
+    source: { program: 'powerbuilder', label: 'Powerbuilder', week: 2, day: 3, sessionIndex: 6, mainLift: 'squat', role: 'conditioning' },
+    timer: { type: 'emom', duration_sec: 600, interval_sec: 60, rounds: 10 },
+    raw: `At the Start of Every Minute
+Minute 1: 1 Pull-Up, 2 Burpees, 3 Push-Ups, 4 Mountain Climbers
+Minute 2: 2 Pull-Ups, 4 Burpees, 6 Push-Ups, 8 Mountain Climbers
+Minute 3: 3 Pull-Ups, 6 Burpees, 9 Push-Ups, 12 Mountain Climbers
+Minute 4: 4 Pull-Ups, 8 Burpees, 12 Push-Ups, 16 Mountain Climbers
+Minute 5: 5 Pull-Ups, 10 Burpees, 15 Push-Ups, 20 Mountain Climbers
+Minute 6: 5 Pull-Ups, 10 Burpees, 15 Push-Ups, 20 Mountain Climbers
+Minute 7: 4 Pull-Ups, 8 Burpees, 12 Push-Ups, 16 Mountain Climbers
+Minute 8: 3 Pull-Ups, 6 Burpees, 9 Push-Ups, 12 Mountain Climbers
+Minute 9: 2 Pull-Ups, 4 Burpees, 6 Push-Ups, 8 Mountain Climbers
+Minute 10: 1 Pull-Up, 2 Burpees, 3 Push-Ups, 4 Mountain Climbers`
+  }),
+  sourceBlock({
+    id: 'powerbuilder-w3d4-conditioning',
+    tags: ['calisthenics', 'pull', 'press'],
+    source: { program: 'powerbuilder', label: 'Powerbuilder', week: 3, day: 4, sessionIndex: 11, mainLift: 'bench', role: 'conditioning' },
+    timer: { type: 'rounds', rounds: 3 },
+    raw: `20, 15, 10 Reps of
+Pull-Ups
+Ring Dips
+Run 400 Meters Between Rounds`
+  }),
+  sourceBlock({
+    id: 'powerbuilder-w1d4-assistance',
+    tags: ['press', 'calisthenics'],
+    source: { program: 'powerbuilder', label: 'Powerbuilder', week: 1, day: 4, sessionIndex: 3, mainLift: 'bench', role: 'assistance' },
+    timer: { type: 'rounds', rest_sec: 90, rounds: 4 },
+    raw: `4 Rounds of the Following Giant Set
+15 Neutral Grip Dumbbell Bench Presses (As Heavy As Possible - Ramping)
+15 Dips (Bench Dips if Necessary)
+20 Band or Cable Trice Extensions (As Heavy As Possible)
+***No Rest between exercises.  Take :90 Seconds Rest after you have finished all 3 and get right back to it.`
+  }),
+  sourceBlock({
+    id: 'powerbuilder-lite-w1d2-conditioning',
+    tags: ['calisthenics', 'pull', 'press', 'carry'],
+    source: { program: 'powerbuilder_lite', label: 'Powerbuilder Lite', week: 1, day: 2, sessionIndex: 1, mainLift: 'ohp', role: 'conditioning' },
+    timer: { type: 'rounds', rounds: 3 },
+    raw: `3 Rounds
+5 Pull-Ups or 20 Inverted Rows
+50ft DB or KB Waiter's Walk (Left Side)
+10 Burpees or 30 Push-Ups
+50ft DB or KB Waiter's Walk (Right Side)`
+  }),
+  sourceBlock({
+    id: 'powerbuilder-lite-w1d3-conditioning',
+    tags: ['calisthenics', 'legs'],
+    source: { program: 'powerbuilder_lite', label: 'Powerbuilder Lite', week: 1, day: 3, sessionIndex: 2, mainLift: 'squat', role: 'conditioning' },
+    timer: { type: 'amrap', duration_sec: 420 },
+    raw: `As Many Rounds As possible in 7 Minutes
+20 Bodyweight Squats
+20 Bodyweight Stepping Lunges
+20 Bodyweight Jumping Lunges (Just barely leave the ground)
+10 Bodyweight Jumping Squats (Just barely leave the ground)`
+  }),
+  sourceBlock({
+    id: 'powerbuilder-lite-w1d4-conditioning',
+    tags: ['calisthenics', 'press'],
+    source: { program: 'powerbuilder_lite', label: 'Powerbuilder Lite', week: 1, day: 4, sessionIndex: 3, mainLift: 'bench', role: 'conditioning' },
+    timer: { type: 'ladder' },
+    raw: `Go As Far as You Can
+Drop & Complete 1 Push-Up, then Stand.
+Drop & Complete 2 Push-Ups, then Stand.
+Drop & Complete 3 Push-Ups, then Stand.
+Continue this pattern until you can no longer complete Push-ups. You can follow the ladder back down if you so desire.`
+  }),
+  sourceBlock({
+    id: 'massbuilder-w1d2-conditioning',
+    tags: ['press', 'calisthenics'],
+    source: { program: 'massbuilder', label: 'Massbuilder', week: 1, day: 2, sessionIndex: 1, mainLift: 'ohp', role: 'conditioning' },
+    timer: { type: 'interval', work_sec: 90, rest_sec: 90 },
+    raw: `In Front of A running Clock
+:90 Seconds Max Reps Close Grip Push-Ups
+:90 Seconds Rest
+:60 Seconds Max Reps Close Grip Push-Ups
+:60 Seconds Rest
+:30 Seconds Max Reps Close Grip Push-Ups
+:30 Seconds Rest
+:90 Seconds Max Reps Deficit Push-Ups
+:90 Seconds Rest
+:60 Seconds Max Reps Deficit Push-Ups
+:60 Seconds Rest
+:30 Seconds Max Reps Deficit Push-Ups
+:30 Seconds Rest
+:90 Seconds Max Reps Hand Release Push-Ups
+:90 Seconds Rest
+:60 Seconds Max Reps Hand Release Push-Ups
+:60 Seconds Rest
+:30 Seconds Max Reps Hand Release Push-Ups
+:30 Seconds Rest`
+  }),
+  sourceBlock({
+    id: 'linear-w10d3-conditioning',
+    tags: ['calisthenics', 'press', 'legs'],
+    source: { program: 'linear', label: 'Linear', week: 10, day: 3, sessionIndex: 38, mainLift: 'squat', role: 'conditioning' },
+    timer: { type: 'emom', duration_sec: 720, interval_sec: 60, rounds: 12 },
+    raw: `At the Top of Every Minute for 12 Minutes
+3-5 Burpees
+3-5 Squats (Bodyweight)
+3-5 Push-Ups
+10-15 Mountain Climbers
+10-15 Jumping Jacks`
+  })
+]
+
+function shortPrescription(raw) {
+  const lines = raw.split('\n').map((line) => line.trim()).filter(Boolean)
+  return lines.slice(1, 4).join(' / ') || lines[0] || ''
 }
 
 function inferLiftFocus(lift = {}) {
@@ -468,128 +463,150 @@ function phaseForWeek(week, deload) {
 function sessionProfile({ week, day, frequency, deload, lifts = [] }) {
   const focusList = lifts.map(inferLiftFocus)
   const focusSet = new Set(focusList)
-  const phase = phaseForWeek(Number(week), deload)
-  const primaryFocus = focusList[0] || 'general'
-  const lowerCount = focusList.filter((focus) => focus === 'squat' || focus === 'hinge').length
-  const pressCount = focusList.filter((focus) => focus === 'press' || focus === 'overhead').length
-  const hasHinge = focusSet.has('hinge')
-  const hasSquat = focusSet.has('squat')
-  const hasPress = focusSet.has('press')
-  const hasOverhead = focusSet.has('overhead')
-  const density = frequency >= 5 ? 'baja' : frequency === 4 ? 'media' : 'alta'
-
   return {
     week: Number(week),
     day: Number(day),
     frequency: Number(frequency),
-    phase,
-    primaryFocus,
+    phase: phaseForWeek(Number(week), deload),
+    primaryFocus: focusList[0] || 'general',
     focusList,
     focusSet,
-    lowerCount,
-    pressCount,
-    hasHinge,
-    hasSquat,
-    hasPress,
-    hasOverhead,
-    density
+    hasHinge: focusSet.has('hinge'),
+    hasSquat: focusSet.has('squat'),
+    hasPress: focusSet.has('press'),
+    hasOverhead: focusSet.has('overhead'),
+    density: frequency >= 5 ? 'baja' : frequency === 4 ? 'media' : 'alta'
   }
 }
 
-function scoreCandidate(candidate, profile) {
+function scoreCandidate(candidate, profile, kind) {
   let score = 100
-  const avoid = candidate.avoid || []
-  const prefer = candidate.prefer || []
   const tags = candidate.tags || []
 
-  for (const focus of profile.focusSet) {
-    if (prefer.includes(focus)) score += 18
-    if (avoid.includes(focus)) score -= 36
-  }
-  if (prefer.includes(profile.phase)) score += 16
-  if (avoid.includes(profile.phase)) score -= 34
-  if (candidate.phase && !candidate.phase.includes(profile.phase)) score -= 12
-
-  if (profile.hasHinge && (tags.includes('hinge') || tags.includes('lumbar'))) score -= 34
-  if (profile.hasHinge && tags.includes('carry') && candidate.fatigue !== 'low') score -= 18
-  if (profile.hasHinge && tags.includes('grip') && candidate.fatigue !== 'low') score -= 8
-  if (profile.lowerCount >= 2 && tags.includes('conditioning') && !tags.includes('low_eccentric')) score -= 18
-  if (profile.hasSquat && tags.includes('legs')) score -= 18
-  if ((profile.hasPress || profile.hasOverhead) && tags.includes('pressing')) score -= 26
-  if (profile.hasOverhead && tags.includes('overhead_stability')) score -= 16
-  if (profile.pressCount >= 2 && (tags.includes('rear_delt') || tags.includes('shoulder_health'))) score += 18
-  if (profile.lowerCount >= 2 && tags.includes('supported')) score += 20
-  if (profile.phase === 'peak' && candidate.fatigue === 'high') score -= 42
-  if (profile.phase === 'build' && candidate.fatigue === 'high') score -= 12
-  if (profile.frequency >= 5 && candidate.fatigue === 'high') score -= 34
-  if (profile.frequency >= 5 && candidate.fatigue === 'moderate') score -= 12
-  if (profile.frequency <= 3 && candidate.fatigue === 'low') score += 4
-  if (profile.phase === 'peak' && tags.includes('low_eccentric')) score += 14
-  if (tags.includes('grip') && !profile.hasHinge) score += 6
+  if (kind === 'assistance' && tags.includes('calisthenics')) score += 18
+  if (tags.includes('pull') && (profile.hasPress || profile.hasOverhead)) score += 8
+  if (tags.includes('legs') && profile.hasSquat) score += 7
+  if (tags.includes('press') && (profile.hasPress || profile.hasOverhead)) score += 5
+  if (tags.includes('carry') && !profile.hasHinge) score += 5
+  if (candidate.source.mainLift === profile.primaryFocus) score += 5
+  if (profile.phase === 'deload' && candidate.timer?.duration_sec && candidate.timer.duration_sec > 720) score -= 6
+  if (profile.phase === 'peak' && tags.includes('carry')) score -= 4
 
   return score
 }
 
 function deterministicBias(index, seed) {
-  return (((seed + 11) * (index + 3) * 17) % 19) / 10
+  return (((seed + 11) * (index + 3) * 17) % 23) / 10
 }
 
-function pickContextual(pool, profile, seed) {
+function pickOptions(pool, profile, seed, count, kind) {
   const scored = pool
     .map((candidate, index) => ({
       candidate,
-      score: scoreCandidate(candidate, profile) + deterministicBias(index, seed)
+      score: scoreCandidate(candidate, profile, kind) + deterministicBias(index, seed)
     }))
     .sort((a, b) => b.score - a.score)
-  const contenders = scored.filter((entry) => entry.score >= 80).slice(0, 6)
-  return contenders[seed % contenders.length]?.candidate || scored[0]?.candidate
+    .map((entry) => entry.candidate)
+
+  const windowSize = Math.min(scored.length, Math.max(count * 3, 8))
+  const window = scored.slice(0, windowSize)
+  const offset = seed % window.length
+  const rotated = [...window.slice(offset), ...window.slice(0, offset)]
+  const picked = []
+
+  for (const candidate of rotated) {
+    const primary = candidate.tags?.[0] || candidate.role
+    const alreadyHasPrimary = picked.some((item) => (item.tags?.[0] || item.role) === primary)
+    if (picked.length < 2 || !alreadyHasPrimary) picked.push(candidate)
+    if (picked.length >= count) break
+  }
+  for (const candidate of rotated) {
+    if (picked.length >= count) break
+    if (!picked.some((item) => item.id === candidate.id)) picked.push(candidate)
+  }
+
+  return picked
 }
 
-function dayRationale(profile, upperBack, assistance) {
+function tagText(tags = []) {
+  const labels = {
+    calisthenics: 'calistenia',
+    pull: 'tiron',
+    press: 'empuje',
+    legs: 'pierna',
+    row: 'remo',
+    core: 'core',
+    carry: 'carry',
+    grip: 'agarre',
+    locomotion: 'locomocion',
+    vertical_pull: 'dominadas',
+    complex: 'complex',
+    hinge: 'bisagra'
+  }
+  return tags.map((tag) => labels[tag] || tag).join(' / ')
+}
+
+function dayRationale(profile, upperBackOptions, assistanceOptions) {
   const focusText = profile.focusList.length ? profile.focusList.join(', ') : 'general'
-  const phaseText = {
-    base: 'base de volumen',
-    build: 'bloque medio',
-    peak: 'fase pesada',
-    deload: 'deload'
-  }[profile.phase]
-  const notes = [`Dia ${focusText}; fase ${phaseText}; dosis ${profile.density}.`]
-  if (profile.hasHinge) notes.push('Se evita sumar bisagras/lumbar pesado despues de deadlift.')
-  if (profile.hasSquat) notes.push('Se controla la fatiga de piernas y se prioriza espalda que no robe recuperacion.')
-  if (profile.hasPress || profile.hasOverhead) notes.push('Se compensa el pressing con traccion, rear delts, agarre o carries.')
-  if (profile.phase === 'peak') notes.push('En semanas pesadas se favorece trabajo corto, bajo en excentrica y sin fallo.')
-  notes.push(`Upper back: ${upperBack.emphasis}`)
-  notes.push(`Asistencia: ${assistance.emphasis}`)
-  return notes
+  return [
+    `Dia ${focusText}; fase ${profile.phase}; dosis ${profile.density}.`,
+    'Todas las opciones salen de bloques reales de training-montage.',
+    `Upper back: ${upperBackOptions.map((item) => item.sourceLabel).join(' | ')}.`,
+    `Asistencia: ${assistanceOptions.map((item) => item.sourceLabel).join(' | ')}.`
+  ]
 }
 
 export function specimenTemplateForSession({ week, day, frequency, deload, lifts = [] }) {
   const profile = sessionProfile({ week, day, frequency, deload, lifts })
   const seed = (profile.week - 1) * profile.frequency + (profile.day - 1)
-  const upperBack = deload ? DELOAD_UPPER_BACK : pickContextual(UPPER_BACK_POOL, profile, seed)
-  const assistance = deload ? DELOAD_ASSISTANCE : pickContextual(ASSISTANCE_POOL, profile, seed + 5)
+  const upperBackOptions = pickOptions(UPPER_SOURCE_BLOCKS, profile, seed, 3, 'upper').map((item) => ({
+    ...item,
+    emphasis: `${tagText(item.tags)} - ${item.sourceLabel}`
+  }))
+  const assistanceOptions = pickOptions(ASSISTANCE_SOURCE_BLOCKS, profile, seed + 5, 5, 'assistance').map((item) => ({
+    ...item,
+    type: item.role,
+    emphasis: `${tagText(item.tags)} - ${item.sourceLabel}`
+  }))
 
   return {
     id: `specimen-W${week}D${day}`,
-    title: 'Specimen work',
+    title: 'Training Montage templates',
     density: profile.density,
     phase: profile.phase,
     profile: {
       primaryFocus: profile.primaryFocus,
       focusList: profile.focusList
     },
-    upperBack,
-    assistance,
-    rationale: dayRationale(profile, upperBack, assistance)
+    sourcePolicy: 'training-montage',
+    upperBackOptions,
+    assistanceOptions,
+    upperBack: upperBackOptions[0],
+    assistance: assistanceOptions[0],
+    rationale: dayRationale(profile, upperBackOptions, assistanceOptions)
   }
 }
 
 export function timerFromSpecimen(specimen) {
   const timer = specimen?.assistance?.timer
   if (!timer) return { label: 'Descanso 3:00', seconds: 180, mode: 'countdown' }
-  if (timer.mode === 'emom') return { label: `EMOM ${timer.minutes}:00`, seconds: timer.minutes * 60, mode: 'emom' }
-  if (timer.mode === 'amrap') return { label: `AMRAP ${timer.minutes}:00`, seconds: timer.minutes * 60, mode: 'countdown' }
-  if (timer.mode === 'interval') return { label: `${timer.minutes}:00 cada ${timer.workSec}s`, seconds: timer.minutes * 60, mode: 'interval' }
-  if (timer.mode === 'rounds') return { label: `${timer.rounds} rondas`, seconds: timer.restSec || 90, mode: 'countdown' }
-  return { label: 'Descanso 3:00', seconds: 180, mode: 'countdown' }
+  if (timer.type === 'emom') {
+    const seconds = timer.duration_sec || (timer.rounds || 10) * (timer.interval_sec || 60)
+    return { label: `EMOM ${Math.round(seconds / 60)}:00`, seconds, mode: 'emom' }
+  }
+  if (timer.type === 'amrap') {
+    const seconds = timer.duration_sec || 600
+    return { label: `AMRAP ${Math.round(seconds / 60)}:00`, seconds, mode: 'countdown' }
+  }
+  if (timer.type === 'sequence') {
+    const seconds = timer.duration_sec || 600
+    return { label: `Secuencia ${Math.round(seconds / 60)}:00`, seconds, mode: 'countdown' }
+  }
+  if (timer.type === 'interval') {
+    const seconds = timer.duration_sec || ((timer.work_sec || 20) + (timer.rest_sec || 10)) * (timer.rounds || 8)
+    return { label: `Intervalos ${timer.work_sec || 20}/${timer.rest_sec || 10}`, seconds, mode: 'countdown' }
+  }
+  if (timer.type === 'rounds') return { label: `${timer.rounds || 3} rondas`, seconds: timer.rest_sec || 90, mode: 'countdown' }
+  if (timer.type === 'for_time') return { label: 'For time', seconds: 0, mode: 'stopwatch' }
+  return { label: 'Cronometro', seconds: 0, mode: 'stopwatch' }
 }
