@@ -36,7 +36,13 @@ function beep() {
   }
 }
 
-export default function SessionTimer({ suggested, title = 'Timer', context = '', embedded = false }) {
+export default function SessionTimer({
+  suggested,
+  title = 'Timer',
+  context = '',
+  embedded = false,
+  autoStartKey = null
+}) {
   const allPresets = useMemo(() => {
     if (!suggested) return PRESETS
     return [{ id: 'suggested', ...suggested }, ...PRESETS]
@@ -48,13 +54,26 @@ export default function SessionTimer({ suggested, title = 'Timer', context = '',
   const startedAtRef = useRef(0)
   const offsetRef = useRef(0)
   const doneRef = useRef(false)
+  const autoStartRef = useRef(autoStartKey)
 
   useEffect(() => {
-    if (phase === 'running') return
+    if (presetId !== 'suggested') return
+    if (phase !== 'idle' && phase !== 'done') return
     setDisplay(preset.seconds)
     offsetRef.current = 0
     doneRef.current = false
-  }, [preset.seconds, phase])
+  }, [preset.seconds, presetId, phase])
+
+  useEffect(() => {
+    if (!autoStartKey || autoStartRef.current === autoStartKey) return
+    autoStartRef.current = autoStartKey
+    setPresetId(suggested ? 'suggested' : 'rest-3')
+    offsetRef.current = 0
+    doneRef.current = false
+    setDisplay((suggested || PRESETS[1]).seconds)
+    startedAtRef.current = Date.now()
+    setPhase('running')
+  }, [autoStartKey, suggested])
 
   useEffect(() => {
     if (phase !== 'running') return
@@ -77,6 +96,10 @@ export default function SessionTimer({ suggested, title = 'Timer', context = '',
   }, [phase, preset.mode, preset.seconds])
 
   function start() {
+    if (phase !== 'paused') {
+      offsetRef.current = 0
+      setDisplay(preset.seconds)
+    }
     doneRef.current = false
     startedAtRef.current = Date.now()
     setPhase('running')
@@ -97,6 +120,10 @@ export default function SessionTimer({ suggested, title = 'Timer', context = '',
 
   function changePreset(nextId) {
     setPresetId(nextId)
+    const next = allPresets.find((item) => item.id === nextId) || allPresets[0]
+    offsetRef.current = 0
+    doneRef.current = false
+    setDisplay(next.seconds)
     setPhase('idle')
   }
 
@@ -132,7 +159,7 @@ export default function SessionTimer({ suggested, title = 'Timer', context = '',
           <button onClick={pause}>Pausa</button>
         ) : (
           <button className="primary" onClick={start}>
-            Start
+            {phase === 'paused' ? 'Reanudar' : 'Start'}
           </button>
         )}
         <button onClick={reset}>Reset</button>

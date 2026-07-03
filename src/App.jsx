@@ -223,11 +223,34 @@ function setTargetText(set, units) {
   return `${set.targetReps} reps con ${weight}.`
 }
 
+function compactSetLabel(set) {
+  if (set?.kind === 'single_at8') return 'Single'
+  if (set?.kind === 'amrap') return 'AMRAP'
+  const match = String(set?.label || '').match(/Serie\s+(\d+)/i)
+  return match ? `S${match[1]}` : set?.label || 'Set'
+}
+
+function compactSetValue(set, units) {
+  const weight = displaySetWeight(set)
+  const reps = displaySetReps(set)
+  if (set?.done) return `${weight || '-'} ${units} x ${reps || '-'}`
+  if (set?.kind === 'single_at8') return `1 @8`
+  if (set?.kind === 'amrap') return `${set.targetReps}+ reps`
+  return `${set?.targetReps || '-'} reps`
+}
+
+function compactSetStatus(set) {
+  if (set?.done) return 'Hecha'
+  if (set?.optional) return 'Opcional'
+  return 'Pendiente'
+}
+
 function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }) {
   const plan = buildSessionPlan(template, setup, logs, selected.week, selected.day)
   const currentLog = normalizeSessionLogForPlan(plan, logs[plan.id] || createEmptySessionLog(plan))
   const [activeLiftIndex, setActiveLiftIndex] = useState(0)
   const [activeSetIndex, setActiveSetIndex] = useState(0)
+  const [restTimer, setRestTimer] = useState(null)
   const specimen = useMemo(
     () => specimenTemplateForSession({
       week: plan.week,
@@ -257,6 +280,7 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
   useEffect(() => {
     setActiveLiftIndex(0)
     setActiveSetIndex(0)
+    setRestTimer(null)
     setSelectedUpperBackId(currentLog.specimenSelection?.upperBackId || specimen.upperBack.id)
     setSelectedAssistanceId(currentLog.specimenSelection?.assistanceId || specimen.assistance.id)
   }, [plan.id])
@@ -304,12 +328,20 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
 
   function noteActiveSetDone() {
     if (!activeSet || !activeSetHasRequiredReps) return
+    const completedLift = activeLift
+    const completedSet = activeSet
     const patch = {
       done: true,
-      weight: displaySetWeight(activeSet),
-      reps: displaySetReps(activeSet)
+      weight: displaySetWeight(completedSet),
+      reps: displaySetReps(completedSet)
     }
-    updateSet(activeLift.slotId, activeSet.id, patch)
+    updateSet(completedLift.slotId, completedSet.id, patch)
+    setRestTimer({
+      key: `${plan.id}:${completedLift.slotId}:${completedSet.id}:${Date.now()}`,
+      suggested: setRestPreset(completedSet, completedLift),
+      context: `${completedLift.name} - ${completedSet.label}`
+    })
+    goNextSet()
   }
 
   function goPreviousSet() {
@@ -526,47 +558,26 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
           )}
 
           <SessionTimer
-            key={`${plan.id}:${activeLift.slotId}:${activeSet?.id || 'set'}`}
+            key={plan.id}
             embedded
             title="Descanso"
-            context={`${activeLift.name} - ${activeSet?.label || ''}`}
-            suggested={setRestPreset(activeSet, activeLift)}
+            context={restTimer?.context || `${activeLift.name} - ${activeSet?.label || ''}`}
+            suggested={restTimer?.suggested || setRestPreset(activeSet, activeLift)}
+            autoStartKey={restTimer?.key}
           />
 
-          <div className="set-log-table" aria-label={`Series registradas ${activeLift.name}`}>
+          <div className="set-chip-list" aria-label={`Series registradas ${activeLift.name}`}>
             {activeSets.map((set, index) => (
-              <div className={`set-row ${index === activeSetIndex ? 'active' : ''} ${set.done ? 'done' : ''}`} key={set.id}>
-                <button onClick={() => setActiveSetIndex(index)} aria-label={`Editar ${set.label} ${activeLift.name}`}>
-                  <strong>{set.label}</strong>
-                  <span>{set.optional ? 'Opcional' : set.kind === 'amrap' ? `${set.targetReps}+` : `${set.targetReps} reps`}</span>
-                </button>
-                <label>
-                  Peso
-                  <input
-                    inputMode="decimal"
-                    aria-label={`Peso ${set.label} ${activeLift.name}`}
-                    value={numberInputValue(displaySetWeight(set))}
-                    onChange={(event) => updateSet(activeLift.slotId, set.id, { weight: event.target.value })}
-                  />
-                </label>
-                <label>
-                  Reps
-                  <input
-                    inputMode="numeric"
-                    aria-label={`Reps ${set.label} ${activeLift.name}`}
-                    value={numberInputValue(displaySetReps(set))}
-                    onChange={(event) => updateSet(activeLift.slotId, set.id, { reps: event.target.value })}
-                  />
-                </label>
-                <label className="done-toggle">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(set.done)}
-                    onChange={(event) => updateSet(activeLift.slotId, set.id, { done: event.target.checked })}
-                  />
-                  Hecha
-                </label>
-              </div>
+              <button
+                className={`set-chip ${index === activeSetIndex ? 'active' : ''} ${set.done ? 'done' : ''} ${set.optional ? 'optional' : ''}`}
+                key={set.id}
+                onClick={() => setActiveSetIndex(index)}
+                aria-label={`Editar ${set.label} ${activeLift.name}, ${compactSetStatus(set).toLowerCase()}, ${compactSetValue(set, setup.units)}`}
+              >
+                <span>{compactSetLabel(set)}</span>
+                <strong>{compactSetValue(set, setup.units)}</strong>
+                <small>{compactSetStatus(set)}</small>
+              </button>
             ))}
           </div>
 

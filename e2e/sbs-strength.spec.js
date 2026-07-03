@@ -41,6 +41,15 @@ test('onboarding blocks entry until required maxes exist', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Serie a serie' })).toBeVisible()
   await expect(page.getByLabel('Preset de timer')).toBeVisible()
   await expect(page.getByText('4x5 + 1x10+')).toBeVisible()
+  await expect(page.getByRole('button', { name: /Editar Single.*Squat/ })).toBeVisible()
+  await page.getByRole('button', { name: 'Anotar serie' }).click()
+  await expect(page.getByRole('heading', { name: 'Serie 1' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Pausa' })).toBeVisible()
+  await page.getByRole('button', { name: 'Pausa' }).click()
+  await expect(page.getByRole('button', { name: 'Reanudar' })).toBeVisible()
+  const paused = await page.locator('[role="timer"]').textContent()
+  await page.waitForTimeout(500)
+  await expect(page.locator('[role="timer"]')).toHaveText(paused)
 })
 
 test('autosaves an in-progress session and applies single @8 live', async ({ page }) => {
@@ -49,7 +58,8 @@ test('autosaves an in-progress session and applies single @8 live', async ({ pag
 
   await page.getByLabel('Peso serie actual Squat').fill('460')
   await expect(page.getByText('357.5')).toBeVisible()
-  await page.getByLabel('Reps Serie 5 AMRAP Squat').fill('12')
+  await page.getByRole('button', { name: /Editar Serie 5 AMRAP Squat/ }).click()
+  await page.getByLabel('Reps serie actual Squat').fill('12')
   await page.getByRole('button', { name: 'Aplicar templates elegidos' }).click()
   await expect(page.locator('section[aria-labelledby="upper-back-title"] select')).toHaveValue(/Rows|Pull|Chin|Rounds|TEMPO|Sandbag/)
 
@@ -57,14 +67,16 @@ test('autosaves an in-progress session and applies single @8 live', async ({ pag
   await expect(page.getByRole('heading', { name: 'Semana 1 Dia 1' })).toBeVisible()
   await page.getByRole('button', { name: 'Continuar sesion' }).click()
   await expect(page.getByLabel('Peso serie actual Squat')).toHaveValue('460')
-  await expect(page.getByLabel('Reps Serie 5 AMRAP Squat')).toHaveValue('12')
+  await page.getByRole('button', { name: /Editar Serie 5 AMRAP Squat/ }).click()
+  await expect(page.getByLabel('Reps serie actual Squat')).toHaveValue('12')
 })
 
 test('last-set reps change the next week load for the lift', async ({ page }) => {
   await completeOnboarding(page)
   await page.getByRole('button', { name: 'Abrir sesion' }).click()
 
-  await page.getByLabel('Reps Serie 5 AMRAP Squat').fill('15')
+  await page.getByRole('button', { name: /Editar Serie 5 AMRAP Squat/ }).click()
+  await page.getByLabel('Reps serie actual Squat').fill('15')
   await page.getByRole('button', { name: 'Guardar sesion' }).click()
   await page.getByRole('button', { name: 'Volver' }).click()
   await expect(page.getByRole('heading', { name: 'Semana 1 Dia 2' })).toBeVisible()
