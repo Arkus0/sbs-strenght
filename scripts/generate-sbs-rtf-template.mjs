@@ -1,0 +1,196 @@
+import fs from 'node:fs'
+import path from 'node:path'
+import process from 'node:process'
+import XLSX from 'xlsx'
+
+const DEFAULT_SOURCE = 'C:\\Users\\Usuario\\Downloads\\SBS Strength Program reps to failure.xlsx'
+const source = process.argv[2] || DEFAULT_SOURCE
+const outFile = path.resolve('src/data/sbsRtfTemplate.json')
+
+function cell(sheet, address) {
+  return sheet[address]?.v ?? null
+}
+
+function number(value, fallback = null) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? Number(parsed.toFixed(4)) : fallback
+}
+
+function colName(index) {
+  return XLSX.utils.encode_col(index)
+}
+
+function quickCell(sheet, colIndex, row) {
+  return cell(sheet, `${colName(colIndex)}${row}`)
+}
+
+function setupSlotFromFormula(formula) {
+  const match = String(formula || '').match(/Setup!\$?A\$?(\d+)/i)
+  if (!match) return null
+  const row = Number(match[1])
+  if (row >= 3 && row <= 6) return `main_${row - 2}`
+  if (row >= 9 && row <= 14) return `aux_${row - 8}`
+  return null
+}
+
+function extractLiftSlots(qs) {
+  const mains = [5, 6, 7, 8].map((row, index) => ({
+    id: `main_${index + 1}`,
+    kind: 'main',
+    label: cell(qs, `B${row}`) || `Main lift ${index + 1}`,
+    defaultName: cell(qs, `C${row}`) || '',
+    defaultTrainingMax: number(cell(qs, `D${row}`)),
+    singleAt8Pct: number(cell(qs, `E${row}`), 0.9)
+  }))
+
+  const auxiliaries = [11, 12, 13, 14, 15, 16].map((row, index) => ({
+    id: `aux_${index + 1}`,
+    kind: 'auxiliary',
+    label: cell(qs, `B${row}`) || `Auxiliary ${index + 1}`,
+    defaultName: cell(qs, `C${row}`) || '',
+    defaultTrainingMax: number(cell(qs, `D${row}`)),
+    singleAt8Pct: number(cell(qs, `E${row}`), 0.9)
+  }))
+
+  return [...mains, ...auxiliaries]
+}
+
+function extractAdjustments(qs) {
+  const rows = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+  return Object.fromEntries(
+    rows.map((row, index) => {
+      const id = index < 4 ? `main_${index + 1}` : `aux_${index - 3}`
+      return [
+        id,
+        {
+          sets: number(cell(qs, `H${row}`), 5),
+          belowBy2Plus: number(cell(qs, `I${row}`), -0.05),
+          belowBy1: number(cell(qs, `J${row}`), -0.02),
+          hit: number(cell(qs, `K${row}`), 0),
+          beatBy1: number(cell(qs, `L${row}`), 0.005),
+          beatBy2: number(cell(qs, `M${row}`), 0.01),
+          beatBy3: number(cell(qs, `N${row}`), 0.015),
+          beatBy4: number(cell(qs, `O${row}`), 0.02),
+          beatBy5Plus: number(cell(qs, `P${row}`), 0.03)
+        }
+      ]
+    })
+  )
+}
+
+function extractTargetTable(qs, headerRow, firstLiftRow) {
+  const intensities = []
+  for (let col = 2; col <= 22; col += 1) {
+    intensities.push(number(quickCell(qs, col, headerRow)))
+  }
+  const table = {}
+  for (let i = 0; i < 10; i += 1) {
+    const id = i < 4 ? `main_${i + 1}` : `aux_${i - 3}`
+    table[id] = Object.fromEntries(
+      intensities.map((intensity, offset) => [
+        String(intensity),
+        number(quickCell(qs, 2 + offset, firstLiftRow + i))
+      ])
+    )
+  }
+  return { intensities, table }
+}
+
+function extractIntensityByWeek(qs) {
+  const weeks = []
+  for (let col = 2; col <= 22; col += 1) {
+    weeks.push(number(quickCell(qs, col, 59)))
+  }
+  const bySlot = {}
+  for (let i = 0; i < 10; i += 1) {
+    const id = i < 4 ? `main_${i + 1}` : `aux_${i - 3}`
+    bySlot[id] = Object.fromEntries(
+      weeks.map((week, offset) => [
+        String(week),
+        number(quickCell(qs, 2 + offset, 60 + i))
+      ])
+    )
+  }
+  return { weeks, bySlot }
+}
+
+function extractFrequencyLayout(workbook, sheetName) {
+  const sheet = workbook.Sheets[sheetName]
+  const range = XLSX.utils.decode_range(sheet['!ref'])
+  const days = []
+  let current = null
+
+  for (let r = range.s.r; r <= range.e.r; r += 1) {
+    const address = XLSX.utils.encode_cell({ c: 0, r })
+    const value = sheet[address]?.v
+    if (typeof value === 'string' && /^Day\s+\d+/i.test(value)) {
+      current = { day: Number(value.match(/\d+/)?.[0]), lifts: [] }
+      days.push(current)
+      continue
+    }
+    if (!current) continue
+    if (value === 'Accessories') {
+      current.accessorySlots = 3
+      current = null
+      continue
+    }
+    const formula = sheet[address]?.f
+    const slotId = setupSlotFromFormula(formula)
+    const weightFormula = sheet[XLSX.utils.encode_cell({ c: 1, r })]?.f
+    if (slotId && weightFormula && /mround/i.test(weightFormula)) {
+      current.lifts.push({ slotId })
+    }
+  }
+
+  return { frequency: Number(sheetName.replace('x', '')), days }
+}
+
+if (!fs.existsSync(source)) {
+  throw new Error(`No existe el Excel fuente: ${source}`)
+}
+
+const workbook = XLSX.readFile(source, { cellFormula: true })
+const qs = workbook.Sheets['Quick Setup']
+if (!qs) throw new Error('No se encontro la hoja Quick Setup')
+const sourceStats = fs.statSync(source)
+
+const normal = extractTargetTable(qs, 31, 32)
+const repOut = extractTargetTable(qs, 45, 46)
+const intensity = extractIntensityByWeek(qs)
+
+const template = {
+  id: 'sbs-rtf',
+  name: 'SBS Strength Program Reps To Failure',
+  source: {
+    fileName: path.basename(source),
+    sourceModifiedAt: sourceStats.mtime.toISOString(),
+    notes: 'Generado desde Quick Setup y hojas 2x-6x. El Excel fuente no se copia al repo.'
+  },
+  defaults: {
+    units: 'kg',
+    rounding: number(cell(qs, 'A2'), 2.5),
+    deloadWeeks: [7, 14, 21],
+    liftSlots: extractLiftSlots(qs),
+    backExercises: Array.from({ length: 8 }, (_, index) => cell(qs, `B${19 + index}`)).filter(Boolean),
+    adjustments: extractAdjustments(qs),
+    normalSetReps: normal.table,
+    repOutTargets: repOut.table,
+    intensityByWeek: intensity.bySlot
+  },
+  meta: {
+    weeks: 21,
+    frequencies: [2, 3, 4, 5, 6],
+    targetIntensities: normal.intensities,
+    intensityWeeks: intensity.weeks
+  },
+  layouts: Object.fromEntries(
+    ['2x', '3x', '4x', '5x', '6x'].map((sheetName) => {
+      const layout = extractFrequencyLayout(workbook, sheetName)
+      return [String(layout.frequency), layout]
+    })
+  )
+}
+
+fs.mkdirSync(path.dirname(outFile), { recursive: true })
+fs.writeFileSync(outFile, `${JSON.stringify(template, null, 2)}\n`)
+console.log(`Generated ${outFile}`)
