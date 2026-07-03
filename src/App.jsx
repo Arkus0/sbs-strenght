@@ -402,7 +402,7 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
         </div>
         <p>
           {plan.deload
-            ? '5 sets con la carga programada. Sin rep-out.'
+            ? 'Single @8 opcional; 5 sets con la carga programada. Sin rep-out.'
             : 'Ultimo set a fallo; las reps registradas mueven el training max.'}
         </p>
       </section>

@@ -158,20 +158,18 @@ export function prescribedSetsForLift(lift) {
   const setGoal = Number(lift?.setGoal || 0)
   const workSets = lift?.deload ? setGoal : Math.max(0, setGoal - 1)
 
-  if (!lift?.deload) {
-    sets.push({
-      id: `${lift.slotId}:single_at8`,
-      kind: 'single_at8',
-      label: 'Single @8',
-      optional: true,
-      prescribedWeight: lift?.singleAt8Weight ?? '',
-      targetReps: 1,
-      weight: '',
-      reps: '1',
-      done: false,
-      notes: ''
-    })
-  }
+  sets.push({
+    id: `${lift.slotId}:single_at8`,
+    kind: 'single_at8',
+    label: 'Single @8',
+    optional: true,
+    prescribedWeight: lift?.singleAt8Weight ?? '',
+    targetReps: 1,
+    weight: '',
+    reps: '1',
+    done: false,
+    notes: ''
+  })
 
   for (let index = 0; index < workSets; index += 1) {
     sets.push({

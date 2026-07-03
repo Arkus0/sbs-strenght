@@ -8,6 +8,7 @@ import {
   createEmptySessionLog,
   listSessions,
   projectTrainingMax,
+  prescribedSetsForLift,
   roundToIncrement,
   sessionId,
   tmOverrideKey
@@ -166,6 +167,37 @@ test('deload weeks do not adjust training max from rep-out entries', () => {
   assert.equal(week7.deload, true)
   assert.equal(week7.repOutTarget, null)
   assert.equal(week8.trainingMax, 490)
+})
+
+test('deload weeks keep the spreadsheet single @8 override but no AMRAP adjustment', () => {
+  const setup = readySetup(3)
+  const week7Plan = buildSessionPlan(template, setup, {}, 7, 1)
+  const squat = week7Plan.lifts.find((lift) => lift.slotId === 'main_1')
+  const prescribed = prescribedSetsForLift(squat)
+
+  assert.equal(squat.deload, true)
+  assert.deepEqual(prescribed.map((set) => set.kind), ['single_at8', 'work', 'work', 'work', 'work', 'work'])
+  assert.equal(prescribed[0].optional, true)
+  assert.equal(prescribed.some((set) => set.kind === 'amrap'), false)
+
+  const logs = {
+    W7D1: {
+      id: 'W7D1',
+      lifts: {
+        main_1: {
+          singleAt8: 450,
+          lastSetReps: 30
+        }
+      }
+    }
+  }
+  const week7 = projectTrainingMax(template, setup, logs, 'main_1', 7, 1)
+  const week8 = projectTrainingMax(template, setup, logs, 'main_1', 8, 1)
+
+  assert.equal(week7.source, 'single_at8')
+  assert.equal(week7.trainingMax, 500)
+  assert.equal(week8.trainingMax, 500)
+  assert.equal(week8.adjustment, null)
 })
 
 test('manual training max overrides apply to the selected week', () => {
