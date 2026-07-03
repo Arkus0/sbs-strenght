@@ -139,6 +139,52 @@ Rest as Long As you Think you need Between Rounds`
 10 Dips (15 push-Ups if Necessary)
 12 Face Pulls
 Rest as little as need to complete as Many Rounds as You Can.`
+  }),
+  sourceBlock({
+    id: 'edc-w5d3-sandbag-carry',
+    tags: ['sandbag', 'upper_back', 'carry', 'legs'],
+    source: { program: 'edc', label: 'EDC', week: 5, day: 3, sessionIndex: 18, mainLift: 'squat', role: 'carry' },
+    timer: { type: 'amrap', duration_sec: 600 },
+    raw: `As Many Rounds As Possible in 10 minutes:
+3 Sandbag Picks. *Pick up to Chest height and hold for 1 Count. (Heavy Sandbag)
+7 Sandbag Squats - DEEP Squeeze Butt and Upper Back Every Rep (Same Sandbag)
+50 Foot Carry (Bearhug Position) - Same Sandbag
+Rest as long as needed Between Rounds but You are trying to complete as many Rounds as You can
+in the Given 10 minutes:
+SCORE:______________`
+  }),
+  sourceBlock({
+    id: 'edc-w9d2-sandbag-turnarounds',
+    tags: ['sandbag', 'upper_back', 'pull', 'press'],
+    source: { program: 'edc', label: 'EDC', week: 9, day: 2, sessionIndex: 33, mainLift: 'ohp', role: 'strength' },
+    timer: { type: 'rounds', rounds: 7, rest_sec: 90 },
+    raw: `7 Rounds of the Following Giant Set
+A. 3 Weighted Pull-Ups or 10 Bodyweight PU's / 25 Inverted Rows
+B. 2 Strict Presses or Push Presses (Goal is 85-95%+ of your 1RM)
+C. :30 Seconds Sandbag Turn Arounds (Heavy) - Each Side *Pick Up Sandbag to Chest Height, Turn 180
+Degrees, Drop it. Pick it Back up, turn in the opposite Direction, Drop it = 1 Rep
+D. D. :90 Seconds Rest to Manipulate and Record Weights`
+  }),
+  sourceBlock({
+    id: 'edc-w12d3-sandbag-tempo-squats',
+    tags: ['sandbag', 'upper_back', 'legs'],
+    source: { program: 'edc', label: 'EDC', week: 12, day: 3, sessionIndex: 46, mainLift: 'squat', role: 'assistance' },
+    timer: { type: 'rounds', rounds: 5, rest_sec: 60 },
+    raw: `TEMPO Reps (4 Sec Descent, 4 Sec Pause, 4 Sec Ascent, 4 Sec Pause)
+5 TEMPO Squats @ 65% of Your 1RM
+5 TEMPO Sandbag Squats @ Bodyweight - Upper Back & Butt Squeeze Each Rep
+Rest one minute and change the Weights
+4 TEMPO Squats @ 70% of Your 1RM
+4 TEMPO Sandbag Squats @ Bodyweight - Upper Back & Butt Squeeze Each Rep
+Rest one minute and change the Weights
+3 TEMPO Squats @ 75% of Your 1RM
+3 TEMPO Sandbag Squats @ Bodyweight - Upper Back & Butt Squeeze Each Rep
+Rest one minute and change the Weights
+2 TEMPO Squats @ 80% of Your 1RM
+2 TEMPO Sandbag Squats @ Bodyweight - Upper Back & Butt Squeeze Each Rep
+Rest one minute and change the Weights
+1 TEMPO Squat @ 85% of Your 1RM
+1 TEMPO Sandbag Squat @ Bodyweight - Upper Back & Butt Squeeze Each Rep`
   })
 ]
 
@@ -272,6 +318,96 @@ SCORE:__________________`
 3 Burpees (Optional)
 100 Foot Farmer's Walk @ 70% of Your 1RM 50ft Walk without Drops
 Take the Remainder of the Minute to Rest`
+  }),
+  sourceBlock({
+    id: 'edc-w17d3-sandbag-burpee-carry',
+    tags: ['carry', 'sandbag', 'calisthenics', 'conditioning'],
+    source: { program: 'edc', label: 'EDC', week: 17, day: 3, sessionIndex: 66, mainLift: 'squat', role: 'carry' },
+    timer: { type: 'emom', duration_sec: 600, interval_sec: 60, rounds: 10 },
+    raw: `At the Top of Every Minute for 10 minutes Complete
+50 Foot Sandbag Carry (Lighter Sandbag)
+3 Burpees
+50 Foot Sandbag Carry Back (Heavier Sandbag)
+Take the Remainder of the Minute to Rest`
+  }),
+  sourceBlock({
+    id: 'edc-w18d3-sandbag-farmer-carry',
+    tags: ['carry', 'sandbag', 'grip'],
+    source: { program: 'edc', label: 'EDC', week: 18, day: 3, sessionIndex: 70, mainLift: 'squat', role: 'carry' },
+    timer: { type: 'emom', duration_sec: 600, interval_sec: 60, rounds: 10 },
+    raw: `At the Top of Every Minute for 10 Minutes Complete:
+50 Foot Sandbag Carry (At Bodyweight or Heavier)
+50 Foot Farmer's Carry (At 70-80% of your 1RM 50ft Carry)
+Take the Remainder of the Minute to Rest`
+  }),
+  sourceBlock({
+    id: 'rpm2-w2d1-sandbag-front-carry',
+    tags: ['carry', 'sandbag', 'grip'],
+    source: { program: 'rpm2', label: 'RPM2', week: 2, day: 1, sessionIndex: 4, mainLift: 'deadlift', role: 'carry' },
+    timer: { type: 'emom', duration_sec: 600, interval_sec: 60, rounds: 10 },
+    raw: `Sandbag, Loading Pin, Keg, Stone, Plates, Odd Object Front Carry (MEDIUM)
+At the Top of Every Minute for 10 Minutes, Complete:
+100 Foot Front Carry (Bear Hug Position) @ 50-55% of Your 50 ft Maximum Carry weight.
+Take the Remainder of the Minute to Rest
+or Add Burpees or Push-Ups during the Remainder of the Minute
+*If Not Possible, Replace the Carry with Marching in place or your Favorite Deadlift or Row Variation but utilize the same reps & Intensity.`
+  }),
+  sourceBlock({
+    id: 'rpm2-w4d1-sandbag-extensions',
+    tags: ['hinge', 'sandbag', 'conditioning'],
+    source: { program: 'rpm2', label: 'RPM2', week: 4, day: 1, sessionIndex: 12, mainLift: 'deadlift', role: 'conditioning' },
+    timer: { type: 'emom', duration_sec: 600, interval_sec: 60, rounds: 10 },
+    raw: `1 Motion Sandbag Extensions or Kettlebell/Dumbbell Snatches
+At the Top of Every Minute for 10 Minutes, Complete:
+5-8 (1 Motion) Sandbag Extensions
+Or
+8-10 Single Arm Kettlebell Snatches (Each Side)`
+  }),
+  sourceBlock({
+    id: 'powerbuilder-w2d1-odd-object-carry',
+    tags: ['carry', 'sandbag', 'grip'],
+    source: { program: 'powerbuilder', label: 'Powerbuilder', week: 2, day: 1, sessionIndex: 4, mainLift: 'deadlift', role: 'conditioning' },
+    timer: { type: 'for_time' },
+    raw: `1 Mile Odd Object Carry (Plates, Dumbbells, Sandbag, Farmer's, etc). Make it heavy.  Get uncomfortable. Become Better.`
+  }),
+  sourceBlock({
+    id: 'powerbuilder-lite-w2d3-strongman',
+    tags: ['strongman', 'sandbag', 'carry', 'legs'],
+    source: { program: 'powerbuilder_lite', label: 'Powerbuilder Lite', week: 2, day: 3, sessionIndex: 6, mainLift: 'squat', role: 'strongman' },
+    timer: { type: 'rounds', rounds: 4, rest_sec: 120 },
+    raw: `3-4 Rounds Depending on how heavy you go
+Feel Free to use a sandbag or any other strongman implement if you have access!!
+Hold a HEAVY DB's or KB's in Front Rack Position
+Squat 8 Times
+Carry the DB/KB's 50ft and
+Squat 8 more times
+Now Carry the DB/KB's 50ft back home.
+Place them on the ground and take 2 Minutes Rest Between Rounds`
+  }),
+  sourceBlock({
+    id: 'massbuilder-w2d3-sandbag-deadlift-power',
+    tags: ['hinge', 'sandbag', 'carry', 'core'],
+    source: { program: 'massbuilder', label: 'Massbuilder', week: 2, day: 3, sessionIndex: 6, mainLift: 'deadlift', role: 'strength' },
+    timer: { type: 'rounds', rounds: 3, rest_sec: 90 },
+    raw: `Deadlift Focus (Power)
+Set 1: 3 Sandbag/Medicine Ball Over Shoulder (As Close to Body Weight As possible) or 5 Max
+Distance Broad Jumps
+10 Paused Deadlifts (1" Off Floor) @ 60% Of your 1RM
+50 Foot Single Arm Farmer's Carry (Each Side) Goal is .75% Bodyweight but do what you can do.
+8 Ring Layouts or Ab Wheel/Barbell Roll-Outs
+Rest 90 Seconds and get right back to your Deadlifts
+Set 2: 3 Sandbag/Medicine Ball Over Shoulder (As Close to Body Weight As possible) or 5 Max
+Distance Broad Jumps
+8 Paused Deadlifts (1" Off Floor) @ 70% Of your 1RM
+50 Foot Single Arm Farmer's Carry (Each Side) Goal is .75% Bodyweight but do what you can do.
+8 Ring Layouts or Ab Wheel/Barbell Roll-Outs
+:90 Seconds Rest
+Set 3: 3 Sandbag/Medicine Ball Over Shoulder (As Close to Body Weight As possible) or 5 Max
+Distance Broad Jumps
+As Many Paused Deadlifts (1" Off Floor) As Possible @ 80% Of your 1RM (Goal 6+)
+50 Foot Single Arm Farmer's Carry (Each Side) Goal is .75% Bodyweight but do what you can do.
+8 Ring Layouts or Ab Wheel/Barbell Roll-Outs
+:90 Seconds Rest`
   }),
   sourceBlock({
     id: 'rpm2-w1d2-conditioning',
@@ -484,6 +620,9 @@ function scoreCandidate(candidate, profile, kind) {
   const tags = candidate.tags || []
 
   if (kind === 'assistance' && tags.includes('calisthenics')) score += 18
+  if (kind === 'upper' && tags.includes('upper_back')) score += 14
+  if (tags.includes('sandbag')) score += kind === 'upper' ? 10 : 8
+  if (tags.includes('sandbag') && candidate.source.program.startsWith('powerbuilder')) score += 18
   if (tags.includes('pull') && (profile.hasPress || profile.hasOverhead)) score += 8
   if (tags.includes('legs') && profile.hasSquat) score += 7
   if (tags.includes('press') && (profile.hasPress || profile.hasOverhead)) score += 5
@@ -541,7 +680,11 @@ function tagText(tags = []) {
     locomotion: 'locomocion',
     vertical_pull: 'dominadas',
     complex: 'complex',
-    hinge: 'bisagra'
+    hinge: 'bisagra',
+    sandbag: 'sandbag',
+    upper_back: 'espalda alta',
+    conditioning: 'conditioning',
+    strongman: 'strongman'
   }
   return tags.map((tag) => labels[tag] || tag).join(' / ')
 }
