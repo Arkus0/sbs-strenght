@@ -4,6 +4,7 @@ import template from '../data/sbsRtfTemplate.json'
 import { ACCESSORY_EXERCISES, BACK_EXERCISES } from '../data/bodybuildingCatalog.js'
 import { ASSISTANCE_BLOCKS } from '../lib/assistanceProgram.js'
 import { exportV3State } from '../lib/stateV3'
+import { requiredSlotIds } from '../lib/sbsRtf.js'
 import { useAppState } from '../app/AppContext'
 import { SyncSettings } from '../sync/SyncSettings'
 
@@ -21,11 +22,21 @@ function downloadJson(text: string): void {
   URL.revokeObjectURL(url)
 }
 
+function percentageInputValue(value: unknown): number | '' {
+  if (value === '' || value === undefined || value === null) return ''
+  const percentage = Number(value)
+  return Number.isFinite(percentage) ? Math.round(percentage * 10000) / 100 : ''
+}
+
 export function SettingsPage(): JSX.Element {
   const { state, setup, updateSetup, importState, resetAll, setTheme, setPreferredWeekdays } = useAppState()
   const [message, setMessage] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const hasHistory = Object.keys(state.logs).length > 0
+  const invalidSinglePercentages = requiredSlotIds(template, setup).some((slotId) => {
+    const value = Number(setup.lifts[slotId]?.singleAt8Pct)
+    return !(value > 0 && value <= 1)
+  })
 
   function updateLift(slotId: string, patch: Record<string, unknown>): void {
     updateSetup({ ...setup, lifts: { ...setup.lifts, [slotId]: { ...setup.lifts[slotId], ...patch } } })
@@ -50,7 +61,7 @@ export function SettingsPage(): JSX.Element {
 
       <section className="settings-section"><header><div><span>Calendario</span><h2>Días preferidos</h2></div><strong>{state.profile.preferredWeekdays.length}/{setup.frequency}</strong></header><div className="weekday-picker">{weekdayOptions.map((day) => { const active = state.profile.preferredWeekdays.includes(day.value); return <button key={day.value} className={active ? 'active' : ''} aria-pressed={active} onClick={() => { const next = active ? state.profile.preferredWeekdays.filter((value) => value !== day.value) : [...state.profile.preferredWeekdays, day.value]; if (next.length <= Number(setup.frequency)) setPreferredWeekdays(next) }}>{day.label}</button> })}</div><p>Estos días se usan al redistribuir sesiones futuras; cambiar la selección no mueve sesiones automáticamente.</p></section>
 
-      <section className="settings-section"><header><div><span>SBS RTF</span><h2>Lifts y training maxes</h2></div><span className="protected-badge"><ShieldCheck size={16} />Motor Excel protegido</span></header><div className="settings-lift-list">{template.defaults.liftSlots.map((slot) => { const lift = setup.lifts[slot.id]; return <article key={slot.id}><div><span>{slot.label}</span><input aria-label={`Nombre ${slot.label}`} value={lift.name} onChange={(event) => updateLift(slot.id, { name: event.target.value })} /></div><label>Training max<input inputMode="decimal" aria-label={`Training max ${lift.name}`} value={lift.trainingMax ?? ''} onChange={(event) => updateLift(slot.id, { trainingMax: event.target.value })} /></label><label>Single @8 %<input inputMode="decimal" value={lift.singleAt8Pct} onChange={(event) => updateLift(slot.id, { singleAt8Pct: event.target.value })} /></label></article> })}</div><p className="protected-note">Las intensidades, targets, buckets, deloads y fórmulas procedentes del Excel no son editables desde esta versión.</p></section>
+      <section className="settings-section"><header><div><span>SBS RTF</span><h2>Lifts y training maxes</h2></div><span className="protected-badge"><ShieldCheck size={16} />Motor Excel protegido</span></header>{setup.singlePctReviewRequired && <div className="settings-review-warning"><strong>Revisión necesaria</strong><span>Confirma los porcentajes @8 antes de continuar con el ciclo.</span></div>}<div className="settings-lift-list">{template.defaults.liftSlots.map((slot) => { const lift = setup.lifts[slot.id]; return <article key={slot.id}><div><span>{slot.label}</span><input aria-label={`Nombre ${slot.label}`} value={lift.name} onChange={(event) => updateLift(slot.id, { name: event.target.value })} /></div><label>Training max<input inputMode="decimal" aria-label={`Training max ${lift.name}`} value={lift.trainingMax ?? ''} onChange={(event) => updateLift(slot.id, { trainingMax: event.target.value })} /></label><label>Single @8 (%)<input inputMode="decimal" aria-label={`Single @8 porcentaje ${lift.name}`} value={percentageInputValue(lift.singleAt8Pct)} onChange={(event) => updateLift(slot.id, { singleAt8Pct: event.target.value === '' ? '' : Number(event.target.value) / 100 })} /></label></article> })}</div>{setup.singlePctReviewRequired && <button className="primary" disabled={invalidSinglePercentages} onClick={() => updateSetup({ ...setup, singlePctReviewRequired: false, singlePctReviewedAt: new Date().toISOString() })}>Confirmar porcentajes @8</button>}<p className="protected-note">Las intensidades, targets, buckets, deloads y fórmulas procedentes del Excel no son editables desde esta versión.</p></section>
 
       <section className="settings-section"><header><div><span>Bodybuilding</span><h2>Ejercicios por bloque</h2></div></header><div className="assistance-settings">{ASSISTANCE_BLOCKS.map((definition: any) => { const block = setup.assistanceBlocks?.[definition.id]; if (!block) return null; return <details key={definition.id}><summary>{definition.label} · semanas {definition.workWeeks[0]}–{definition.workWeeks.at(-1)}</summary>{Object.values<any>(block.days).map((day) => <article key={day.day}><h3>Día {day.day}</h3><label>Espalda<select value={day.backExerciseId} onChange={(event) => updateAssistance(definition.id, String(day.day), 'back', 0, event.target.value)}>{BACK_EXERCISES.map((exercise: any) => <option key={exercise.id} value={exercise.id}>{exercise.name}</option>)}</select></label>{day.accessoryExerciseIds.map((exerciseId: string, index: number) => <label key={`${day.day}:${index}`}>Accesorio {index + 1}<select value={exerciseId} onChange={(event) => updateAssistance(definition.id, String(day.day), 'accessory', index, event.target.value)}>{ACCESSORY_EXERCISES.map((exercise: any) => <option key={exercise.id} value={exercise.id}>{exercise.name} · {exercise.repMin}–{exercise.repMax}</option>)}</select></label>)}</article>)}</details> })}</div></section>
 

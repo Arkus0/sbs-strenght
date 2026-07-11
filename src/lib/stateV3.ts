@@ -147,13 +147,79 @@ function historicalDate(log: any): string | null {
   return isoLocalDate(new Date(timestamp))
 }
 
+function progressionSet(kind: 'single_at8' | 'amrap', slotId: string, value: unknown, completed: boolean): Record<string, any> | null {
+  const number = Number(value)
+  if (kind === 'single_at8' && !(number > 0)) return null
+  if (kind === 'amrap' && !(Number.isInteger(number) && number >= 0)) return null
+  return {
+    id: `${slotId}:${kind}`,
+    kind,
+    weight: kind === 'single_at8' ? value : '',
+    reps: kind === 'amrap' ? value : '1',
+    done: completed,
+    useForAutoregulation: kind === 'single_at8' ? completed : undefined,
+    notes: ''
+  }
+}
+
+export function upgradeProgressionState(input: AppStateV3): AppStateV3 {
+  const state = structuredClone(input)
+  let upgraded = false
+
+  for (const program of Object.values<any>(state.programs)) {
+    const previousVersion = Number(program.setup?.version || 0)
+    program.setup = normalizeImportedSetup(template, program.setup)
+    if (previousVersion < 3 && program.setup.completedAt) {
+      program.setup.singlePctReviewRequired = true
+      program.setup.singlePctReviewedAt = null
+      upgraded = true
+    }
+  }
+
+  for (const log of Object.values<any>(state.logs)) {
+    if (Number(log?.progressionSemanticsVersion || 0) >= 2) continue
+    const completed = log?.status === 'completed'
+    for (const [slotId, liftLog] of Object.entries<any>(log?.lifts || {})) {
+      if (!Array.isArray(liftLog.sets)) {
+        liftLog.sets = [
+          progressionSet('single_at8', slotId, liftLog.singleAt8, completed),
+          progressionSet('amrap', slotId, liftLog.lastSetReps, completed)
+        ].filter(Boolean)
+      } else {
+        liftLog.sets = liftLog.sets.map((set: any) => {
+          if (set?.kind === 'single_at8') {
+            const valid = Number(set.weight) > 0
+            return { ...set, done: completed && valid ? true : Boolean(set.done), useForAutoregulation: completed && valid ? true : Boolean(set.useForAutoregulation) }
+          }
+          if (set?.kind === 'amrap') {
+            const reps = Number(set.reps)
+            const valid = set.reps !== '' && Number.isInteger(reps) && reps >= 0
+            return { ...set, done: completed && valid ? true : Boolean(set.done) }
+          }
+          return set
+        })
+      }
+    }
+    log.progressionSemanticsVersion = 2
+    upgraded = true
+  }
+
+  if (upgraded) state.schedule = state.schedule.map((session) => ({ ...session, prescriptionSnapshot: null }))
+  return state
+}
+
 export function migrateLegacyState(input: unknown): AppStateV3 {
   const exported = input && typeof input === 'object' && 'state' in input ? (input as any).state : input
   if (!exported || typeof exported !== 'object' || !(exported as any).setup) return createFreshState()
 
   const now = new Date().toISOString()
   const legacy = exported as any
+  const legacySetupVersion = Number(legacy.setup?.version || 0)
   const setup = normalizeImportedSetup(template, legacy.setup)
+  if (legacySetupVersion < 3 && setup.completedAt) {
+    setup.singlePctReviewRequired = true
+    setup.singlePctReviewedAt = null
+  }
   const logs = legacy.logs && typeof legacy.logs === 'object' ? structuredClone(legacy.logs) : {}
   const programId = makeId()
   const preferredWeekdays = evenlySpacedWeekdays(Number(setup.frequency))
@@ -195,7 +261,7 @@ export function migrateLegacyState(input: unknown): AppStateV3 {
     updatedAt: now,
     version: 1
   }
-  return appStateV3Schema.parse({
+  return upgradeProgressionState(appStateV3Schema.parse({
     schemaVersion: 3,
     profile,
     programs: { [programId]: program },
@@ -207,11 +273,11 @@ export function migrateLegacyState(input: unknown): AppStateV3 {
     completionSummary: null,
     migrationCompletedAt: now,
     sync: baseSync()
-  })
+  }))
 }
 
 export function normalizeV3State(input: unknown): AppStateV3 {
-  return appStateV3Schema.parse(input)
+  return upgradeProgressionState(appStateV3Schema.parse(input))
 }
 
 export function exportV3State(state: AppStateV3): string {

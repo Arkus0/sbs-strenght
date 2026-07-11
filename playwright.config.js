@@ -20,6 +20,10 @@ export default defineConfig({
     {
       name: 'chromium-mobile',
       use: { ...devices['Pixel 7'] }
+    },
+    {
+      name: 'chromium-desktop',
+      use: { ...devices['Desktop Chrome'] }
     }
   ]
 })

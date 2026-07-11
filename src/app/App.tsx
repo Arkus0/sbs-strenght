@@ -27,6 +27,7 @@ function WorkoutRoute(): JSX.Element {
   const { sessionId = '' } = useParams()
   const navigate = useNavigate()
   const { state, setup, updateLog, completeLog, discardLog } = useAppState()
+  if (setup.singlePctReviewRequired) return <Navigate to="/ajustes" replace />
   const scheduled = state.schedule.find((session) => session.id === sessionId || session.code === sessionId)
   const selected = parseSessionId(scheduled?.code || '')
   if (!scheduled || !selected) return <Navigate to="/calendario" replace />

@@ -44,6 +44,13 @@ export function TodayPage(): JSX.Element {
         </section>
       )}
 
+      {setup.singlePctReviewRequired && (
+        <section className="result-banner setup-review-banner">
+          <div><span>Configuración SBS</span><h2>Revisa los porcentajes @8</h2><p>La versión anterior aplicaba 90% sin mostrarlo durante el alta.</p></div>
+          <Link className="primary-link" to="/ajustes">Revisar ahora</Link>
+        </section>
+      )}
+
       {plan && target ? (
         <section className="next-workout-card">
           <div className="next-workout-top"><div><span>{target.status === 'draft' ? 'Sesión en curso' : target.scheduledDate === today ? 'Entrenamiento de hoy' : `Programada · ${target.scheduledDate}`}</span><h2>Semana {plan.week} · Día {plan.day}</h2></div><span className={plan.deload ? 'phase deload' : 'phase'}>{plan.deload ? 'Deload' : 'RTF'}</span></div>
@@ -51,7 +58,9 @@ export function TodayPage(): JSX.Element {
             {plan.lifts.map((lift: any) => <div key={lift.slotId}><span>{lift.name}</span><strong>{lift.weight ?? '—'} {setup.units}</strong><small>{Math.max(0, lift.setGoal - 1)}×{lift.normalReps} + AMRAP</small></div>)}
           </div>
           <div className="next-assistance"><span>{bodybuilding.map((item: any) => item.name).join(' · ')}</span>{conditioning && <small>Opcional: {conditioning.title}</small>}</div>
-          <Link className="primary-link" to={`/sesion/${target.id}`}>{target.status === 'draft' ? 'Continuar sesión' : 'Empezar sesión'}<ArrowRight size={20} /></Link>
+          {setup.singlePctReviewRequired
+            ? <Link className="primary-link" to="/ajustes">Revisar porcentajes antes de entrenar<ArrowRight size={20} /></Link>
+            : <Link className="primary-link" to={`/sesion/${target.id}`}>{target.status === 'draft' ? 'Continuar sesión' : 'Empezar sesión'}<ArrowRight size={20} /></Link>}
         </section>
       ) : <section className="empty-state"><Trophy size={34} /><h2>Ciclo completado</h2><p>Todas las sesiones están finalizadas u omitidas.</p></section>}
 

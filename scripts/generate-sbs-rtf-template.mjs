@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import crypto from 'node:crypto'
 import path from 'node:path'
 import process from 'node:process'
 import ExcelJS from 'exceljs'
@@ -119,6 +120,55 @@ function extractIntensityByWeek(qs) {
   return { weeks, bySlot }
 }
 
+const SETUP_ROWS = {
+  main_1: 3,
+  main_2: 4,
+  main_3: 5,
+  main_4: 6,
+  aux_1: 9,
+  aux_2: 10,
+  aux_3: 11,
+  aux_4: 12,
+  aux_5: 13,
+  aux_6: 14
+}
+
+function extractWeeklyParameters(workbook) {
+  const setup = workbook.getWorksheet('Setup')
+  if (!setup) throw new Error('No se encontro la hoja Setup')
+
+  return Object.fromEntries(
+    Object.entries(SETUP_ROWS).map(([slotId, row]) => [
+      slotId,
+      Object.fromEntries(
+        Array.from({ length: 21 }, (_, index) => {
+          const week = index + 1
+          const firstColumn = 2 + index * 12
+          return [
+            String(week),
+            {
+              intensity: number(quickCell(setup, firstColumn - 1, row)),
+              normalReps: number(quickCell(setup, firstColumn, row)),
+              repOutTarget: number(quickCell(setup, firstColumn + 1, row)),
+              sets: number(quickCell(setup, firstColumn + 2, row), 5),
+              adjustments: {
+                belowBy2Plus: number(quickCell(setup, firstColumn + 3, row), -0.05),
+                belowBy1: number(quickCell(setup, firstColumn + 4, row), -0.02),
+                hit: number(quickCell(setup, firstColumn + 5, row), 0),
+                beatBy1: number(quickCell(setup, firstColumn + 6, row), 0.005),
+                beatBy2: number(quickCell(setup, firstColumn + 7, row), 0.01),
+                beatBy3: number(quickCell(setup, firstColumn + 8, row), 0.015),
+                beatBy4: number(quickCell(setup, firstColumn + 9, row), 0.02),
+                beatBy5Plus: number(quickCell(setup, firstColumn + 10, row), 0.03)
+              }
+            }
+          ]
+        })
+      )
+    ])
+  )
+}
+
 function extractFrequencyLayout(workbook, sheetName) {
   const sheet = workbook.getWorksheet(sheetName)
   if (!sheet) throw new Error(`No se encontró la hoja ${sheetName}`)
@@ -148,6 +198,18 @@ function extractFrequencyLayout(workbook, sheetName) {
   return { frequency: Number(sheetName.replace('x', '')), days }
 }
 
+function formulaDigest(workbook) {
+  const formulas = []
+  for (const sheetName of ['Setup', '2x', '3x', '4x', '5x', '6x']) {
+    const sheet = workbook.getWorksheet(sheetName)
+    sheet.eachRow((row) => row.eachCell((cell) => {
+      const value = cell.value
+      if (value && typeof value === 'object' && 'formula' in value) formulas.push(`${sheetName}!${cell.address}=${value.formula}`)
+    }))
+  }
+  return crypto.createHash('sha256').update(formulas.join('\n')).digest('hex')
+}
+
 if (!fs.existsSync(source)) {
   throw new Error(`No existe el Excel fuente: ${source}`)
 }
@@ -168,6 +230,7 @@ const template = {
   source: {
     fileName: path.basename(source),
     sourceModifiedAt: sourceStats.mtime.toISOString(),
+    formulaDigest: formulaDigest(workbook),
     notes: 'Generado desde Quick Setup y hojas 2x-6x. El Excel fuente no se copia al repo.'
   },
   defaults: {
@@ -179,7 +242,8 @@ const template = {
     adjustments: extractAdjustments(qs),
     normalSetReps: normal.table,
     repOutTargets: repOut.table,
-    intensityByWeek: intensity.bySlot
+    intensityByWeek: intensity.bySlot,
+    weeklyParameters: extractWeeklyParameters(workbook)
   },
   meta: {
     weeks: 21,

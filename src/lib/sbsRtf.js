@@ -43,7 +43,7 @@ export function createDefaultSetup(template) {
   ])
 
   return {
-    version: 2,
+    version: 3,
     templateId: template.id,
     units: 'kg',
     rounding: template.defaults.rounding || 2.5,
@@ -55,7 +55,10 @@ export function createDefaultSetup(template) {
     normalSetReps: structuredClone(template.defaults.normalSetReps),
     repOutTargets: structuredClone(template.defaults.repOutTargets),
     intensityByWeek: structuredClone(template.defaults.intensityByWeek),
+    weeklyParameters: structuredClone(template.defaults.weeklyParameters || {}),
     tmOverrides: {},
+    singlePctReviewRequired: false,
+    singlePctReviewedAt: null,
     assistanceBlocks: createAssistanceBlocks(template, 3)
   }
 }
@@ -66,12 +69,13 @@ export function normalizeImportedSetup(template, setup) {
   const merged = {
     ...base,
     ...setup,
-    version: 2,
+    version: 3,
     lifts: { ...base.lifts, ...(setup.lifts || {}) },
     adjustments: { ...base.adjustments, ...(setup.adjustments || {}) },
     normalSetReps: { ...base.normalSetReps, ...(setup.normalSetReps || {}) },
     repOutTargets: { ...base.repOutTargets, ...(setup.repOutTargets || {}) },
     intensityByWeek: { ...base.intensityByWeek, ...(setup.intensityByWeek || {}) },
+    weeklyParameters: { ...base.weeklyParameters, ...(setup.weeklyParameters || {}) },
     tmOverrides: setup.tmOverrides || {}
   }
   return {
@@ -125,12 +129,20 @@ function targetFromIntensity(table, slotId, intensity) {
   if (!slotTable) return null
   const rounded = roundNumber(intensity)
   if (Object.hasOwn(slotTable, String(rounded))) return slotTable[String(rounded)]
-  let best = null
-  for (const [key, value] of Object.entries(slotTable)) {
-    const distance = Math.abs(Number(key) - intensity)
-    if (!best || distance < best.distance) best = { distance, value }
+  return null
+}
+
+function weeklyParametersFor(setup, slotId, week) {
+  const exact = setup.weeklyParameters?.[slotId]?.[String(week)]
+  if (exact) return exact
+  const intensity = setup.intensityByWeek?.[slotId]?.[String(week)] ?? null
+  return {
+    intensity,
+    normalReps: targetFromIntensity(setup.normalSetReps, slotId, intensity),
+    repOutTarget: targetFromIntensity(setup.repOutTargets, slotId, intensity),
+    sets: Number(setup.adjustments?.[slotId]?.sets || 5),
+    adjustments: setup.adjustments?.[slotId] || null
   }
-  return best?.value ?? null
 }
 
 export function adjustmentRateForDelta(adjustments, delta) {
@@ -153,6 +165,12 @@ function numericOrNull(value) {
   return Number.isFinite(n) && n > 0 ? n : null
 }
 
+function nonNegativeIntegerOrNull(value) {
+  if (value === '' || value === undefined || value === null) return null
+  const n = Number(value)
+  return Number.isInteger(n) && n >= 0 ? n : null
+}
+
 function logFor(logs, id) {
   return logs?.[id] || null
 }
@@ -171,11 +189,12 @@ export function prescribedSetsForLift(lift) {
     kind: 'single_at8',
     label: 'Single @8',
     optional: true,
-    prescribedWeight: lift?.singleAt8Weight ?? '',
+    prescribedWeight: '',
     targetReps: 1,
     weight: '',
     reps: '1',
     done: false,
+    useForAutoregulation: false,
     notes: ''
   })
 
@@ -233,13 +252,14 @@ export function normalizeLiftLogForPlan(liftLog = {}, lift) {
       weight: existing.weight ?? '',
       reps: existing.reps ?? set.reps ?? '',
       done: Boolean(existing.done),
+      useForAutoregulation: Boolean(existing.useForAutoregulation),
       notes: existing.notes || ''
     }
 
-    if (set.kind === 'single_at8' && merged.weight === '' && liftLog.singleAt8 !== undefined) {
+    if (!Array.isArray(liftLog.sets) && set.kind === 'single_at8' && merged.weight === '' && liftLog.singleAt8 !== undefined) {
       merged.weight = liftLog.singleAt8
     }
-    if (set.kind === 'amrap' && merged.reps === '' && liftLog.lastSetReps !== undefined) {
+    if (!Array.isArray(liftLog.sets) && set.kind === 'amrap' && merged.reps === '' && liftLog.lastSetReps !== undefined) {
       merged.reps = liftLog.lastSetReps
     }
 
@@ -303,20 +323,21 @@ export function normalizeSessionLogForPlan(plan, log = {}, bodybuildingPrescript
 }
 
 function loggedSingleAt8(liftLog) {
-  const direct = numericOrNull(liftLog.singleAt8)
-  if (direct) return direct
-  const singleSet = Array.isArray(liftLog.sets)
-    ? liftLog.sets.find((set) => set?.kind === 'single_at8')
-    : null
-  return numericOrNull(singleSet?.weight)
+  if (Array.isArray(liftLog.sets)) {
+    const singleSet = liftLog.sets.find((set) => set?.kind === 'single_at8')
+    if (!singleSet?.done || !singleSet?.useForAutoregulation) return null
+    return numericOrNull(singleSet.weight)
+  }
+  return numericOrNull(liftLog.singleAt8)
 }
 
 function loggedLastSetReps(liftLog) {
-  const direct = numericOrNull(liftLog.lastSetReps)
-  if (direct) return direct
-  if (!Array.isArray(liftLog.sets)) return null
-  const amrap = liftLog.sets.filter((set) => set?.kind === 'amrap').at(-1)
-  return numericOrNull(amrap?.reps)
+  if (Array.isArray(liftLog.sets)) {
+    const amrap = liftLog.sets.filter((set) => set?.kind === 'amrap').at(-1)
+    if (!amrap?.done) return null
+    return nonNegativeIntegerOrNull(amrap.reps)
+  }
+  return nonNegativeIntegerOrNull(liftLog.lastSetReps)
 }
 
 export function projectTrainingMax(template, setup, logs, slotId, targetWeek, targetDay) {
@@ -348,6 +369,8 @@ export function projectTrainingMax(template, setup, logs, slotId, targetWeek, ta
     const log = logFor(logs, id)
     const liftLog = rowLog(log, slotId)
     const override = numericOrNull(setup.tmOverrides?.[tmOverrideKey(session.week, slotId)])
+    const isTarget = session.week === Number(targetWeek) && session.day === Number(targetDay)
+    const logCanAffectProjection = isTarget || log?.status === SESSION_STATUS.COMPLETED || log?.status === undefined
     let current = { ...state, baseTrainingMax: state.trainingMax }
 
     if (override) {
@@ -360,8 +383,8 @@ export function projectTrainingMax(template, setup, logs, slotId, targetWeek, ta
       }
     }
 
-    const singleAt8 = loggedSingleAt8(liftLog)
-    if (singleAt8) {
+    const singleAt8 = logCanAffectProjection && !override ? loggedSingleAt8(liftLog) : null
+    if (singleAt8 !== null) {
       current = {
         trainingMax: singleAt8 / Number(setup.lifts[slotId].singleAt8Pct || 0.9),
         source: 'single_at8',
@@ -371,10 +394,11 @@ export function projectTrainingMax(template, setup, logs, slotId, targetWeek, ta
       }
     }
 
-    if (session.week === Number(targetWeek) && session.day === Number(targetDay)) {
+    if (isTarget) {
       return {
         slotId,
         ...current,
+        rawTrainingMax: current.trainingMax,
         trainingMax: roundNumber(current.trainingMax, 3),
         baseTrainingMax: roundNumber(current.baseTrainingMax, 3)
       }
@@ -385,12 +409,12 @@ export function projectTrainingMax(template, setup, logs, slotId, targetWeek, ta
       continue
     }
 
-    const lastSetReps = loggedLastSetReps(liftLog)
-    if (lastSetReps) {
-      const intensity = setup.intensityByWeek[slotId]?.[String(session.week)]
-      const repOutTarget = targetFromIntensity(setup.repOutTargets, slotId, intensity)
+    const lastSetReps = logCanAffectProjection ? loggedLastSetReps(liftLog) : null
+    if (lastSetReps !== null) {
+      const weekly = weeklyParametersFor(setup, slotId, session.week)
+      const repOutTarget = weekly.repOutTarget
       const delta = lastSetReps - Number(repOutTarget)
-      const adjustment = adjustmentRateForDelta(setup.adjustments[slotId], delta)
+      const adjustment = adjustmentRateForDelta(weekly.adjustments, delta)
       state = {
         trainingMax: current.trainingMax * (1 + adjustment),
         source: 'last_set',
@@ -409,6 +433,7 @@ export function projectTrainingMax(template, setup, logs, slotId, targetWeek, ta
   return {
     slotId,
     ...state,
+    rawTrainingMax: state.trainingMax,
     trainingMax: roundNumber(state.trainingMax, 3),
     baseTrainingMax: roundNumber(state.baseTrainingMax, 3)
   }
@@ -423,16 +448,18 @@ export function buildSessionPlan(template, setup, logs, week, day) {
   const lifts = layout.lifts.map(({ slotId }) => {
     const lift = setup.lifts[slotId]
     const projection = projectTrainingMax(template, setup, logs, slotId, week, day)
-    const intensity = setup.intensityByWeek[slotId]?.[String(week)] ?? null
-    const setGoal = deload ? 5 : Number(setup.adjustments[slotId]?.sets || 5)
-    const normalReps = deload ? 5 : targetFromIntensity(setup.normalSetReps, slotId, intensity)
-    const repOutTarget = deload ? null : targetFromIntensity(setup.repOutTargets, slotId, intensity)
+    const weekly = weeklyParametersFor(setup, slotId, week)
+    const intensity = weekly.intensity
+    const setGoal = deload ? 5 : Number(weekly.sets || 5)
+    const normalReps = deload ? 5 : weekly.normalReps
+    const repOutTarget = deload ? null : weekly.repOutTarget
     const singleAt8Pct = Number(lift?.singleAt8Pct || 0.9)
-    const weight = projection.trainingMax
-      ? roundToIncrement(projection.trainingMax * intensity, setup.rounding)
+    const calculationTrainingMax = projection.trainingMax
+    const weight = calculationTrainingMax
+      ? roundToIncrement(calculationTrainingMax * intensity, setup.rounding)
       : null
-    const singleAt8Weight = projection.trainingMax
-      ? roundToIncrement(projection.trainingMax * singleAt8Pct, setup.rounding)
+    const singleAt8Weight = calculationTrainingMax
+      ? roundToIncrement(calculationTrainingMax * singleAt8Pct, setup.rounding)
       : null
 
     return {

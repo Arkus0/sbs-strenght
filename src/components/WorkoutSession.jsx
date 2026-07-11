@@ -4,7 +4,8 @@ import { bodybuildingForSession, conditioningOptionsForSession } from '../lib/as
 import {
   buildSessionPlan,
   createEmptySessionLog,
-  normalizeSessionLogForPlan
+  normalizeSessionLogForPlan,
+  roundToIncrement
 } from '../lib/sbsRtf.js'
 import { primeTimerAudio } from '../lib/timerAudio.js'
 import SessionTimer from './SessionTimer.jsx'
@@ -23,11 +24,19 @@ function updateNested(object, key, patch) {
   }
 }
 
-function displaySetWeight(set) {
+function recordedSetWeight(set) {
+  return set?.weight ?? ''
+}
+
+function effectiveSetWeight(set) {
   return set?.weight !== '' && set?.weight !== undefined ? set.weight : set?.prescribedWeight ?? ''
 }
 
-function displaySetReps(set) {
+function recordedSetReps(set) {
+  return set?.reps ?? ''
+}
+
+function effectiveSetReps(set) {
   return set?.reps !== '' && set?.reps !== undefined
     ? set.reps
     : set?.kind === 'work'
@@ -86,8 +95,9 @@ function completedCount(sets) {
   return (sets || []).filter((set) => set.done).length
 }
 
-function MainLiftCard({ lift, liftLog, units, rowError, onSetChange, onToggleSet, onLiftChange }) {
+function MainLiftCard({ lift, liftLog, units, rowError, onSetChange, onToggleSet, onLiftChange, onSingleAutoregulation }) {
   const sets = liftLog.sets || []
+  const singleSet = sets.find((set) => set.kind === 'single_at8')
   return (
     <article className="workout-exercise-card main-exercise-card">
       <header className="exercise-card-header">
@@ -118,7 +128,8 @@ function MainLiftCard({ lift, liftLog, units, rowError, onSetChange, onToggleSet
                 <input
                   inputMode="decimal"
                   aria-label={`Peso ${set.label} ${lift.name}`}
-                  value={numberValue(displaySetWeight(set))}
+                  value={numberValue(recordedSetWeight(set))}
+                  placeholder={set.kind === 'single_at8' ? 'Peso real' : `Prescrito ${set.prescribedWeight}`}
                   onChange={(event) => onSetChange(lift.slotId, set.id, { weight: event.target.value })}
                 />
               </label>
@@ -127,7 +138,8 @@ function MainLiftCard({ lift, liftLog, units, rowError, onSetChange, onToggleSet
                 <input
                   inputMode="numeric"
                   aria-label={`Reps ${set.label} ${lift.name}`}
-                  value={numberValue(displaySetReps(set))}
+                  value={numberValue(recordedSetReps(set))}
+                  placeholder={set.kind === 'work' ? `Prescritas ${set.targetReps}` : ''}
                   onChange={(event) => onSetChange(lift.slotId, set.id, { reps: event.target.value })}
                 />
               </label>
@@ -139,11 +151,30 @@ function MainLiftCard({ lift, liftLog, units, rowError, onSetChange, onToggleSet
               >
                 ✓
               </button>
-              {rowError === errorKey && <small className="set-row-error">Introduce las reps antes de completar.</small>}
+              {rowError === errorKey && <small className="set-row-error">Introduce una carga y unas reps válidas antes de completar.</small>}
             </div>
           )
         })}
       </div>
+
+      {singleSet && (
+        <div className="single-autoregulation-control">
+          <label>
+            <input
+              type="checkbox"
+              checked={Boolean(singleSet.useForAutoregulation)}
+              disabled={!singleSet.done || !(Number(singleSet.weight) > 0)}
+              onChange={(event) => onSingleAutoregulation(lift, singleSet, event.target.checked)}
+            />
+            Usar esta single para autorregular {lift.name}
+          </label>
+          <small>
+            {singleSet.useForAutoregulation
+              ? `${singleSet.weight} ${units} ÷ ${Math.round(lift.singleAt8Pct * 10000) / 100}% → TM ${lift.projection.trainingMax}`
+              : `Opcional. Porcentaje configurado: ${Math.round(lift.singleAt8Pct * 10000) / 100}%. Registrar la single no cambia el TM.`}
+          </small>
+        </div>
+      )}
 
       <details className="exercise-details">
         <summary>Detalles y notas</summary>
@@ -517,24 +548,50 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
     let changed = null
     const sets = liftLog.sets.map((set) => {
       if (set.id !== setId) return set
-      changed = { ...set, ...patch }
+      const normalizedPatch = { ...patch }
+      if (Object.hasOwn(patch, 'weight') && patch.weight === '') {
+        normalizedPatch.done = false
+        if (set.kind === 'single_at8') normalizedPatch.useForAutoregulation = false
+      }
+      if (Object.hasOwn(patch, 'reps') && patch.reps === '') normalizedPatch.done = false
+      changed = { ...set, ...normalizedPatch }
       return changed
     })
     const derived = {}
-    if (changed?.kind === 'single_at8' && Object.hasOwn(patch, 'weight')) derived.singleAt8 = patch.weight
-    if (changed?.kind === 'amrap' && Object.hasOwn(patch, 'reps')) derived.lastSetReps = patch.reps
+    if (changed?.kind === 'single_at8' && Object.hasOwn(patch, 'weight')) derived.singleAt8 = ''
+    if (changed?.kind === 'amrap' && Object.hasOwn(patch, 'reps')) derived.lastSetReps = ''
     updateLift(slotId, { sets, ...derived })
+  }
+
+  function setSingleAutoregulation(lift, singleSet, enabled) {
+    if (!enabled) {
+      updateSet(lift.slotId, singleSet.id, { useForAutoregulation: false })
+      return
+    }
+    const weight = Number(singleSet.weight)
+    const percentage = Number(lift.singleAt8Pct)
+    if (!(weight > 0 && percentage > 0)) return
+    const workStarted = currentLog.lifts[lift.slotId]?.sets?.some((set) => set.kind !== 'single_at8' && set.done)
+    const nextTm = weight / percentage
+    const nextWeight = roundToIncrement(nextTm * Number(lift.intensity), setup.rounding)
+    const message = `Esta single sustituirá el TM de ${lift.projection.trainingMax} por ${Math.round(nextTm * 1000) / 1000} y la carga de trabajo por ${nextWeight} ${setup.units}. ¿Aplicar?`
+    if ((workStarted || nextWeight !== lift.weight) && !window.confirm(message)) return
+    updateSet(lift.slotId, singleSet.id, { useForAutoregulation: true })
   }
 
   function toggleLiftSet(lift, set) {
     const errorKey = `${lift.slotId}:${set.id}`
     if (set.done) {
       setRowError('')
-      updateSet(lift.slotId, set.id, { done: false })
+      updateSet(lift.slotId, set.id, set.kind === 'single_at8' ? { done: false, useForAutoregulation: false } : { done: false })
       return
     }
-    const reps = displaySetReps(set)
-    if (!(Number(reps) > 0)) {
+    const reps = effectiveSetReps(set)
+    const validReps = set.kind === 'amrap'
+      ? Number.isInteger(Number(reps)) && Number(reps) >= 0
+      : Number(reps) > 0
+    const weight = effectiveSetWeight(set)
+    if (!validReps || !(Number(weight) > 0)) {
       setRowError(errorKey)
       return
     }
@@ -542,7 +599,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
     primeTimerAudio()
     updateSet(lift.slotId, set.id, {
       done: true,
-      weight: displaySetWeight(set),
+      weight,
       reps
     })
     setRestTimer({
@@ -671,6 +728,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
             onSetChange={updateSet}
             onToggleSet={toggleLiftSet}
             onLiftChange={updateLift}
+            onSingleAutoregulation={setSingleAutoregulation}
           />
         ))}
 

@@ -1076,6 +1076,33 @@ td input {
   font-weight: 800;
 }
 
+.single-autoregulation-control {
+  display: grid;
+  gap: 4px;
+  border-left: 3px solid #d0a437;
+  border-radius: 0 8px 8px 0;
+  background: #fff7df;
+  padding: 9px 10px;
+}
+
+.single-autoregulation-control label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 850;
+}
+
+.single-autoregulation-control input {
+  width: 20px;
+  min-height: 20px;
+}
+
+.single-autoregulation-control small {
+  color: #65551f;
+  font-size: 0.72rem;
+}
+
 .bodybuilding-head,
 .bodybuilding-row {
   grid-template-columns: 44px 72px minmax(70px, 1fr) 44px;
