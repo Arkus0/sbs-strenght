@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import template from '../data/sbsRtfTemplate.json'
 import { bodybuildingForSession, conditioningOptionsForSession } from '../lib/assistanceProgram.js'
 import {
@@ -162,6 +162,15 @@ function MainLiftCard({ lift, liftLog, units, rowError, onSetChange, onToggleSet
         </div>
         <div className="inline-fields">
           <label>
+            RPE real del single (opcional)
+            <input
+              inputMode="decimal"
+              aria-label={`RPE del single ${lift.name}`}
+              value={liftLog.singleRpe || ''}
+              onChange={(event) => onLiftChange(lift.slotId, { singleRpe: event.target.value })}
+            />
+          </label>
+          <label>
             Video
             <input value={liftLog.video || ''} onChange={(event) => onLiftChange(lift.slotId, { video: event.target.value })} />
           </label>
@@ -189,6 +198,8 @@ function BodybuildingCard({ item, exerciseIndex, units, rowError, onChange, onSe
             ? 'Sin progresion'
             : item.progressionAction === 'increase'
               ? 'Subir carga'
+              : item.progressionAction === 'reduce'
+                ? 'Bajar carga'
               : item.progressionAction === 'repeat'
                 ? 'Repetir carga'
                 : 'Elige carga'}
@@ -196,6 +207,12 @@ function BodybuildingCard({ item, exerciseIndex, units, rowError, onChange, onSe
       </header>
 
       {item.previousSessionId && <p className="previous-performance">Anterior: {item.previousLoad || '-'} {units} · {item.previousSessionId}</p>}
+      {item.recommendation?.reason && (
+        <p className="accessory-recommendation">
+          <strong>Recomendación: {item.recommendedLoad || item.previousLoad || 'elige carga'} {item.recommendedLoad || item.previousLoad ? units : ''}</strong>
+          <span>{item.recommendation.reason}</span>
+        </p>
+      )}
       <label className="exercise-load-field">
         {item.loadMode === 'added_weight' ? 'Lastre' : 'Carga'} ({units})
         <input
@@ -244,6 +261,15 @@ function BodybuildingCard({ item, exerciseIndex, units, rowError, onChange, onSe
 
       <details className="exercise-details">
         <summary>Notas</summary>
+        <label>
+          Resultado del ejercicio
+          <select value={item.outcome || 'performed'} onChange={(event) => onChange(exerciseIndex, { outcome: event.target.value })}>
+            <option value="performed">Realizado</option>
+            <option value="unavailable">Material no disponible</option>
+            <option value="pain">Dolor o molestia</option>
+            <option value="skipped">Omitido</option>
+          </select>
+        </label>
         <label>
           Notas de {item.name}
           <input value={item.notes || ''} onChange={(event) => onChange(exerciseIndex, { notes: event.target.value })} />
@@ -347,11 +373,23 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
   const bodybuildingPrescription = logs[plan.id]?.status === 'completed' && logs[plan.id]?.bodybuilding?.length
     ? logs[plan.id].bodybuilding
     : generatedBodybuilding
-  const currentLog = normalizeSessionLogForPlan(
+  const normalizedLog = normalizeSessionLogForPlan(
     plan,
     logs[plan.id] || createEmptySessionLog(plan, bodybuildingPrescription),
     bodybuildingPrescription
   )
+  const storedLog = logs[plan.id] || {}
+  const currentLog = {
+    ...normalizedLog,
+    lifts: Object.fromEntries(plan.lifts.map((lift) => [
+      lift.slotId,
+      { ...normalizedLog.lifts[lift.slotId], singleRpe: storedLog.lifts?.[lift.slotId]?.singleRpe || '' }
+    ])),
+    activeSeconds: Number(storedLog.activeSeconds || 0),
+    lastActiveAt: storedLog.lastActiveAt,
+    sessionRpe: storedLog.sessionRpe || '',
+    completionSummary: storedLog.completionSummary
+  }
   const conditioningOptions = conditioningOptionsForSession(plan, bodybuildingPrescription, logs)
   const savedConditioningId = currentLog.conditioning?.optionId || ''
   const firstConditioningId = conditioningOptions[0]?.id || ''
@@ -360,6 +398,16 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
   const [conditioningTimerKey, setConditioningTimerKey] = useState(null)
   const [rowError, setRowError] = useState('')
   const [now, setNow] = useState(Date.now())
+  const [resumeNotice, setResumeNotice] = useState(false)
+  const activeSecondsRef = useRef(Number(currentLog.activeSeconds || 0))
+  const activeStartedAtRef = useRef(Date.now())
+  const hiddenAtRef = useRef(null)
+  const endingRef = useRef(false)
+  const logRef = useRef(currentLog)
+  const onLogChangeRef = useRef(onLogChange)
+
+  useEffect(() => { logRef.current = currentLog })
+  useEffect(() => { onLogChangeRef.current = onLogChange }, [onLogChange])
 
   useEffect(() => {
     const stored = logs[plan.id]
@@ -369,7 +417,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
     }
     if (stored.status !== 'completed' && !stored.startedAt) {
       const timestamp = new Date().toISOString()
-      onLogChange({ ...currentLog, startedAt: timestamp, updatedAt: timestamp })
+      onLogChange({ ...currentLog, startedAt: timestamp, activeSeconds: 0, lastActiveAt: timestamp, updatedAt: timestamp })
     }
   }, [currentLog, logs, onLogChange, plan.id])
 
@@ -381,7 +429,63 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
     setRestTimer(null)
     setConditioningTimerKey(null)
     setRowError('')
+    setResumeNotice(false)
+    const storedSeconds = Number(logs[plan.id]?.activeSeconds || 0)
+    const startedAt = Date.parse(logs[plan.id]?.startedAt || '')
+    const recentElapsed = Number.isFinite(startedAt) && Date.now() - startedAt <= 15 * 60 * 1000
+      ? (Date.now() - startedAt) / 1000
+      : 0
+    activeSecondsRef.current = storedSeconds || recentElapsed
+    activeStartedAtRef.current = Date.now()
+    hiddenAtRef.current = null
   }, [plan.id])
+
+  useEffect(() => {
+    if (currentLog.status === 'completed') return undefined
+
+    function elapsed(at = Date.now()) {
+      if (hiddenAtRef.current) return activeSecondsRef.current
+      return activeSecondsRef.current + Math.max(0, (at - activeStartedAtRef.current) / 1000)
+    }
+
+    function persist(at = Date.now()) {
+      const seconds = elapsed(at)
+      activeSecondsRef.current = seconds
+      activeStartedAtRef.current = at
+      const timestamp = new Date(at).toISOString()
+      onLogChangeRef.current({
+        ...logRef.current,
+        activeSeconds: Math.round(seconds),
+        lastActiveAt: timestamp,
+        updatedAt: timestamp
+      })
+    }
+
+    function visibilityChanged() {
+      const timestamp = Date.now()
+      if (document.hidden) {
+        persist(timestamp)
+        hiddenAtRef.current = timestamp
+        return
+      }
+      const hiddenAt = hiddenAtRef.current
+      hiddenAtRef.current = null
+      if (hiddenAt) {
+        const gapSeconds = (timestamp - hiddenAt) / 1000
+        if (gapSeconds <= 15 * 60) activeSecondsRef.current += gapSeconds
+        else setResumeNotice(true)
+      }
+      activeStartedAtRef.current = timestamp
+    }
+
+    const interval = window.setInterval(() => persist(), 15_000)
+    document.addEventListener('visibilitychange', visibilityChanged)
+    return () => {
+      window.clearInterval(interval)
+      document.removeEventListener('visibilitychange', visibilityChanged)
+      if (!hiddenAtRef.current && !endingRef.current) persist()
+    }
+  }, [currentLog.status, plan.id])
 
   useEffect(() => {
     if (currentLog.status === 'completed' || !currentLog.startedAt) return undefined
@@ -395,8 +499,9 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
   const completedSets = requiredSets.filter((set) => set.done).length
   const totalSets = requiredSets.length
   const progressPct = totalSets ? Math.round((completedSets / totalSets) * 100) : 0
-  const elapsedEnd = currentLog.status === 'completed' && currentLog.completedAt ? Date.parse(currentLog.completedAt) : now
-  const elapsedSeconds = currentLog.startedAt ? Math.max(0, (elapsedEnd - Date.parse(currentLog.startedAt)) / 1000) : null
+  const elapsedSeconds = currentLog.status === 'completed'
+    ? Number(currentLog.activeSeconds || currentLog.completionSummary?.durationSeconds || 0)
+    : activeSecondsRef.current + (hiddenAtRef.current ? 0 : Math.max(0, (now - activeStartedAtRef.current) / 1000))
 
   function updateLift(slotId, patch) {
     onLogChange({
@@ -501,19 +606,19 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
   function finishSession() {
     const incomplete = totalSets - completedSets
     if (incomplete > 0 && !window.confirm(`Finalizar con ${incomplete} series obligatorias pendientes?`)) return
+    endingRef.current = true
     const completedAt = new Date().toISOString()
+    const finalActiveSeconds = Math.round(activeSecondsRef.current + (hiddenAtRef.current ? 0 : Math.max(0, (Date.now() - activeStartedAtRef.current) / 1000)))
     const completedLog = {
       ...currentLog,
       status: 'completed',
+      activeSeconds: finalActiveSeconds,
       completedAt,
       updatedAt: completedAt
     }
-    const durationSeconds = currentLog.startedAt
-      ? Math.max(0, (Date.parse(completedAt) - Date.parse(currentLog.startedAt)) / 1000)
-      : null
     onComplete(completedLog, {
       id: plan.id,
-      durationSeconds,
+      durationSeconds: finalActiveSeconds,
       completedSets,
       totalSets,
       exerciseCount: plan.lifts.length + currentLog.bodybuilding.length + (currentLog.conditioning.status === 'completed' ? 1 : 0)
@@ -532,6 +637,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
           <span className="session-elapsed" aria-label="Duracion de la sesion">
             {elapsedSeconds === null ? '--:--' : formatDuration(elapsedSeconds)}
           </span>
+          <span className="autosave-state" title="Guardado local automático">Guardado</span>
           <button className="primary finish-session-button" disabled={currentLog.status === 'completed'} onClick={finishSession}>
             {currentLog.status === 'completed' ? 'Completada' : 'Finalizar'}
           </button>
@@ -546,6 +652,13 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
         <progress max="100" value={progressPct}>{progressPct}%</progress>
         <p>{plan.deload ? 'Deload' : 'RTF'} · Los singles y el conditioning son opcionales.</p>
       </section>
+
+      {resumeNotice && (
+        <div className="resume-notice" role="status">
+          <span>La app estuvo en segundo plano más de 15 minutos; ese intervalo no se ha sumado.</span>
+          <button onClick={() => setResumeNotice(false)}>Entendido</button>
+        </div>
+      )}
 
       <section className="workout-exercise-list" aria-label="Ejercicios de la sesion">
         {plan.lifts.map((lift) => (
@@ -599,6 +712,15 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
       <details className="panel session-notes-panel">
         <summary>Notas de sesion</summary>
         <label>
+          Esfuerzo global de la sesión (1-10, opcional)
+          <input
+            inputMode="decimal"
+            aria-label="Esfuerzo global de la sesión"
+            value={currentLog.sessionRpe || ''}
+            onChange={(event) => onLogChange({ ...currentLog, sessionRpe: event.target.value, updatedAt: new Date().toISOString() })}
+          />
+        </label>
+        <label>
           Notas de la sesion
           <textarea
             rows="3"
@@ -609,7 +731,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
       </details>
 
       {currentLog.status !== 'completed' && (
-        <button className="discard-session-button" onClick={() => onDiscard(plan.id)}>Descartar sesion</button>
+        <button className="discard-session-button" onClick={() => { endingRef.current = true; onDiscard(plan.id) }}>Descartar sesion</button>
       )}
 
       {restTimer && (

@@ -1,14 +1,21 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 
 const DEFAULT_SOURCE = 'C:\\Users\\Usuario\\Downloads\\SBS Strength Program reps to failure.xlsx'
 const source = process.argv[2] || DEFAULT_SOURCE
 const outFile = path.resolve('src/data/sbsRtfTemplate.json')
 
 function cell(sheet, address) {
-  return sheet[address]?.v ?? null
+  const value = sheet.getCell(address).value
+  if (value && typeof value === 'object' && 'result' in value) return value.result ?? null
+  return value ?? null
+}
+
+function formula(sheet, row, column) {
+  const value = sheet.getCell(row, column).value
+  return value && typeof value === 'object' && 'formula' in value ? value.formula : null
 }
 
 function number(value, fallback = null) {
@@ -16,12 +23,10 @@ function number(value, fallback = null) {
   return Number.isFinite(parsed) ? Number(parsed.toFixed(4)) : fallback
 }
 
-function colName(index) {
-  return XLSX.utils.encode_col(index)
-}
-
 function quickCell(sheet, colIndex, row) {
-  return cell(sheet, `${colName(colIndex)}${row}`)
+  const value = sheet.getCell(row, colIndex + 1).value
+  if (value && typeof value === 'object' && 'result' in value) return value.result ?? null
+  return value ?? null
 }
 
 function setupSlotFromFormula(formula) {
@@ -115,14 +120,13 @@ function extractIntensityByWeek(qs) {
 }
 
 function extractFrequencyLayout(workbook, sheetName) {
-  const sheet = workbook.Sheets[sheetName]
-  const range = XLSX.utils.decode_range(sheet['!ref'])
+  const sheet = workbook.getWorksheet(sheetName)
+  if (!sheet) throw new Error(`No se encontró la hoja ${sheetName}`)
   const days = []
   let current = null
 
-  for (let r = range.s.r; r <= range.e.r; r += 1) {
-    const address = XLSX.utils.encode_cell({ c: 0, r })
-    const value = sheet[address]?.v
+  for (let r = 1; r <= sheet.rowCount; r += 1) {
+    const value = sheet.getCell(r, 1).value
     if (typeof value === 'string' && /^Day\s+\d+/i.test(value)) {
       current = { day: Number(value.match(/\d+/)?.[0]), lifts: [] }
       days.push(current)
@@ -134,9 +138,8 @@ function extractFrequencyLayout(workbook, sheetName) {
       current = null
       continue
     }
-    const formula = sheet[address]?.f
-    const slotId = setupSlotFromFormula(formula)
-    const weightFormula = sheet[XLSX.utils.encode_cell({ c: 1, r })]?.f
+    const slotId = setupSlotFromFormula(formula(sheet, r, 1))
+    const weightFormula = formula(sheet, r, 2)
     if (slotId && weightFormula && /mround/i.test(weightFormula)) {
       current.lifts.push({ slotId })
     }
@@ -149,8 +152,9 @@ if (!fs.existsSync(source)) {
   throw new Error(`No existe el Excel fuente: ${source}`)
 }
 
-const workbook = XLSX.readFile(source, { cellFormula: true })
-const qs = workbook.Sheets['Quick Setup']
+const workbook = new ExcelJS.Workbook()
+await workbook.xlsx.readFile(source)
+const qs = workbook.getWorksheet('Quick Setup')
 if (!qs) throw new Error('No se encontro la hoja Quick Setup')
 const sourceStats = fs.statSync(source)
 

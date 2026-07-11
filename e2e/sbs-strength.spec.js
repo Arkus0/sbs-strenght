@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import AxeBuilder from '@axe-core/playwright'
 
 const maxes = {
   Squat: '490',
@@ -13,48 +14,88 @@ const maxes = {
   'Push Press': '245'
 }
 
-async function completeOnboarding(page) {
+async function clearApp(page) {
   await page.goto('/')
-  for (const [name, value] of Object.entries(maxes)) {
-    await page.getByLabel(`Training max ${name}`).fill(value)
-  }
-  await page.getByRole('button', { name: 'Entrar' }).click()
-  await expect(page.getByRole('heading', { name: 'Inicio' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Semana 1 Dia 1' })).toBeVisible()
+  await page.evaluate(async () => {
+    localStorage.clear()
+    await new Promise((resolve, reject) => {
+      const request = indexedDB.open('sbs-strength-v3')
+      request.onerror = () => reject(request.error)
+      request.onsuccess = () => {
+        const db = request.result
+        const names = [...db.objectStoreNames]
+        if (!names.length) { db.close(); resolve(); return }
+        const transaction = db.transaction(names, 'readwrite')
+        for (const name of names) transaction.objectStore(name).clear()
+        transaction.oncomplete = () => { db.close(); resolve() }
+        transaction.onerror = () => reject(transaction.error)
+      }
+    })
+  })
+  await page.reload()
 }
 
-test.beforeEach(async ({ page }) => {
-  await page.goto('/')
-  await page.evaluate(() => localStorage.clear())
-})
+async function completeOnboarding(page) {
+  for (const [name, value] of Object.entries(maxes)) await page.getByLabel(`Training max ${name}`).fill(value)
+  await page.getByRole('button', { name: 'Crear ciclo' }).click()
+  await expect(page.getByRole('heading', { name: 'Hoy' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Semana 1 · Día 1' })).toBeVisible()
+}
 
-test('onboarding blocks entry until required maxes exist', async ({ page }) => {
-  await page.goto('/')
-
-  await expect(page.getByRole('button', { name: 'Entrar' })).toBeDisabled()
-  await page.getByLabel('Training max Squat').fill('490')
-  await expect(page.getByText(/maxes pendientes/)).toBeVisible()
-
-  await completeOnboarding(page)
-  await expect(page.getByText('342.5')).toBeVisible()
-  await page.getByRole('button', { name: 'Abrir sesion' }).click()
+async function openNextSession(page) {
+  await page.getByRole('link', { name: 'Empezar sesión' }).click()
   await expect(page.getByRole('button', { name: 'Finalizar' })).toBeVisible()
+}
+
+async function sessionIdFor(page, code) {
+  return page.evaluate(async (wanted) => {
+    const db = await new Promise((resolve, reject) => {
+      const request = indexedDB.open('sbs-strength-v3')
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    const rows = await new Promise((resolve, reject) => {
+      const request = db.transaction('schedule').objectStore('schedule').getAll()
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    db.close()
+    return rows.find((row) => row.code === wanted)?.id
+  }, code)
+}
+
+async function logFor(page, code) {
+  return page.evaluate(async (wanted) => {
+    const db = await new Promise((resolve, reject) => {
+      const request = indexedDB.open('sbs-strength-v3')
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    const value = await new Promise((resolve, reject) => {
+      const request = db.transaction('logs').objectStore('logs').get(wanted)
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    db.close()
+    return value
+  }, code)
+}
+
+test.beforeEach(async ({ page }) => clearApp(page))
+
+test('onboarding protects the Excel prescription and opens the runner', async ({ page }) => {
+  await expect(page.getByRole('button', { name: 'Crear ciclo' })).toBeDisabled()
+  await completeOnboarding(page)
+  await expect(page.getByText('342.5 kg')).toBeVisible()
+  await openNextSession(page)
   await expect(page.getByLabel('Duracion de la sesion')).toBeVisible()
   await expect(page.getByText('4x5 + 1x10+')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Completar Single @8 Squat' })).toBeVisible()
-  await page.getByRole('button', { name: 'Completar Single @8 Squat' }).click()
-  await expect(page.getByRole('button', { name: 'Pausa' })).toBeVisible()
-  await page.getByRole('button', { name: 'Pausa' }).click()
-  await expect(page.getByRole('button', { name: 'Reanudar' })).toBeVisible()
-  const paused = await page.locator('[role="timer"]').textContent()
-  await page.waitForTimeout(500)
-  await expect(page.locator('[role="timer"]')).toHaveText(paused)
 })
 
-test('autosaves main lifts, bodybuilding and optional conditioning', async ({ page }) => {
+test('autosaves main lifts, bodybuilding and conditioning in IndexedDB', async ({ page }) => {
   await completeOnboarding(page)
-  await page.getByRole('button', { name: 'Abrir sesion' }).click()
-
+  await openNextSession(page)
   await page.getByLabel('Peso Single @8 Squat').fill('460')
   await expect(page.getByText('357.5')).toBeVisible()
   await page.getByLabel('Reps Serie 5 AMRAP Squat').fill('12')
@@ -66,47 +107,41 @@ test('autosaves main lifts, bodybuilding and optional conditioning', async ({ pa
   await page.getByRole('button', { name: 'Empezar' }).click()
   await page.getByLabel('Resultado conditioning').fill('5 rondas')
   await page.getByRole('button', { name: 'Completar', exact: true }).click()
-
+  await page.waitForTimeout(350)
   await page.reload()
-  await expect(page.getByRole('heading', { name: 'Semana 1 Dia 1' })).toBeVisible()
-  await page.getByRole('button', { name: 'Continuar sesion' }).click()
   await expect(page.getByLabel('Peso Single @8 Squat')).toHaveValue('460')
   await expect(page.getByLabel('Reps Serie 5 AMRAP Squat')).toHaveValue('12')
   await expect(page.locator('.bodybuilding-exercise-card').first().getByLabel(/Carga|Lastre/)).toHaveValue('50')
   await expect(page.getByLabel('Resultado conditioning')).toHaveValue('5 rondas')
 })
 
-test('bodybuilding reaches the top of its range and requests a load increase next time', async ({ page }) => {
+test('accessory engine explains and applies an increase after reaching the top', async ({ page }) => {
   await completeOnboarding(page)
-  await page.getByRole('button', { name: 'Abrir sesion' }).click()
-
+  await openNextSession(page)
   const firstAssistance = page.locator('.bodybuilding-exercise-card').first()
   await firstAssistance.getByLabel(/Carga|Lastre/).fill('50')
   for (let set = 1; set <= 3; set += 1) {
     await firstAssistance.getByLabel(`Reps serie ${set} Chest-supported row`).fill('12')
     await firstAssistance.getByRole('button', { name: `Completar serie ${set} Chest-supported row` }).click()
+    await page.getByLabel('Descanso activo').getByRole('button', { name: 'Omitir' }).click()
   }
   page.once('dialog', (dialog) => dialog.accept())
   await page.getByRole('button', { name: 'Finalizar' }).click()
-  await page.getByRole('button', { name: 'Plan' }).click()
-  await page.getByRole('button', { name: 'Abrir W2D1' }).click()
-
+  const id = await sessionIdFor(page, 'W2D1')
+  await page.goto(`/sesion/${id}`)
   await expect(page.locator('.bodybuilding-exercise-card').first().getByText('Subir carga')).toBeVisible()
-  await expect(page.locator('.bodybuilding-exercise-card').first().getByLabel(/Carga|Lastre/)).toHaveValue('50')
+  await expect(page.locator('.bodybuilding-exercise-card').first().getByText(/Todas las series alcanzaron/)).toBeVisible()
+  await expect(page.locator('.bodybuilding-exercise-card').first().getByLabel(/Carga|Lastre/)).toHaveValue('52.5')
 })
 
-test('last-set reps change the next week load for the lift', async ({ page }) => {
+test('Excel AMRAP progression remains identical in week two', async ({ page }) => {
   await completeOnboarding(page)
-  await page.getByRole('button', { name: 'Abrir sesion' }).click()
-
+  await openNextSession(page)
   await page.getByLabel('Reps Serie 5 AMRAP Squat').fill('15')
   page.once('dialog', (dialog) => dialog.accept())
   await page.getByRole('button', { name: 'Finalizar' }).click()
-  await expect(page.getByRole('heading', { name: 'Semana 1 Dia 2' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Abrir sesion' })).toBeVisible()
-  await page.getByRole('button', { name: 'Plan' }).click()
-  await page.getByRole('button', { name: 'Abrir W2D1' }).click()
-
+  const id = await sessionIdFor(page, 'W2D1')
+  await page.goto(`/sesion/${id}`)
   await expect(page.getByRole('heading', { name: 'Semana 2 · D1' })).toBeVisible()
   await expect(page.getByText('377.5')).toBeVisible()
   const squatCard = page.locator('.main-exercise-card').filter({ has: page.getByRole('heading', { name: 'Squat' }) })
@@ -114,58 +149,61 @@ test('last-set reps change the next week load for the lift', async ({ page }) =>
   await expect(squatCard.getByText(/\+5 reps.*3%/)).toBeVisible()
 })
 
-test('can discard the active draft without completing the session', async ({ page }) => {
+test('discard removes a draft without recreating it on unmount', async ({ page }) => {
   await completeOnboarding(page)
-  await page.getByRole('button', { name: 'Abrir sesion' }).click()
-
+  await openNextSession(page)
   await page.getByLabel('Peso Single @8 Squat').fill('460')
   page.once('dialog', (dialog) => dialog.accept())
-  await page.getByRole('button', { name: 'Descartar' }).click()
-
-  await expect(page.getByRole('heading', { name: 'Semana 1 Dia 1' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Abrir sesion' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Continuar sesion' })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Descartar sesion' }).click()
+  await expect(page.getByRole('heading', { name: 'Hoy' })).toBeVisible()
+  await page.waitForTimeout(300)
+  expect(await logFor(page, 'W1D1')).toBeUndefined()
 })
 
-test('finishing stores timing and returns to a compact session summary', async ({ page }) => {
+test('completion stores reliable active time and a persistent summary', async ({ page }) => {
   await completeOnboarding(page)
-  await page.getByRole('button', { name: 'Abrir sesion' }).click()
-
-  const startedAt = await page.evaluate(() => JSON.parse(localStorage.getItem('sbs_strength_state_v2')).logs.W1D1.startedAt)
-  expect(Number.isFinite(Date.parse(startedAt))).toBeTruthy()
-
+  await openNextSession(page)
+  await page.waitForTimeout(1100)
   page.once('dialog', (dialog) => dialog.accept())
   await page.getByRole('button', { name: 'Finalizar' }).click()
-
-  await expect(page.getByRole('heading', { name: 'W1D1' })).toBeVisible()
-  await expect(page.getByText('Sesion completada')).toBeVisible()
-  await expect(page.getByText('0/24')).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Semana 1 Dia 2' })).toBeVisible()
-
-  const completedAt = await page.evaluate(() => JSON.parse(localStorage.getItem('sbs_strength_state_v2')).logs.W1D1.completedAt)
-  expect(Date.parse(completedAt)).toBeGreaterThanOrEqual(Date.parse(startedAt))
+  await expect(page.getByText('Sesión completada')).toBeVisible()
+  await expect(page.getByText('0/24 series')).toBeVisible()
+  const log = await logFor(page, 'W1D1')
+  expect(log.status).toBe('completed')
+  expect(log.activeSeconds).toBeGreaterThanOrEqual(1)
+  expect(log.activeSeconds).toBeLessThan(30)
 })
 
-test('advanced edits affect prescriptions and JSON import restores exported data', async ({ page }) => {
+test('calendar reprograms without changing the SBS code and exports ICS', async ({ page }) => {
   await completeOnboarding(page)
+  await page.getByRole('link', { name: 'Calendario' }).click()
+  await page.getByRole('button', { name: 'Semana siguiente' }).click()
+  const card = page.locator('.calendar-session').first()
+  await card.locator('summary').click()
+  await card.getByLabel('Nueva fecha').fill('2026-08-10')
+  await card.getByRole('button', { name: 'Mover sesión' }).click()
+  await page.waitForTimeout(250)
+  const id = await sessionIdFor(page, 'W1D1')
+  expect(id).toBeTruthy()
+  const download = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Exportar calendario' }).click()
+  await expect(await download).toBeTruthy()
+})
 
-  await page.getByRole('button', { name: 'Setup' }).click()
-  await page.getByRole('button', { name: 'Editar tablas' }).click()
-  const intensitySection = page.locator('section.panel').filter({ has: page.getByRole('heading', { name: 'Intensidad semanal' }) })
-  const squatDetails = intensitySection.locator('details').filter({ hasText: 'Squat' }).first()
-  await squatDetails.locator('summary').click()
-  await squatDetails.getByLabel('S1', { exact: true }).fill('0.6')
-  await page.getByRole('button', { name: 'Inicio' }).click()
-  await expect(page.getByText('295')).toBeVisible()
+test('analytics and protected settings are reachable by persistent routes', async ({ page }) => {
+  await completeOnboarding(page)
+  await page.goto('/analiticas')
+  await expect(page.getByRole('heading', { name: 'Analíticas' })).toBeVisible()
+  await expect(page.getByText('e1RM usa Epley')).toBeVisible()
+  await page.goto('/ajustes')
+  await expect(page.getByText('Motor Excel protegido')).toBeVisible()
+  await expect(page.getByText(/intensidades, targets, buckets, deloads y fórmulas/)).toBeVisible()
+  await expect(page.getByText('Modo local activo')).toBeVisible()
+})
 
-  await page.getByRole('button', { name: 'Setup' }).click()
-  const [download] = await Promise.all([
-    page.waitForEvent('download'),
-    page.getByRole('button', { name: 'Exportar JSON' }).click()
-  ])
-  const exported = await download.path()
-  expect(exported).toBeTruthy()
-
-  await page.locator('input[type="file"]').setInputFiles(exported)
-  await expect(page.getByText('Importacion completada')).toBeVisible()
+test('Today has no serious or critical accessibility violations', async ({ page }) => {
+  await completeOnboarding(page)
+  const results = await new AxeBuilder({ page }).analyze()
+  const blocking = results.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact || ''))
+  expect(blocking).toEqual([])
 })
