@@ -14,6 +14,14 @@ import {
   tmOverrideKey
 } from '../src/lib/sbsRtf.js'
 import { specimenTemplateForSession, timerFromSpecimen } from '../src/data/specimenAssistance.js'
+import {
+  accessoryCountForLiftCount,
+  bodybuildingForSession,
+  conditioningOptionsForSession,
+  createAssistanceBlocks,
+  normalizeBodybuildingItems
+} from '../src/lib/assistanceProgram.js'
+import { parseImport } from '../src/lib/storage.js'
 
 const template = JSON.parse(fs.readFileSync(new URL('../src/data/sbsRtfTemplate.json', import.meta.url), 'utf8'))
 
@@ -279,4 +287,86 @@ test('specimen template keeps broad no-sled variety across the 21 week cycle', (
   assert.match(sandbagOptions.map((option) => option.prescription).join(' '), /Sandbag/i)
   assert.match(allText, /Push-Ups|Dips|Squats|Pull-Ups/)
   assert.doesNotMatch(allText, /sled|trineo/i)
+})
+
+test('bodybuilding dose keeps sessions near six resistance blocks at every frequency', () => {
+  for (const frequency of template.meta.frequencies) {
+    const setup = readySetup(frequency)
+    setup.assistanceBlocks = createAssistanceBlocks(template, frequency)
+    const layout = template.layouts[String(frequency)]
+    for (const day of layout.days) {
+      const plan = buildSessionPlan(template, setup, {}, 1, day.day)
+      const assistance = bodybuildingForSession(setup, plan, {})
+      assert.equal(assistance.length, 1 + accessoryCountForLiftCount(plan.lifts.length))
+      assert.equal(assistance[0].role, 'back')
+      assert.ok(assistance.every((item) => item.targetSets === 3))
+    }
+  }
+})
+
+test('bodybuilding selections stay fixed through work and deload weeks', () => {
+  const setup = readySetup(3)
+  const week1 = buildSessionPlan(template, setup, {}, 1, 1)
+  const week6 = buildSessionPlan(template, setup, {}, 6, 1)
+  const week7 = buildSessionPlan(template, setup, {}, 7, 1)
+  const week8 = buildSessionPlan(template, setup, {}, 8, 1)
+  const ids = (plan) => bodybuildingForSession(setup, plan, {}).map((item) => item.exerciseId)
+
+  assert.deepEqual(ids(week1), ids(week6))
+  assert.deepEqual(ids(week6), ids(week7))
+  assert.ok(bodybuildingForSession(setup, week7, {}).every((item) => item.targetSets === 2 && item.deload))
+  assert.notDeepEqual(ids(week7), ids(week8))
+})
+
+test('double progression is tied to exercise history and ignores deload promotion', () => {
+  const setup = readySetup(3)
+  const week1 = buildSessionPlan(template, setup, {}, 1, 1)
+  const prescription = bodybuildingForSession(setup, week1, {})
+  const completed = normalizeBodybuildingItems(prescription)
+  completed[0].load = '50'
+  completed[0].sets = completed[0].sets.map((set) => ({ ...set, done: true, reps: completed[0].repMax }))
+  const logs = { W1D1: { id: 'W1D1', status: 'completed', bodybuilding: completed } }
+  const week2 = buildSessionPlan(template, setup, logs, 2, 1)
+  const next = bodybuildingForSession(setup, week2, logs)[0]
+
+  assert.equal(next.exerciseId, completed[0].exerciseId)
+  assert.equal(next.previousLoad, '50')
+  assert.equal(next.progressionAction, 'increase')
+
+  const deloadItem = { ...completed[0], deload: true }
+  const deloadLogs = { W7D1: { id: 'W7D1', status: 'completed', bodybuilding: [deloadItem] } }
+  const week8 = buildSessionPlan(template, setup, deloadLogs, 8, 1)
+  const changedBlock = bodybuildingForSession(setup, week8, deloadLogs)
+  assert.ok(changedBlock.every((item) => item.progressionAction !== 'increase'))
+})
+
+test('conditioning fills uncommon domains, excludes sleds and avoids immediate repeats', () => {
+  const setup = readySetup(3)
+  const plan1 = buildSessionPlan(template, setup, {}, 1, 1)
+  const bodybuilding1 = bodybuildingForSession(setup, plan1, {})
+  const options1 = conditioningOptionsForSession(plan1, bodybuilding1, {})
+  assert.equal(options1.length, 3)
+  assert.ok(options1.some((option) => option.fills.some((tag) => ['sandbag', 'carry', 'calisthenics', 'core', 'locomotion'].includes(tag))))
+  assert.ok(options1.every((option) => !/sled|trineo/i.test(`${option.title} ${option.prescription}`)))
+
+  const logs = { W1D1: { id: 'W1D1', conditioning: { optionId: options1[0].id, status: 'completed' } } }
+  const plan2 = buildSessionPlan(template, setup, logs, 1, 2)
+  const options2 = conditioningOptionsForSession(plan2, bodybuildingForSession(setup, plan2, logs), logs)
+  assert.notEqual(options2[0].id, options1[0].id)
+})
+
+test('v1 imports receive v2 assistance blocks without losing logs', () => {
+  const oldSetup = readySetup(3)
+  delete oldSetup.assistanceBlocks
+  oldSetup.version = 1
+  const imported = parseImport(template, JSON.stringify({
+    state: {
+      setup: oldSetup,
+      logs: { W1D1: { id: 'W1D1', upperBack: { exercise: 'DB rows' } } }
+    }
+  }))
+
+  assert.equal(imported.setup.version, 2)
+  assert.equal(imported.setup.assistanceBlocks['block-1'].frequency, 3)
+  assert.equal(imported.logs.W1D1.upperBack.exercise, 'DB rows')
 })

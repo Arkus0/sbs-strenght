@@ -1,6 +1,7 @@
 import { normalizeImportedSetup } from './sbsRtf.js'
 
-const KEY = 'sbs_strength_state_v1'
+const KEY = 'sbs_strength_state_v2'
+const LEGACY_KEY = 'sbs_strength_state_v1'
 
 export function initialState() {
   return {
@@ -13,7 +14,7 @@ export function initialState() {
 export function loadState(template) {
   if (typeof localStorage === 'undefined') return initialState()
   try {
-    const raw = JSON.parse(localStorage.getItem(KEY) || 'null')
+    const raw = JSON.parse(localStorage.getItem(KEY) || localStorage.getItem(LEGACY_KEY) || 'null')
     if (!raw || typeof raw !== 'object') return initialState()
     return {
       ...initialState(),
@@ -41,7 +42,7 @@ export function exportState(state) {
     {
       exportedAt: new Date().toISOString(),
       app: 'sbs-strength',
-      version: 1,
+      version: 2,
       state
     },
     null,
@@ -62,5 +63,8 @@ export function parseImport(template, text) {
 }
 
 export function clearStoredState() {
-  if (typeof localStorage !== 'undefined') localStorage.removeItem(KEY)
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem(KEY)
+    localStorage.removeItem(LEGACY_KEY)
+  }
 }

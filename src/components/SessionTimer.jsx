@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 const PRESETS = [
   { id: 'rest-2', label: 'Descanso 2:00', seconds: 120, mode: 'countdown' },
@@ -43,6 +43,7 @@ export default function SessionTimer({
   embedded = false,
   autoStartKey = null
 }) {
+  const titleId = useId()
   const allPresets = useMemo(() => {
     if (!suggested) return PRESETS
     return [{ id: 'suggested', ...suggested }, ...PRESETS]
@@ -134,12 +135,12 @@ export default function SessionTimer({
   return (
     <section
       className={`timer-card ${embedded ? 'embedded-timer' : ''} ${phase === 'running' ? 'live' : ''}`}
-      aria-labelledby="session-timer-title"
+      aria-labelledby={titleId}
     >
       <div className="section-title">
         <div>
           <span className="eyebrow">{title}</span>
-          <h2 id="session-timer-title">{preset.label}</h2>
+          <h2 id={titleId}>{preset.label}</h2>
           {context && <p className="timer-context">{context}</p>}
         </div>
         {emomRound && <span className="status-pill">Ronda {Math.min(10, emomRound)}</span>}

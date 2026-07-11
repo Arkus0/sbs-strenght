@@ -1,3 +1,5 @@
+import { createAssistanceBlocks, ensureAssistanceBlocks, normalizeBodybuildingItems } from './assistanceProgram.js'
+
 export const SESSION_STATUS = {
   DRAFT: 'draft',
   COMPLETED: 'completed'
@@ -41,7 +43,7 @@ export function createDefaultSetup(template) {
   ])
 
   return {
-    version: 1,
+    version: 2,
     templateId: template.id,
     units: 'kg',
     rounding: template.defaults.rounding || 2.5,
@@ -53,22 +55,28 @@ export function createDefaultSetup(template) {
     normalSetReps: structuredClone(template.defaults.normalSetReps),
     repOutTargets: structuredClone(template.defaults.repOutTargets),
     intensityByWeek: structuredClone(template.defaults.intensityByWeek),
-    tmOverrides: {}
+    tmOverrides: {},
+    assistanceBlocks: createAssistanceBlocks(template, 3)
   }
 }
 
 export function normalizeImportedSetup(template, setup) {
   const base = createDefaultSetup(template)
   if (!setup || typeof setup !== 'object') return base
-  return {
+  const merged = {
     ...base,
     ...setup,
+    version: 2,
     lifts: { ...base.lifts, ...(setup.lifts || {}) },
     adjustments: { ...base.adjustments, ...(setup.adjustments || {}) },
     normalSetReps: { ...base.normalSetReps, ...(setup.normalSetReps || {}) },
     repOutTargets: { ...base.repOutTargets, ...(setup.repOutTargets || {}) },
     intensityByWeek: { ...base.intensityByWeek, ...(setup.intensityByWeek || {}) },
     tmOverrides: setup.tmOverrides || {}
+  }
+  return {
+    ...merged,
+    assistanceBlocks: ensureAssistanceBlocks(template, merged)
   }
 }
 
@@ -247,8 +255,13 @@ export function normalizeLiftLogForPlan(liftLog = {}, lift) {
   }
 }
 
-export function normalizeSessionLogForPlan(plan, log = {}) {
+export function normalizeSessionLogForPlan(plan, log = {}, bodybuildingPrescription = []) {
   const base = log && typeof log === 'object' ? log : {}
+  const legacyAssistance = base.legacyAssistance || [
+    base.upperBack?.exercise ? { role: 'back', name: base.upperBack.exercise, ...base.upperBack } : null,
+    ...(base.accessories || []).filter((item) => item?.name || item?.load || item?.sets || item?.reps)
+      .map((item) => ({ role: 'accessory', ...item }))
+  ].filter(Boolean)
   return {
     id: plan.id,
     week: plan.week,
@@ -274,7 +287,17 @@ export function normalizeSessionLogForPlan(plan, log = {}) {
       upperBackId: '',
       assistanceId: '',
       ...(base.specimenSelection || {})
-    }
+    },
+    bodybuilding: normalizeBodybuildingItems(bodybuildingPrescription, base.bodybuilding || []),
+    conditioning: {
+      optionId: '',
+      status: 'not_selected',
+      score: '',
+      load: '',
+      notes: '',
+      ...(base.conditioning || {})
+    },
+    legacyAssistance
   }
 }
 
@@ -475,12 +498,12 @@ export function latestAccessorySnapshot(logs, beforeId) {
   return null
 }
 
-export function createEmptySessionLog(plan) {
+export function createEmptySessionLog(plan, bodybuildingPrescription = []) {
   return normalizeSessionLogForPlan(plan, {
     id: plan.id,
     week: plan.week,
     day: plan.day,
     status: SESSION_STATUS.DRAFT,
     updatedAt: new Date().toISOString()
-  })
+  }, bodybuildingPrescription)
 }
