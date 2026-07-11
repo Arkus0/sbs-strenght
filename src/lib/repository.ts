@@ -1,6 +1,6 @@
 import { openDB, type IDBPDatabase } from 'idb'
 import type { AppStateV3 } from '../types/domain'
-import { appStateV3Schema, createFreshState, migrateLegacyState, V3_DB_NAME } from './stateV3'
+import { appStateV3Schema, createFreshState, migrateLegacyState, upgradeProgressionState, V3_DB_NAME } from './stateV3'
 
 const DB_VERSION = 1
 let databasePromise: Promise<IDBPDatabase> | null = null
@@ -58,7 +58,7 @@ async function readV3(): Promise<AppStateV3 | null> {
     db.getAll('measurements')
   ])
   const logs = Object.fromEntries(logKeys.map((key, index) => [String(key), logValues[index]]))
-  return appStateV3Schema.parse({
+  return upgradeProgressionState(appStateV3Schema.parse({
     schemaVersion: 3,
     profile: profiles[0],
     programs: Object.fromEntries(programs.map((program: any) => [program.id, program])),
@@ -70,7 +70,7 @@ async function readV3(): Promise<AppStateV3 | null> {
     completionSummary: meta.completionSummary,
     migrationCompletedAt: meta.migrationCompletedAt,
     sync: meta.sync
-  })
+  }))
 }
 
 export async function loadStateV3(): Promise<AppStateV3> {

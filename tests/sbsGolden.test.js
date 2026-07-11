@@ -18,6 +18,10 @@ function digest(value) {
   return crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex')
 }
 
+test('Excel SBS RTF: source formula graph is immutable', () => {
+  assert.equal(template.source.formulaDigest, 'c4a9d6a6241f22fdddf4df65b341f4a7dde49ebd3e9a6c5da31126825b6ecc4a')
+})
+
 test('Excel SBS RTF: every default prescription across frequencies and weeks is immutable', () => {
   const matrix = {}
   for (const frequency of template.meta.frequencies) {
@@ -68,11 +72,13 @@ test('Excel SBS RTF: sequential single and AMRAP adjustments are immutable', () 
       if (single && session.week % 4 === 0) {
         single.weight = lift.singleAt8Weight
         single.done = true
+        single.useForAutoregulation = true
         row.singleAt8 = lift.singleAt8Weight
       }
       if (amrap) {
         amrap.reps = Number(lift.repOutTarget) + ((session.week + session.day) % 7 - 2)
-        amrap.done = true
+        // Preserve the historical golden trace: legacy non-positive entries were treated as blank.
+        amrap.done = Number(amrap.reps) > 0
         row.lastSetReps = amrap.reps
       }
     }

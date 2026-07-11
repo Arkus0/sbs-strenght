@@ -82,7 +82,8 @@ export function AppStateProvider({ children }: PropsWithChildren): JSX.Element {
           programs: {
             ...current.programs,
             [program.id]: { ...program, setup: nextSetup, updatedAt: new Date().toISOString(), version: program.version + 1 }
-          }
+          },
+          schedule: current.schedule.map((session) => ({ ...session, prescriptionSnapshot: null }))
         }
       })
     }
@@ -91,7 +92,8 @@ export function AppStateProvider({ children }: PropsWithChildren): JSX.Element {
       setState((current) => {
         if (!current) return current
         const program = current.programs[current.activeProgramId]
-        const completedSetup = { ...program.setup, completedAt: new Date().toISOString() }
+        const completedAt = new Date().toISOString()
+        const completedSetup = { ...program.setup, completedAt, singlePctReviewRequired: false, singlePctReviewedAt: completedAt }
         const next: AppStateV3 = {
           ...current,
           programs: {

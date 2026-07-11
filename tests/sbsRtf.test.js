@@ -109,6 +109,8 @@ test('set logs capture every work set and feed single @8 projection', () => {
   assert.equal(squatLog.sets.at(-1).kind, 'amrap')
 
   single.weight = 460
+  single.done = true
+  single.useForAutoregulation = true
   const livePlan = buildSessionPlan(template, setup, { W1D1: log }, 1, 1)
   const squat = livePlan.lifts.find((lift) => lift.slotId === 'main_1')
 
@@ -152,6 +154,8 @@ test('amrap set reps adjust the next appearance of a lift', () => {
   const log = createEmptySessionLog(plan)
   const amrap = log.lifts.main_1.sets.find((set) => set.kind === 'amrap')
   amrap.reps = 15
+  amrap.done = true
+  log.status = 'completed'
 
   const projection = projectTrainingMax(template, setup, { W1D1: log }, 'main_1', 2, 1)
   assert.equal(projection.source, 'last_set')
@@ -227,6 +231,92 @@ test('manual training max overrides apply to the selected week', () => {
   assert.equal(squat.projection.source, 'manual_override')
   assert.equal(squat.projection.trainingMax, 500)
   assert.equal(squat.weight, 375)
+})
+
+test('screenshot acceptance: a 94% single reproduces weeks 1-3 exactly', () => {
+  const setup = readySetup(3)
+  setup.rounding = 2
+  setup.lifts.main_1.trainingMax = 100
+  setup.lifts.main_1.singleAt8Pct = 0.94
+
+  const week1 = buildSessionPlan(template, setup, {}, 1, 1)
+  const log1 = createEmptySessionLog(week1)
+  const squat1 = log1.lifts.main_1
+  const single = squat1.sets.find((set) => set.kind === 'single_at8')
+  const amrap1 = squat1.sets.find((set) => set.kind === 'amrap')
+  single.weight = 94
+  single.done = true
+  single.useForAutoregulation = true
+  amrap1.reps = 13
+  amrap1.done = true
+  log1.status = 'completed'
+
+  const adjustedWeek1 = buildSessionPlan(template, setup, { W1D1: log1 }, 1, 1).lifts.find((lift) => lift.slotId === 'main_1')
+  assert.equal(adjustedWeek1.projection.trainingMax, 100)
+  assert.equal(adjustedWeek1.weight, 70)
+
+  const week2 = buildSessionPlan(template, setup, { W1D1: log1 }, 2, 1)
+  const squat2 = week2.lifts.find((lift) => lift.slotId === 'main_1')
+  assert.equal(squat2.projection.trainingMax, 101.5)
+  assert.equal(squat2.weight, 76)
+
+  const log2 = createEmptySessionLog(week2)
+  const amrap2 = log2.lifts.main_1.sets.find((set) => set.kind === 'amrap')
+  amrap2.reps = 12
+  amrap2.done = true
+  log2.status = 'completed'
+  const squat3 = buildSessionPlan(template, setup, { W1D1: log1, W2D1: log2 }, 3, 1).lifts.find((lift) => lift.slotId === 'main_1')
+  assert.equal(squat3.projection.trainingMax, 103.53)
+  assert.equal(squat3.weight, 82)
+})
+
+test('a performed single does not autoregulate unless explicitly enabled', () => {
+  const setup = readySetup(3)
+  setup.lifts.main_1.trainingMax = 100
+  setup.lifts.main_1.singleAt8Pct = 0.94
+  const plan = buildSessionPlan(template, setup, {}, 1, 1)
+  const log = createEmptySessionLog(plan)
+  const single = log.lifts.main_1.sets.find((set) => set.kind === 'single_at8')
+  single.weight = 94
+  single.done = true
+
+  const squat = buildSessionPlan(template, setup, { W1D1: log }, 1, 1).lifts.find((lift) => lift.slotId === 'main_1')
+  assert.equal(squat.projection.source, 'initial')
+  assert.equal(squat.weight, 70)
+})
+
+test('zero AMRAP reps are valid and apply the spreadsheet minus-five-percent bucket', () => {
+  const setup = readySetup(3)
+  setup.lifts.main_1.trainingMax = 100
+  const plan = buildSessionPlan(template, setup, {}, 1, 1)
+  const log = createEmptySessionLog(plan)
+  const amrap = log.lifts.main_1.sets.find((set) => set.kind === 'amrap')
+  amrap.reps = 0
+  amrap.done = true
+  log.status = 'completed'
+
+  const projection = projectTrainingMax(template, setup, { W1D1: log }, 'main_1', 2, 1)
+  assert.equal(projection.delta, -10)
+  assert.equal(projection.adjustment, -0.05)
+  assert.equal(projection.trainingMax, 95)
+})
+
+test('all spreadsheet AMRAP buckets apply to every main and auxiliary lift', () => {
+  const setup = readySetup(6)
+  const deltas = [-2, -1, 0, 1, 2, 3, 4, 5]
+  const expectedRates = [-0.05, -0.02, 0, 0.005, 0.01, 0.015, 0.02, 0.03]
+  const layout = template.layouts['6'].days
+
+  for (const slot of template.defaults.liftSlots) {
+    const day = layout.find((entry) => entry.lifts.some((lift) => lift.slotId === slot.id)).day
+    const target = setup.weeklyParameters[slot.id]['1'].repOutTarget
+    for (let index = 0; index < deltas.length; index += 1) {
+      const code = `W1D${day}`
+      const logs = { [code]: { id: code, status: 'completed', lifts: { [slot.id]: { lastSetReps: target + deltas[index] } } } }
+      const projection = projectTrainingMax(template, setup, logs, slot.id, 2, day)
+      assert.equal(projection.adjustment, expectedRates[index], `${slot.id} delta ${deltas[index]}`)
+    }
+  }
 })
 
 test('specimen assistance is deterministic and sourced from training montage', () => {
@@ -364,7 +454,7 @@ test('conditioning fills uncommon domains, excludes sleds and avoids immediate r
   assert.notEqual(options2[0].id, options1[0].id)
 })
 
-test('v1 imports receive v2 assistance blocks without losing logs', () => {
+test('v1 imports receive current setup defaults without losing logs', () => {
   const oldSetup = readySetup(3)
   delete oldSetup.assistanceBlocks
   oldSetup.version = 1
@@ -375,7 +465,7 @@ test('v1 imports receive v2 assistance blocks without losing logs', () => {
     }
   }))
 
-  assert.equal(imported.setup.version, 2)
+  assert.equal(imported.setup.version, 3)
   assert.equal(imported.setup.assistanceBlocks['block-1'].frequency, 3)
   assert.equal(imported.logs.W1D1.upperBack.exercise, 'DB rows')
 })

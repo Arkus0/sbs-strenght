@@ -68,3 +68,29 @@ test('v2 migration preserves draft logs and v3 export round-trips', () => {
   const restored = parseStateImport(exportV3State(migrated))
   assert.deepEqual(restored, migrated)
 })
+
+test('completed legacy progression entries are upgraded once without losing values', () => {
+  const setup: any = createDefaultSetup(template)
+  setup.version = 2
+  setup.completedAt = '2026-01-01T00:00:00.000Z'
+  for (const slot of template.defaults.liftSlots) setup.lifts[slot.id].trainingMax = slot.defaultTrainingMax
+  const migrated = migrateLegacyState({
+    setup,
+    logs: {
+      W1D1: {
+        id: 'W1D1', week: 1, day: 1, status: 'completed',
+        lifts: { main_1: { singleAt8: 94, lastSetReps: 13 } }
+      }
+    }
+  })
+  const lift = migrated.logs.W1D1.lifts.main_1
+  const single = lift.sets.find((set: any) => set.kind === 'single_at8')
+  const amrap = lift.sets.find((set: any) => set.kind === 'amrap')
+  assert.equal(single.weight, 94)
+  assert.equal(single.done, true)
+  assert.equal(single.useForAutoregulation, true)
+  assert.equal(amrap.reps, 13)
+  assert.equal(amrap.done, true)
+  assert.equal(migrated.logs.W1D1.progressionSemanticsVersion, 2)
+  assert.equal(migrated.programs[migrated.activeProgramId].setup.singlePctReviewRequired, true)
+})

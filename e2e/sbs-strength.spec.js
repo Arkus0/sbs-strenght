@@ -37,6 +37,7 @@ async function clearApp(page) {
 
 async function completeOnboarding(page) {
   for (const [name, value] of Object.entries(maxes)) await page.getByLabel(`Training max ${name}`).fill(value)
+  await page.getByLabel(/He revisado los training maxes/).check()
   await page.getByRole('button', { name: 'Crear ciclo' }).click()
   await expect(page.getByRole('heading', { name: 'Hoy' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Semana 1 · Día 1' })).toBeVisible()
@@ -83,6 +84,16 @@ async function logFor(page, code) {
 
 test.beforeEach(async ({ page }) => clearApp(page))
 
+test('dev server renders meaningful content without browser errors', async ({ page }) => {
+  const browserErrors = []
+  page.on('console', (message) => { if (message.type() === 'error') browserErrors.push(message.text()) })
+  page.on('pageerror', (error) => browserErrors.push(error.message))
+  await page.reload({ waitUntil: 'networkidle' })
+  await expect(page.getByRole('heading', { name: /Tu ciclo/ })).toBeVisible()
+  await expect(page.locator('vite-error-overlay, .vite-error-overlay, #webpack-dev-server-client-overlay')).toHaveCount(0)
+  expect(browserErrors).toEqual([])
+})
+
 test('onboarding protects the Excel prescription and opens the runner', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Crear ciclo' })).toBeDisabled()
   await completeOnboarding(page)
@@ -97,6 +108,10 @@ test('autosaves main lifts, bodybuilding and conditioning in IndexedDB', async (
   await completeOnboarding(page)
   await openNextSession(page)
   await page.getByLabel('Peso Single @8 Squat').fill('460')
+  await page.getByRole('button', { name: 'Completar Single @8 Squat' }).click()
+  page.once('dialog', (dialog) => dialog.accept())
+  await page.getByLabel('Usar esta single para autorregular Squat').check()
+  await page.getByLabel('Descanso activo').getByRole('button', { name: 'Omitir' }).click()
   await expect(page.getByText('357.5')).toBeVisible()
   await page.getByLabel('Reps Serie 5 AMRAP Squat').fill('12')
   const firstAssistance = page.locator('.bodybuilding-exercise-card').first()
@@ -138,6 +153,8 @@ test('Excel AMRAP progression remains identical in week two', async ({ page }) =
   await completeOnboarding(page)
   await openNextSession(page)
   await page.getByLabel('Reps Serie 5 AMRAP Squat').fill('15')
+  await page.getByRole('button', { name: 'Completar Serie 5 AMRAP Squat' }).click()
+  await page.getByLabel('Descanso activo').getByRole('button', { name: 'Omitir' }).click()
   page.once('dialog', (dialog) => dialog.accept())
   await page.getByRole('button', { name: 'Finalizar' }).click()
   const id = await sessionIdFor(page, 'W2D1')
@@ -147,6 +164,43 @@ test('Excel AMRAP progression remains identical in week two', async ({ page }) =
   const squatCard = page.locator('.main-exercise-card').filter({ has: page.getByRole('heading', { name: 'Squat' }) })
   await squatCard.getByText('Detalles y notas').click()
   await expect(squatCard.getByText(/\+5 reps.*3%/)).toBeVisible()
+})
+
+test('94 percent single reproduces the Excel weeks 1 to 3', async ({ page }) => {
+  for (const [name, value] of Object.entries(maxes)) await page.getByLabel(`Training max ${name}`).fill(name === 'Squat' ? '100' : value)
+  await page.getByLabel('Single @8 porcentaje Squat').fill('94')
+  await page.getByLabel('Redondeo de cargas').fill('2')
+  await page.getByLabel(/He revisado los training maxes/).check()
+  await page.getByRole('button', { name: 'Crear ciclo' }).click()
+  await openNextSession(page)
+
+  const squat = page.locator('.main-exercise-card').filter({ has: page.getByRole('heading', { name: 'Squat' }) })
+  await expect(squat.getByText(/70 kg/)).toBeVisible()
+  await page.getByLabel('Peso Single @8 Squat').fill('94')
+  await page.getByRole('button', { name: 'Completar Single @8 Squat' }).click()
+  await page.getByLabel('Descanso activo').getByRole('button', { name: 'Omitir' }).click()
+  await page.getByLabel('Usar esta single para autorregular Squat').check()
+  await expect(squat.getByText(/70 kg/)).toBeVisible()
+  await page.getByLabel('Reps Serie 5 AMRAP Squat').fill('13')
+  await page.getByRole('button', { name: 'Completar Serie 5 AMRAP Squat' }).click()
+  await page.getByLabel('Descanso activo').getByRole('button', { name: 'Omitir' }).click()
+  page.once('dialog', (dialog) => dialog.accept())
+  await page.getByRole('button', { name: 'Finalizar' }).click()
+
+  const week2Id = await sessionIdFor(page, 'W2D1')
+  await page.goto(`/sesion/${week2Id}`)
+  const squat2 = page.locator('.main-exercise-card').filter({ has: page.getByRole('heading', { name: 'Squat' }) })
+  await expect(squat2.getByText(/76 kg/)).toBeVisible()
+  await page.getByLabel('Reps Serie 5 AMRAP Squat').fill('12')
+  await page.getByRole('button', { name: 'Completar Serie 5 AMRAP Squat' }).click()
+  await page.getByLabel('Descanso activo').getByRole('button', { name: 'Omitir' }).click()
+  page.once('dialog', (dialog) => dialog.accept())
+  await page.getByRole('button', { name: 'Finalizar' }).click()
+
+  const week3Id = await sessionIdFor(page, 'W3D1')
+  await page.goto(`/sesion/${week3Id}`)
+  const squat3 = page.locator('.main-exercise-card').filter({ has: page.getByRole('heading', { name: 'Squat' }) })
+  await expect(squat3.getByText(/82 kg/)).toBeVisible()
 })
 
 test('discard removes a draft without recreating it on unmount', async ({ page }) => {

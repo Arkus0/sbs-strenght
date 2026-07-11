@@ -4,6 +4,7 @@
   "source": {
     "fileName": "SBS Strength Program reps to failure.xlsx",
     "sourceModifiedAt": "2026-07-03T17:15:45.002Z",
+    "formulaDigest": "c4a9d6a6241f22fdddf4df65b341f4a7dde49ebd3e9a6c5da31126825b6ecc4a",
     "notes": "Generado desde Quick Setup y hojas 2x-6x. El Excel fuente no se copia al repo."
   },
   "defaults": {
@@ -912,6 +913,3388 @@
         "19": 0.8,
         "20": 0.85,
         "21": 0.5
+      }
+    },
+    "weeklyParameters": {
+      "main_1": {
+        "1": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "2": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "3": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "4": {
+          "intensity": 0.725,
+          "normalReps": 5,
+          "repOutTarget": 9,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "5": {
+          "intensity": 0.775,
+          "normalReps": 4,
+          "repOutTarget": 7,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "6": {
+          "intensity": 0.825,
+          "normalReps": 3,
+          "repOutTarget": 5,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "7": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "8": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "9": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "10": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "11": {
+          "intensity": 0.775,
+          "normalReps": 4,
+          "repOutTarget": 7,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "12": {
+          "intensity": 0.825,
+          "normalReps": 3,
+          "repOutTarget": 5,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "13": {
+          "intensity": 0.875,
+          "normalReps": 2,
+          "repOutTarget": 3,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "14": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "15": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "16": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "17": {
+          "intensity": 0.9,
+          "normalReps": 1,
+          "repOutTarget": 2,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "18": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "19": {
+          "intensity": 0.9,
+          "normalReps": 1,
+          "repOutTarget": 2,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "20": {
+          "intensity": 0.95,
+          "normalReps": 1,
+          "repOutTarget": 1,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "21": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        }
+      },
+      "main_2": {
+        "1": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "2": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "3": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "4": {
+          "intensity": 0.725,
+          "normalReps": 5,
+          "repOutTarget": 9,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "5": {
+          "intensity": 0.775,
+          "normalReps": 4,
+          "repOutTarget": 7,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "6": {
+          "intensity": 0.825,
+          "normalReps": 3,
+          "repOutTarget": 5,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "7": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "8": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "9": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "10": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "11": {
+          "intensity": 0.775,
+          "normalReps": 4,
+          "repOutTarget": 7,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "12": {
+          "intensity": 0.825,
+          "normalReps": 3,
+          "repOutTarget": 5,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "13": {
+          "intensity": 0.875,
+          "normalReps": 2,
+          "repOutTarget": 3,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "14": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "15": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "16": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "17": {
+          "intensity": 0.9,
+          "normalReps": 1,
+          "repOutTarget": 2,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "18": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "19": {
+          "intensity": 0.9,
+          "normalReps": 1,
+          "repOutTarget": 2,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "20": {
+          "intensity": 0.95,
+          "normalReps": 1,
+          "repOutTarget": 1,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "21": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        }
+      },
+      "main_3": {
+        "1": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "2": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "3": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "4": {
+          "intensity": 0.725,
+          "normalReps": 5,
+          "repOutTarget": 9,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "5": {
+          "intensity": 0.775,
+          "normalReps": 4,
+          "repOutTarget": 7,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "6": {
+          "intensity": 0.825,
+          "normalReps": 3,
+          "repOutTarget": 5,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "7": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "8": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "9": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "10": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "11": {
+          "intensity": 0.775,
+          "normalReps": 4,
+          "repOutTarget": 7,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "12": {
+          "intensity": 0.825,
+          "normalReps": 3,
+          "repOutTarget": 5,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "13": {
+          "intensity": 0.875,
+          "normalReps": 2,
+          "repOutTarget": 3,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "14": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "15": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "16": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "17": {
+          "intensity": 0.9,
+          "normalReps": 1,
+          "repOutTarget": 2,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "18": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "19": {
+          "intensity": 0.9,
+          "normalReps": 1,
+          "repOutTarget": 2,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "20": {
+          "intensity": 0.95,
+          "normalReps": 1,
+          "repOutTarget": 1,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "21": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        }
+      },
+      "main_4": {
+        "1": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "2": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "3": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "4": {
+          "intensity": 0.725,
+          "normalReps": 5,
+          "repOutTarget": 9,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "5": {
+          "intensity": 0.775,
+          "normalReps": 4,
+          "repOutTarget": 7,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "6": {
+          "intensity": 0.825,
+          "normalReps": 3,
+          "repOutTarget": 5,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "7": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "8": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "9": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "10": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "11": {
+          "intensity": 0.775,
+          "normalReps": 4,
+          "repOutTarget": 7,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "12": {
+          "intensity": 0.825,
+          "normalReps": 3,
+          "repOutTarget": 5,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "13": {
+          "intensity": 0.875,
+          "normalReps": 2,
+          "repOutTarget": 3,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "14": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "15": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "16": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "17": {
+          "intensity": 0.9,
+          "normalReps": 1,
+          "repOutTarget": 2,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "18": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "19": {
+          "intensity": 0.9,
+          "normalReps": 1,
+          "repOutTarget": 2,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "20": {
+          "intensity": 0.95,
+          "normalReps": 1,
+          "repOutTarget": 1,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "21": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        }
+      },
+      "aux_1": {
+        "1": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "2": {
+          "intensity": 0.65,
+          "normalReps": 6,
+          "repOutTarget": 12,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "3": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "4": {
+          "intensity": 0.625,
+          "normalReps": 7,
+          "repOutTarget": 13,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "5": {
+          "intensity": 0.675,
+          "normalReps": 6,
+          "repOutTarget": 11,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "6": {
+          "intensity": 0.725,
+          "normalReps": 5,
+          "repOutTarget": 9,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "7": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "8": {
+          "intensity": 0.65,
+          "normalReps": 6,
+          "repOutTarget": 12,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "9": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "10": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "11": {
+          "intensity": 0.675,
+          "normalReps": 6,
+          "repOutTarget": 11,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "12": {
+          "intensity": 0.725,
+          "normalReps": 5,
+          "repOutTarget": 9,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "13": {
+          "intensity": 0.775,
+          "normalReps": 4,
+          "repOutTarget": 7,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "14": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "15": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "16": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "17": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "18": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "19": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "20": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "21": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        }
+      },
+      "aux_2": {
+        "1": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "2": {
+          "intensity": 0.65,
+          "normalReps": 6,
+          "repOutTarget": 12,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "3": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "4": {
+          "intensity": 0.625,
+          "normalReps": 7,
+          "repOutTarget": 13,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "5": {
+          "intensity": 0.675,
+          "normalReps": 6,
+          "repOutTarget": 11,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "6": {
+          "intensity": 0.725,
+          "normalReps": 5,
+          "repOutTarget": 9,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "7": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "8": {
+          "intensity": 0.65,
+          "normalReps": 6,
+          "repOutTarget": 12,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "9": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "10": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "11": {
+          "intensity": 0.675,
+          "normalReps": 6,
+          "repOutTarget": 11,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "12": {
+          "intensity": 0.725,
+          "normalReps": 5,
+          "repOutTarget": 9,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "13": {
+          "intensity": 0.775,
+          "normalReps": 4,
+          "repOutTarget": 7,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "14": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "15": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "16": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "17": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "18": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "19": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "20": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "21": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        }
+      },
+      "aux_3": {
+        "1": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "2": {
+          "intensity": 0.65,
+          "normalReps": 6,
+          "repOutTarget": 12,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "3": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "4": {
+          "intensity": 0.625,
+          "normalReps": 7,
+          "repOutTarget": 13,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "5": {
+          "intensity": 0.675,
+          "normalReps": 6,
+          "repOutTarget": 11,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "6": {
+          "intensity": 0.725,
+          "normalReps": 5,
+          "repOutTarget": 9,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "7": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "8": {
+          "intensity": 0.65,
+          "normalReps": 6,
+          "repOutTarget": 12,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "9": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "10": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "11": {
+          "intensity": 0.675,
+          "normalReps": 6,
+          "repOutTarget": 11,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "12": {
+          "intensity": 0.725,
+          "normalReps": 5,
+          "repOutTarget": 9,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "13": {
+          "intensity": 0.775,
+          "normalReps": 4,
+          "repOutTarget": 7,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "14": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "15": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "16": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "17": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "18": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "19": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "20": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "21": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        }
+      },
+      "aux_4": {
+        "1": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "2": {
+          "intensity": 0.65,
+          "normalReps": 6,
+          "repOutTarget": 12,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "3": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "4": {
+          "intensity": 0.625,
+          "normalReps": 7,
+          "repOutTarget": 13,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "5": {
+          "intensity": 0.675,
+          "normalReps": 6,
+          "repOutTarget": 11,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "6": {
+          "intensity": 0.725,
+          "normalReps": 5,
+          "repOutTarget": 9,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "7": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "8": {
+          "intensity": 0.65,
+          "normalReps": 6,
+          "repOutTarget": 12,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "9": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "10": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "11": {
+          "intensity": 0.675,
+          "normalReps": 6,
+          "repOutTarget": 11,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "12": {
+          "intensity": 0.725,
+          "normalReps": 5,
+          "repOutTarget": 9,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "13": {
+          "intensity": 0.775,
+          "normalReps": 4,
+          "repOutTarget": 7,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "14": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "15": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "16": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "17": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "18": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "19": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "20": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "21": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        }
+      },
+      "aux_5": {
+        "1": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "2": {
+          "intensity": 0.65,
+          "normalReps": 6,
+          "repOutTarget": 12,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "3": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "4": {
+          "intensity": 0.625,
+          "normalReps": 7,
+          "repOutTarget": 13,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "5": {
+          "intensity": 0.675,
+          "normalReps": 6,
+          "repOutTarget": 11,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "6": {
+          "intensity": 0.725,
+          "normalReps": 5,
+          "repOutTarget": 9,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "7": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "8": {
+          "intensity": 0.65,
+          "normalReps": 6,
+          "repOutTarget": 12,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "9": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "10": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "11": {
+          "intensity": 0.675,
+          "normalReps": 6,
+          "repOutTarget": 11,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "12": {
+          "intensity": 0.725,
+          "normalReps": 5,
+          "repOutTarget": 9,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "13": {
+          "intensity": 0.775,
+          "normalReps": 4,
+          "repOutTarget": 7,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "14": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "15": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "16": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "17": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "18": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "19": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "20": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "21": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        }
+      },
+      "aux_6": {
+        "1": {
+          "intensity": 0.6,
+          "normalReps": 7,
+          "repOutTarget": 14,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "2": {
+          "intensity": 0.65,
+          "normalReps": 6,
+          "repOutTarget": 12,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "3": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "4": {
+          "intensity": 0.625,
+          "normalReps": 7,
+          "repOutTarget": 13,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "5": {
+          "intensity": 0.675,
+          "normalReps": 6,
+          "repOutTarget": 11,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "6": {
+          "intensity": 0.725,
+          "normalReps": 5,
+          "repOutTarget": 9,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "7": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "8": {
+          "intensity": 0.65,
+          "normalReps": 6,
+          "repOutTarget": 12,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "9": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "10": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "11": {
+          "intensity": 0.675,
+          "normalReps": 6,
+          "repOutTarget": 11,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "12": {
+          "intensity": 0.725,
+          "normalReps": 5,
+          "repOutTarget": 9,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "13": {
+          "intensity": 0.775,
+          "normalReps": 4,
+          "repOutTarget": 7,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "14": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "15": {
+          "intensity": 0.7,
+          "normalReps": 5,
+          "repOutTarget": 10,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "16": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "17": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "18": {
+          "intensity": 0.75,
+          "normalReps": 4,
+          "repOutTarget": 8,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "19": {
+          "intensity": 0.8,
+          "normalReps": 3,
+          "repOutTarget": 6,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "20": {
+          "intensity": 0.85,
+          "normalReps": 2,
+          "repOutTarget": 4,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        },
+        "21": {
+          "intensity": 0.5,
+          "normalReps": 8,
+          "repOutTarget": 18,
+          "sets": 5,
+          "adjustments": {
+            "belowBy2Plus": -0.05,
+            "belowBy1": -0.02,
+            "hit": 0,
+            "beatBy1": 0.005,
+            "beatBy2": 0.01,
+            "beatBy3": 0.015,
+            "beatBy4": 0.02,
+            "beatBy5Plus": 0.03
+          }
+        }
       }
     }
   },
