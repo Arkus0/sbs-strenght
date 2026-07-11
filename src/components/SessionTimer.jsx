@@ -41,7 +41,9 @@ export default function SessionTimer({
   title = 'Timer',
   context = '',
   embedded = false,
-  autoStartKey = null
+  compact = false,
+  autoStartKey = null,
+  onSkip = null
 }) {
   const titleId = useId()
   const allPresets = useMemo(() => {
@@ -54,12 +56,14 @@ export default function SessionTimer({
   const [display, setDisplay] = useState(preset.seconds)
   const startedAtRef = useRef(0)
   const offsetRef = useRef(0)
+  const durationRef = useRef(preset.seconds)
   const doneRef = useRef(false)
-  const autoStartRef = useRef(autoStartKey)
+  const autoStartRef = useRef(null)
 
   useEffect(() => {
     if (presetId !== 'suggested') return
     if (phase !== 'idle' && phase !== 'done') return
+    durationRef.current = preset.seconds
     setDisplay(preset.seconds)
     offsetRef.current = 0
     doneRef.current = false
@@ -70,6 +74,7 @@ export default function SessionTimer({
     autoStartRef.current = autoStartKey
     setPresetId(suggested ? 'suggested' : 'rest-3')
     offsetRef.current = 0
+    durationRef.current = (suggested || PRESETS[1]).seconds
     doneRef.current = false
     setDisplay((suggested || PRESETS[1]).seconds)
     startedAtRef.current = Date.now()
@@ -84,7 +89,7 @@ export default function SessionTimer({
         setDisplay(elapsed)
         return
       }
-      const remaining = Math.max(0, preset.seconds - elapsed)
+      const remaining = Math.max(0, durationRef.current - elapsed)
       setDisplay(remaining)
       if (remaining <= 0 && !doneRef.current) {
         doneRef.current = true
@@ -99,7 +104,8 @@ export default function SessionTimer({
   function start() {
     if (phase !== 'paused') {
       offsetRef.current = 0
-      setDisplay(preset.seconds)
+      durationRef.current = preset.seconds
+      setDisplay(durationRef.current)
     }
     doneRef.current = false
     startedAtRef.current = Date.now()
@@ -114,6 +120,7 @@ export default function SessionTimer({
 
   function reset() {
     offsetRef.current = 0
+    durationRef.current = preset.seconds
     doneRef.current = false
     setDisplay(preset.seconds)
     setPhase('idle')
@@ -123,9 +130,21 @@ export default function SessionTimer({
     setPresetId(nextId)
     const next = allPresets.find((item) => item.id === nextId) || allPresets[0]
     offsetRef.current = 0
+    durationRef.current = next.seconds
     doneRef.current = false
     setDisplay(next.seconds)
     setPhase('idle')
+  }
+
+  function adjust(seconds) {
+    if (preset.mode === 'stopwatch') return
+    durationRef.current = Math.max(0, durationRef.current + seconds)
+    setDisplay((value) => Math.max(0, value + seconds))
+  }
+
+  function skip() {
+    reset()
+    onSkip?.()
   }
 
   const emomRound = preset.mode === 'emom' && phase === 'running'
@@ -134,10 +153,10 @@ export default function SessionTimer({
 
   return (
     <section
-      className={`timer-card ${embedded ? 'embedded-timer' : ''} ${phase === 'running' ? 'live' : ''}`}
+      className={`timer-card ${embedded ? 'embedded-timer' : ''} ${compact ? 'compact-timer-card' : ''} ${phase === 'running' ? 'live' : ''}`}
       aria-labelledby={titleId}
     >
-      <div className="section-title">
+      <div className="section-title timer-heading">
         <div>
           <span className="eyebrow">{title}</span>
           <h2 id={titleId}>{preset.label}</h2>
@@ -145,17 +164,11 @@ export default function SessionTimer({
         </div>
         {emomRound && <span className="status-pill">Ronda {Math.min(10, emomRound)}</span>}
       </div>
-      <div className="timer-face" role="timer" aria-live="polite">
+      <div className={`timer-face ${compact ? 'compact' : ''}`} role="timer" aria-live="polite">
         {fmt(display)}
       </div>
-      <div className="timer-controls">
-        <select aria-label="Preset de timer" value={presetId} onChange={(event) => changePreset(event.target.value)}>
-          {allPresets.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.label}
-            </option>
-          ))}
-        </select>
+      <div className={`timer-controls ${compact ? 'compact' : ''}`}>
+        {compact && preset.mode !== 'stopwatch' && <button onClick={() => adjust(-15)}>-15 s</button>}
         {phase === 'running' ? (
           <button onClick={pause}>Pausa</button>
         ) : (
@@ -163,8 +176,22 @@ export default function SessionTimer({
             {phase === 'paused' ? 'Reanudar' : 'Start'}
           </button>
         )}
-        <button onClick={reset}>Reset</button>
+        {compact && preset.mode !== 'stopwatch' && <button onClick={() => adjust(15)}>+15 s</button>}
+        <button onClick={skip}>{compact ? 'Omitir' : 'Reset'}</button>
       </div>
+      <details className="timer-settings">
+        <summary>Ajustes del timer</summary>
+        <div className="timer-settings-fields">
+          <select aria-label="Preset de timer" value={presetId} onChange={(event) => changePreset(event.target.value)}>
+            {allPresets.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+          <button onClick={reset}>Reset</button>
+        </div>
+      </details>
     </section>
   )
 }

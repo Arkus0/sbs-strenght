@@ -69,6 +69,15 @@ test('generates the expected 3x session layout', () => {
   assert.equal(plan.lifts[1].normalReps, 7)
 })
 
+test('new session logs include a resumable start timestamp', () => {
+  const setup = readySetup(3)
+  const plan = buildSessionPlan(template, setup, {}, 1, 1)
+  const log = createEmptySessionLog(plan)
+
+  assert.equal(log.status, 'draft')
+  assert.ok(Number.isFinite(Date.parse(log.startedAt)))
+})
+
 test('single @8 updates the current session training max and load', () => {
   const setup = readySetup(3)
   const logs = {

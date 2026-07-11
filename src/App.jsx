@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import template from './data/sbsRtfTemplate.json'
 import { ACCESSORY_EXERCISES, BACK_EXERCISES, bodybuildingExercise } from './data/bodybuildingCatalog.js'
 import SessionTimer from './components/SessionTimer.jsx'
+import WorkoutSession from './components/WorkoutSession.jsx'
 import {
   ASSISTANCE_BLOCKS,
   bodybuildingForSession,
@@ -879,7 +880,7 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
   )
 }
 
-function DashboardView({ setup, logs, selected, onOpen, onGoPlan, onGoAnalytics }) {
+function DashboardView({ setup, logs, selected, completionSummary, onDismissSummary, onOpen, onGoPlan, onGoAnalytics }) {
   const draft = Object.values(logs).find((log) => log.status !== 'completed')
   const next = nextSession(template, setup, logs)
   const target = draft ? parseSessionId(draft.id) : next || selected
@@ -891,6 +892,22 @@ function DashboardView({ setup, logs, selected, onOpen, onGoPlan, onGoAnalytics 
 
   return (
     <main className="screen dashboard-screen">
+      {completionSummary && (
+        <section className="completion-summary-card" aria-labelledby="completion-summary-title">
+          <div className="section-title">
+            <div>
+              <span className="eyebrow">Sesion completada</span>
+              <h2 id="completion-summary-title">{completionSummary.id}</h2>
+            </div>
+            <button aria-label="Cerrar resumen de sesion" onClick={onDismissSummary}>Cerrar</button>
+          </div>
+          <div className="completion-summary-stats">
+            <div><span>Duracion</span><strong>{formatSummaryDuration(completionSummary.durationSeconds)}</strong></div>
+            <div><span>Series</span><strong>{completionSummary.completedSets}/{completionSummary.totalSets}</strong></div>
+            <div><span>Ejercicios</span><strong>{completionSummary.exerciseCount}</strong></div>
+          </div>
+        </section>
+      )}
       <section className="current-session-card" aria-labelledby="current-session-title">
         <div className="section-title">
           <div>
@@ -928,6 +945,17 @@ function DashboardView({ setup, logs, selected, onOpen, onGoPlan, onGoAnalytics 
       </section>
     </main>
   )
+}
+
+function formatSummaryDuration(seconds) {
+  if (seconds === null || seconds === undefined) return 'Sin datos'
+  const safe = Math.max(0, Math.floor(Number(seconds) || 0))
+  const hours = Math.floor(safe / 3600)
+  const minutes = Math.floor((safe % 3600) / 60)
+  const remainder = safe % 60
+  return hours
+    ? `${hours}:${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`
+    : `${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`
 }
 
 function sourceLabel(source) {
@@ -1406,6 +1434,7 @@ function SetupView({ setup, onChange, state, onImport, onReset }) {
 export default function App() {
   const [state, setState] = useState(() => loadState(template))
   const [view, setView] = useState(VIEWS.DASHBOARD)
+  const [completionSummary, setCompletionSummary] = useState(null)
 
   const setup = state.setup || createDefaultSetup(template)
   const setupComplete = isSetupComplete(template, setup)
@@ -1435,6 +1464,7 @@ export default function App() {
   }
 
   function selectSession(session) {
+    setCompletionSummary(null)
     setState((current) => ({ ...current, selectedSessionId: session.id }))
     setView(VIEWS.RUNNER)
   }
@@ -1447,6 +1477,20 @@ export default function App() {
         [log.id]: log
       }
     }))
+  }
+
+  function completeLog(log, summary) {
+    setState((current) => {
+      const logs = { ...current.logs, [log.id]: log }
+      const next = nextSession(template, setup, logs)
+      return {
+        ...current,
+        logs,
+        selectedSessionId: next?.id || current.selectedSessionId
+      }
+    })
+    setCompletionSummary(summary)
+    setView(VIEWS.DASHBOARD)
   }
 
   function discardLog(logId) {
@@ -1483,19 +1527,22 @@ export default function App() {
           setup={setup}
           logs={state.logs}
           selected={selected}
+          completionSummary={completionSummary}
+          onDismissSummary={() => setCompletionSummary(null)}
           onOpen={selectSession}
           onGoPlan={() => setView(VIEWS.PLAN)}
           onGoAnalytics={() => setView(VIEWS.ANALYTICS)}
         />
       )}
       {view === VIEWS.RUNNER && (
-        <SessionRunner
+        <WorkoutSession
           setup={setup}
           logs={state.logs}
           selected={selected}
           onLogChange={updateLog}
           onDiscard={discardLog}
           onBack={() => setView(VIEWS.DASHBOARD)}
+          onComplete={completeLog}
         />
       )}
       {view === VIEWS.PLAN && <PlanView setup={setup} logs={state.logs} onSelect={selectSession} />}
