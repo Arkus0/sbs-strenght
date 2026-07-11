@@ -6,6 +6,7 @@ import {
   createEmptySessionLog,
   normalizeSessionLogForPlan
 } from '../lib/sbsRtf.js'
+import { primeTimerAudio } from '../lib/timerAudio.js'
 import SessionTimer from './SessionTimer.jsx'
 
 function numberValue(value) {
@@ -433,6 +434,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
       return
     }
     setRowError('')
+    primeTimerAudio()
     updateSet(lift.slotId, set.id, {
       done: true,
       weight: displaySetWeight(set),
@@ -472,6 +474,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
       return
     }
     setRowError('')
+    primeTimerAudio()
     updateBodybuildingSet(exerciseIndex, setIndex, { done: true })
     setRestTimer({
       key: `${plan.id}:${item.slotKey}:${set.id}:${Date.now()}`,
@@ -489,6 +492,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
   }
 
   function startConditioning(option) {
+    primeTimerAudio()
     setSelectedConditioningId(option.id)
     updateConditioning({ optionId: option.id, status: 'selected' })
     setConditioningTimerKey(`${plan.id}:conditioning:${Date.now()}`)

@@ -1213,6 +1213,13 @@ td input {
   gap: 8px;
 }
 
+.timer-cue-note {
+  margin-bottom: 8px;
+  color: #596167;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
 .completion-summary-card {
   border-color: #1d6b54;
   background: #edf6ef;
