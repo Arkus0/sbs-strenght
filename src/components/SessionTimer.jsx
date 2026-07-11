@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { nextTimerCue, playTimerCue, primeTimerAudio } from '../lib/timerAudio.js'
 
 const PRESETS = [
   { id: 'rest-2', label: 'Descanso 2:00', seconds: 120, mode: 'countdown' },
@@ -13,27 +14,6 @@ function fmt(seconds) {
   const min = Math.floor(safe / 60)
   const sec = safe % 60
   return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
-}
-
-function beep() {
-  try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext
-    if (!AudioContext) return
-    const ctx = new AudioContext()
-    const osc = ctx.createOscillator()
-    const gain = ctx.createGain()
-    osc.type = 'square'
-    osc.frequency.value = 880
-    gain.gain.setValueAtTime(0.001, ctx.currentTime)
-    gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.01)
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25)
-    osc.connect(gain)
-    gain.connect(ctx.destination)
-    osc.start()
-    osc.stop(ctx.currentTime + 0.28)
-  } catch {
-    // Audio is best-effort in browser/PWA mode.
-  }
 }
 
 export default function SessionTimer({
@@ -59,11 +39,15 @@ export default function SessionTimer({
   const durationRef = useRef(preset.seconds)
   const doneRef = useRef(false)
   const autoStartRef = useRef(null)
+  const firedCueIdsRef = useRef(new Set())
+  const previousRemainingRef = useRef(preset.seconds)
 
   useEffect(() => {
     if (presetId !== 'suggested') return
     if (phase !== 'idle' && phase !== 'done') return
     durationRef.current = preset.seconds
+    firedCueIdsRef.current = new Set()
+    previousRemainingRef.current = preset.seconds
     setDisplay(preset.seconds)
     offsetRef.current = 0
     doneRef.current = false
@@ -75,6 +59,8 @@ export default function SessionTimer({
     setPresetId(suggested ? 'suggested' : 'rest-3')
     offsetRef.current = 0
     durationRef.current = (suggested || PRESETS[1]).seconds
+    firedCueIdsRef.current = new Set()
+    previousRemainingRef.current = durationRef.current
     doneRef.current = false
     setDisplay((suggested || PRESETS[1]).seconds)
     startedAtRef.current = Date.now()
@@ -91,20 +77,32 @@ export default function SessionTimer({
       }
       const remaining = Math.max(0, durationRef.current - elapsed)
       setDisplay(remaining)
+      const cue = nextTimerCue(
+        durationRef.current,
+        previousRemainingRef.current,
+        remaining,
+        firedCueIdsRef.current
+      )
+      if (cue) {
+        firedCueIdsRef.current.add(cue.id)
+        playTimerCue(cue.type)
+      }
+      previousRemainingRef.current = remaining
       if (remaining <= 0 && !doneRef.current) {
         doneRef.current = true
         setPhase('done')
-        beep()
-        navigator.vibrate?.([100, 50, 100])
       }
     }, 200)
     return () => window.clearInterval(tick)
   }, [phase, preset.mode, preset.seconds])
 
   function start() {
+    primeTimerAudio()
     if (phase !== 'paused') {
       offsetRef.current = 0
       durationRef.current = preset.seconds
+      firedCueIdsRef.current = new Set()
+      previousRemainingRef.current = durationRef.current
       setDisplay(durationRef.current)
     }
     doneRef.current = false
@@ -121,6 +119,8 @@ export default function SessionTimer({
   function reset() {
     offsetRef.current = 0
     durationRef.current = preset.seconds
+    firedCueIdsRef.current = new Set()
+    previousRemainingRef.current = preset.seconds
     doneRef.current = false
     setDisplay(preset.seconds)
     setPhase('idle')
@@ -131,6 +131,8 @@ export default function SessionTimer({
     const next = allPresets.find((item) => item.id === nextId) || allPresets[0]
     offsetRef.current = 0
     durationRef.current = next.seconds
+    firedCueIdsRef.current = new Set()
+    previousRemainingRef.current = next.seconds
     doneRef.current = false
     setDisplay(next.seconds)
     setPhase('idle')
@@ -139,7 +141,11 @@ export default function SessionTimer({
   function adjust(seconds) {
     if (preset.mode === 'stopwatch') return
     durationRef.current = Math.max(0, durationRef.current + seconds)
-    setDisplay((value) => Math.max(0, value + seconds))
+    setDisplay((value) => {
+      const nextDisplay = Math.max(0, value + seconds)
+      previousRemainingRef.current = nextDisplay
+      return nextDisplay
+    })
   }
 
   function skip() {
@@ -181,6 +187,7 @@ export default function SessionTimer({
       </div>
       <details className="timer-settings">
         <summary>Ajustes del timer</summary>
+        <p className="timer-cue-note">Avisos sonoros: mitad · 10 s · cuenta atras 3-2-1 · final.</p>
         <div className="timer-settings-fields">
           <select aria-label="Preset de timer" value={presetId} onChange={(event) => changePreset(event.target.value)}>
             {allPresets.map((item) => (
