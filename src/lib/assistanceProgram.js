@@ -4,6 +4,7 @@ import {
   bodybuildingExercise
 } from '../data/bodybuildingCatalog.js'
 import { alsruheConditioningCatalog, timerFromConditioning } from '../data/specimenAssistance.js'
+import { recommendAccessoryProgression } from './accessoryProgression.ts'
 
 export const ASSISTANCE_BLOCKS = [
   { id: 'block-1', label: 'Bloque 1', workWeeks: [1, 2, 3, 4, 5, 6], deloadWeek: 7 },
@@ -152,6 +153,30 @@ export function previousBodybuildingLog(logs, exerciseId, plan) {
     .find((item) => item.exerciseId === exerciseId) || null
 }
 
+export function previousBodybuildingHistory(logs, exerciseId, plan) {
+  return Object.values(logs || {})
+    .filter((log) => log?.status === 'completed' && beforePlan(log, plan))
+    .sort((a, b) => {
+      const aa = parseLogPosition(a)
+      const bb = parseLogPosition(b)
+      return aa.week - bb.week || aa.day - bb.day
+    })
+    .flatMap((log) => (log.bodybuilding || [])
+      .filter((item) => item.exerciseId === exerciseId)
+      .map((item) => ({
+        sessionId: log.id,
+        load: Number(item.load) > 0 ? Number(item.load) : null,
+        repMin: Number(item.repMin),
+        repMax: Number(item.repMax),
+        deload: Boolean(item.deload),
+        status: item.outcome || 'performed',
+        sets: (item.sets || []).map((set) => ({
+          done: Boolean(set.done),
+          reps: Number(set.reps) > 0 ? Number(set.reps) : null
+        }))
+      })))
+}
+
 export function completedAtTop(item) {
   if (!item || item.deload || !Array.isArray(item.sets) || !item.sets.length) return false
   return item.sets.every((set) => set.done && Number(set.reps) >= Number(item.repMax))
@@ -168,7 +193,12 @@ export function bodybuildingForSession(setup, plan, logs = {}) {
     const exercise = bodybuildingExercise(exerciseId)
     if (!exercise) return null
     const previous = previousBodybuildingLog(logs, exerciseId, plan)
-    const readyToIncrease = completedAtTop(previous)
+    const history = previousBodybuildingHistory(logs, exerciseId, plan)
+    const recommendation = recommendAccessoryProgression({
+      history,
+      loadStep: Number(setup.accessoryLoadSteps?.[exerciseId] || setup.rounding || 2.5),
+      deload: plan.deload
+    })
     return {
       slotKey: index === 0 ? 'back' : `accessory-${index}`,
       role: index === 0 ? 'back' : 'accessory',
@@ -183,7 +213,9 @@ export function bodybuildingForSession(setup, plan, logs = {}) {
       deload: plan.deload,
       previousLoad: previous?.load ?? '',
       previousSessionId: previous?.sessionId || '',
-      progressionAction: readyToIncrease ? 'increase' : previous ? 'repeat' : 'choose'
+      progressionAction: recommendation.action === 'deload' ? 'repeat' : recommendation.action,
+      recommendedLoad: recommendation.recommendedLoad ?? '',
+      recommendation
     }
   }).filter(Boolean)
 }
@@ -198,7 +230,8 @@ export function normalizeBodybuildingItems(prescription, existing = []) {
     }))
     return {
       ...item,
-      load: prior.load ?? item.previousLoad ?? '',
+      load: prior.load ?? item.recommendedLoad ?? item.previousLoad ?? '',
+      outcome: prior.outcome || 'performed',
       notes: prior.notes || '',
       sets
     }
