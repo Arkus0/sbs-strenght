@@ -366,6 +366,105 @@ td input {
   background: #f7fbf5;
 }
 
+.bodybuilding-card {
+  border-color: #aebed0;
+  background: #f7f9fc;
+}
+
+.bodybuilding-list,
+.conditioning-options,
+.assistance-block-editor,
+.block-days {
+  display: grid;
+  gap: 12px;
+}
+
+.bodybuilding-exercise,
+.block-day {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #d8deea;
+  border-radius: 8px;
+  background: #fffdf7;
+}
+
+.bodybuilding-exercise h3,
+.bodybuilding-exercise p,
+.block-day h3 {
+  margin: 0;
+}
+
+.bodybuilding-sets {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.bodybuilding-sets label {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #ded8c8;
+  border-radius: 8px;
+  background: #fbf7ef;
+}
+
+.bodybuilding-sets label.done {
+  border-color: #8dbd99;
+  background: #edf6ef;
+}
+
+.bodybuilding-sets input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}
+
+.progression-badge {
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: #e8e2d3;
+  color: #3e474d;
+  font-size: 0.74rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.progression-badge.increase {
+  background: #1d6b54;
+  color: #ffffff;
+}
+
+.conditioning-card {
+  border-color: #d0a437;
+  background: #fffaf0;
+}
+
+.legacy-assistance summary,
+.assistance-block-editor summary {
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.assistance-block-editor details {
+  padding: 10px;
+  border: 1px solid #d1c8b7;
+  border-radius: 8px;
+  background: #fbf7ef;
+}
+
+.assistance-block-editor details[open] summary {
+  margin-bottom: 10px;
+}
+
+.block-day label small {
+  display: block;
+  margin-top: 3px;
+  color: #687178;
+}
+
 .specimen-grid {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
@@ -858,6 +957,11 @@ summary {
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
     align-items: start;
   }
+
+  .bodybuilding-list,
+  .block-days {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 430px) {
@@ -881,7 +985,8 @@ summary {
   .active-lift-preview,
   .analytics-hero,
   .timer-controls,
-  .set-actions {
+  .set-actions,
+  .bodybuilding-sets {
     grid-template-columns: 1fr;
   }
 

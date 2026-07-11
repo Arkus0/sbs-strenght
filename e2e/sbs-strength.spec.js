@@ -52,7 +52,7 @@ test('onboarding blocks entry until required maxes exist', async ({ page }) => {
   await expect(page.locator('[role="timer"]')).toHaveText(paused)
 })
 
-test('autosaves an in-progress session and applies single @8 live', async ({ page }) => {
+test('autosaves main lifts, bodybuilding and optional conditioning', async ({ page }) => {
   await completeOnboarding(page)
   await page.getByRole('button', { name: 'Abrir sesion' }).click()
 
@@ -60,8 +60,13 @@ test('autosaves an in-progress session and applies single @8 live', async ({ pag
   await expect(page.getByText('357.5')).toBeVisible()
   await page.getByRole('button', { name: /Editar Serie 5 AMRAP Squat/ }).click()
   await page.getByLabel('Reps serie actual Squat').fill('12')
-  await page.getByRole('button', { name: 'Aplicar templates elegidos' }).click()
-  await expect(page.locator('section[aria-labelledby="upper-back-title"] select')).toHaveValue(/Rows|Pull|Chin|Rounds|TEMPO|Sandbag/)
+  const firstAssistance = page.locator('.bodybuilding-exercise').first()
+  await firstAssistance.getByLabel(/Carga|Lastre/).fill('50')
+  await firstAssistance.getByLabel(/Reps serie 1/).fill('12')
+  await firstAssistance.getByLabel(/Completar serie 1/).check()
+  await page.locator('.conditioning-options button').first().click()
+  await page.getByLabel('Resultado conditioning').fill('5 rondas')
+  await page.getByRole('button', { name: 'Conditioning hecho' }).click()
 
   await page.reload()
   await expect(page.getByRole('heading', { name: 'Semana 1 Dia 1' })).toBeVisible()
@@ -69,6 +74,27 @@ test('autosaves an in-progress session and applies single @8 live', async ({ pag
   await expect(page.getByLabel('Peso serie actual Squat')).toHaveValue('460')
   await page.getByRole('button', { name: /Editar Serie 5 AMRAP Squat/ }).click()
   await expect(page.getByLabel('Reps serie actual Squat')).toHaveValue('12')
+  await expect(page.locator('.bodybuilding-exercise').first().getByLabel(/Carga|Lastre/)).toHaveValue('50')
+  await expect(page.getByLabel('Resultado conditioning')).toHaveValue('5 rondas')
+})
+
+test('bodybuilding reaches the top of its range and requests a load increase next time', async ({ page }) => {
+  await completeOnboarding(page)
+  await page.getByRole('button', { name: 'Abrir sesion' }).click()
+
+  const firstAssistance = page.locator('.bodybuilding-exercise').first()
+  await firstAssistance.getByLabel(/Carga|Lastre/).fill('50')
+  for (let set = 1; set <= 3; set += 1) {
+    await firstAssistance.getByLabel(`Reps serie ${set} Chest-supported row`).fill('12')
+    await firstAssistance.getByLabel(`Completar serie ${set} Chest-supported row`).check()
+  }
+  await page.getByRole('button', { name: 'Guardar sesion' }).click()
+  await page.getByRole('button', { name: 'Volver' }).click()
+  await page.getByRole('button', { name: 'Plan' }).click()
+  await page.getByRole('button', { name: 'Abrir W2D1' }).click()
+
+  await expect(page.locator('.bodybuilding-exercise').first().getByText('Subir carga')).toBeVisible()
+  await expect(page.locator('.bodybuilding-exercise').first().getByLabel(/Carga|Lastre/)).toHaveValue('50')
 })
 
 test('last-set reps change the next week load for the lift', async ({ page }) => {
@@ -107,7 +133,8 @@ test('advanced edits affect prescriptions and JSON import restores exported data
 
   await page.getByRole('button', { name: 'Setup' }).click()
   await page.getByRole('button', { name: 'Editar tablas' }).click()
-  const squatDetails = page.locator('details').filter({ hasText: 'Squat' }).first()
+  const intensitySection = page.locator('section.panel').filter({ has: page.getByRole('heading', { name: 'Intensidad semanal' }) })
+  const squatDetails = intensitySection.locator('details').filter({ hasText: 'Squat' }).first()
   await squatDetails.locator('summary').click()
   await squatDetails.getByLabel('S1', { exact: true }).fill('0.6')
   await page.getByRole('button', { name: 'Inicio' }).click()

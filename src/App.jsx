@@ -1,7 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import template from './data/sbsRtfTemplate.json'
-import { specimenTemplateForSession } from './data/specimenAssistance.js'
+import { ACCESSORY_EXERCISES, BACK_EXERCISES, bodybuildingExercise } from './data/bodybuildingCatalog.js'
 import SessionTimer from './components/SessionTimer.jsx'
+import {
+  ASSISTANCE_BLOCKS,
+  bodybuildingForSession,
+  completedAtTop,
+  conditioningOptionsForSession,
+  createAssistanceBlocks
+} from './lib/assistanceProgram.js'
 import {
   buildSessionPlan,
   createDefaultSetup,
@@ -59,6 +66,14 @@ function Onboarding({ setup, onChange, onComplete }) {
     })
   }
 
+  function setFrequency(frequency) {
+    onChange({
+      ...setup,
+      frequency,
+      assistanceBlocks: createAssistanceBlocks(template, frequency)
+    })
+  }
+
   return (
     <main className="setup-shell">
       <section className="setup-hero">
@@ -89,7 +104,7 @@ function Onboarding({ setup, onChange, onComplete }) {
           Frecuencia semanal
           <select
             value={setup.frequency}
-            onChange={(event) => onChange({ ...setup, frequency: Number(event.target.value) })}
+            onChange={(event) => setFrequency(Number(event.target.value))}
           >
             {template.meta.frequencies.map((frequency) => (
               <option key={frequency} value={frequency}>
@@ -152,6 +167,95 @@ function Onboarding({ setup, onChange, onComplete }) {
         </button>
       </div>
     </main>
+  )
+}
+
+function AssistanceBlocksEditor({ setup, onChange }) {
+  function updateExercise(blockId, dayId, role, index, exerciseId) {
+    const block = setup.assistanceBlocks[blockId]
+    const day = block.days[String(dayId)]
+    const nextDay = role === 'back'
+      ? { ...day, backExerciseId: exerciseId }
+      : {
+          ...day,
+          accessoryExerciseIds: day.accessoryExerciseIds.map((id, itemIndex) => itemIndex === index ? exerciseId : id)
+        }
+    onChange({
+      ...setup,
+      assistanceBlocks: {
+        ...setup.assistanceBlocks,
+        [blockId]: {
+          ...block,
+          days: { ...block.days, [String(dayId)]: nextDay }
+        }
+      }
+    })
+  }
+
+  function regenerate() {
+    onChange({ ...setup, assistanceBlocks: createAssistanceBlocks(template, setup.frequency) })
+  }
+
+  return (
+    <section className="panel" aria-labelledby="assistance-blocks-title">
+      <div className="section-title">
+        <div>
+          <span className="eyebrow">Bodybuilding</span>
+          <h2 id="assistance-blocks-title">Ejercicios por bloque</h2>
+        </div>
+        <button onClick={regenerate}>Regenerar propuesta</button>
+      </div>
+      <p className="muted">Las semanas de deload conservan estos ejercicios con dos series.</p>
+      <div className="assistance-block-editor">
+        {ASSISTANCE_BLOCKS.map((definition) => {
+          const block = setup.assistanceBlocks?.[definition.id]
+          if (!block) return null
+          return (
+            <details key={definition.id} open={definition.id === 'block-1'}>
+              <summary>{definition.label} · semanas {definition.workWeeks[0]}-{definition.workWeeks.at(-1)} + deload {definition.deloadWeek}</summary>
+              <div className="block-days">
+                {Object.values(block.days).map((day) => (
+                  <article className="block-day" key={day.day}>
+                    <h3>Dia {day.day}</h3>
+                    <span className="muted">{day.focus.join(' / ')}</span>
+                    <label>
+                      Espalda
+                      <select
+                        aria-label={`${definition.label} dia ${day.day} espalda`}
+                        value={day.backExerciseId}
+                        onChange={(event) => updateExercise(definition.id, day.day, 'back', 0, event.target.value)}
+                      >
+                        {BACK_EXERCISES.map((exercise) => (
+                          <option key={exercise.id} value={exercise.id}>{exercise.name} · {exercise.repMin}-{exercise.repMax}</option>
+                        ))}
+                      </select>
+                    </label>
+                    {day.accessoryExerciseIds.map((exerciseId, index) => {
+                      const selectedExercise = bodybuildingExercise(exerciseId)
+                      return (
+                        <label key={`${day.day}:${index}`}>
+                          Accesorio {index + 1}
+                          <select
+                            aria-label={`${definition.label} dia ${day.day} accesorio ${index + 1}`}
+                            value={exerciseId}
+                            onChange={(event) => updateExercise(definition.id, day.day, 'accessory', index, event.target.value)}
+                          >
+                            {ACCESSORY_EXERCISES.map((exercise) => (
+                              <option key={exercise.id} value={exercise.id}>{exercise.name} · {exercise.repMin}-{exercise.repMax}</option>
+                            ))}
+                          </select>
+                          {selectedExercise && <small>{selectedExercise.category.replaceAll('_', ' ')}</small>}
+                        </label>
+                      )
+                    })}
+                  </article>
+                ))}
+              </div>
+            </details>
+          )
+        })}
+      </div>
+    </section>
   )
 }
 
@@ -247,31 +351,20 @@ function compactSetStatus(set) {
 
 function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }) {
   const plan = buildSessionPlan(template, setup, logs, selected.week, selected.day)
-  const currentLog = normalizeSessionLogForPlan(plan, logs[plan.id] || createEmptySessionLog(plan))
+  const generatedBodybuilding = bodybuildingForSession(setup, plan, logs)
+  const bodybuildingPrescription = logs[plan.id]?.status === 'completed' && logs[plan.id]?.bodybuilding?.length
+    ? logs[plan.id].bodybuilding
+    : generatedBodybuilding
+  const currentLog = normalizeSessionLogForPlan(
+    plan,
+    logs[plan.id] || createEmptySessionLog(plan, bodybuildingPrescription),
+    bodybuildingPrescription
+  )
   const [activeLiftIndex, setActiveLiftIndex] = useState(0)
   const [activeSetIndex, setActiveSetIndex] = useState(0)
   const [restTimer, setRestTimer] = useState(null)
-  const specimen = useMemo(
-    () => specimenTemplateForSession({
-      week: plan.week,
-      day: plan.day,
-      frequency: plan.frequency,
-      deload: plan.deload,
-      lifts: plan.lifts
-    }),
-    [plan.day, plan.deload, plan.frequency, plan.lifts, plan.week]
-  )
-  const [selectedUpperBackId, setSelectedUpperBackId] = useState('')
-  const [selectedAssistanceId, setSelectedAssistanceId] = useState('')
-  const latestAccessory = useMemo(() => {
-    const entries = Object.values(logs)
-      .filter((log) => log.id !== plan.id)
-      .sort((a, b) => {
-        if (a.week !== b.week) return b.week - a.week
-        return b.day - a.day
-      })
-    return entries.find((log) => log.upperBack?.exercise || log.accessories?.some((item) => item.name))
-  }, [logs, plan.id])
+  const conditioningOptions = conditioningOptionsForSession(plan, bodybuildingPrescription, logs)
+  const [selectedConditioningId, setSelectedConditioningId] = useState('')
 
   useEffect(() => {
     if (!logs[plan.id]) onLogChange(currentLog)
@@ -281,8 +374,7 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
     setActiveLiftIndex(0)
     setActiveSetIndex(0)
     setRestTimer(null)
-    setSelectedUpperBackId(currentLog.specimenSelection?.upperBackId || specimen.upperBack.id)
-    setSelectedAssistanceId(currentLog.specimenSelection?.assistanceId || specimen.assistance.id)
+    setSelectedConditioningId(currentLog.conditioning?.optionId || '')
   }, [plan.id])
 
   const activeLift = plan.lifts[activeLiftIndex] || plan.lifts[0]
@@ -292,8 +384,7 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
   const activeSetDone = Boolean(activeSet?.done)
   const activeSetNeedsReps = activeSet?.kind === 'amrap'
   const activeSetHasRequiredReps = !activeSetNeedsReps || Number(displaySetReps(activeSet)) > 0
-  const selectedUpperBack = specimen.upperBackOptions.find((option) => option.id === selectedUpperBackId) || specimen.upperBack
-  const selectedAssistance = specimen.assistanceOptions.find((option) => option.id === selectedAssistanceId) || specimen.assistance
+  const selectedConditioning = conditioningOptions.find((option) => option.id === selectedConditioningId) || null
 
   useEffect(() => {
     if (activeSetIndex >= activeSets.length) setActiveSetIndex(Math.max(0, activeSets.length - 1))
@@ -373,10 +464,38 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
     setActiveSetIndex(0)
   }
 
-  function updateAccessory(index, patch) {
-    const accessories = [...currentLog.accessories]
-    accessories[index] = { ...accessories[index], ...patch }
-    onLogChange({ ...currentLog, accessories, updatedAt: new Date().toISOString() })
+  function updateBodybuilding(index, patch) {
+    const bodybuilding = [...currentLog.bodybuilding]
+    bodybuilding[index] = { ...bodybuilding[index], ...patch }
+    onLogChange({ ...currentLog, bodybuilding, updatedAt: new Date().toISOString() })
+  }
+
+  function updateBodybuildingSet(exerciseIndex, setIndex, patch) {
+    const item = currentLog.bodybuilding[exerciseIndex]
+    const sets = [...item.sets]
+    sets[setIndex] = { ...sets[setIndex], ...patch }
+    updateBodybuilding(exerciseIndex, { sets })
+  }
+
+  function chooseConditioning(optionId) {
+    setSelectedConditioningId(optionId)
+    onLogChange({
+      ...currentLog,
+      updatedAt: new Date().toISOString(),
+      conditioning: {
+        ...currentLog.conditioning,
+        optionId,
+        status: currentLog.conditioning?.status === 'completed' ? 'completed' : 'selected'
+      }
+    })
+  }
+
+  function updateConditioning(patch) {
+    onLogChange({
+      ...currentLog,
+      updatedAt: new Date().toISOString(),
+      conditioning: { ...currentLog.conditioning, ...patch }
+    })
   }
 
   function completeSession() {
@@ -385,33 +504,6 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
       status: 'completed',
       completedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    })
-  }
-
-  function applySpecimenTemplate() {
-    const accessories = [...currentLog.accessories]
-    accessories[0] = {
-      ...(accessories[0] || {}),
-      name: selectedAssistance.title,
-      sets: selectedAssistance.timer?.rounds ? `${selectedAssistance.timer.rounds}` : accessories[0]?.sets || '',
-      reps: selectedAssistance.shortPrescription,
-      notes: `${selectedAssistance.prescription}\n\n${selectedAssistance.notes}`
-    }
-    onLogChange({
-      ...currentLog,
-      updatedAt: new Date().toISOString(),
-      specimenAccepted: true,
-      specimenSelection: {
-        upperBackId: selectedUpperBack.id,
-        assistanceId: selectedAssistance.id
-      },
-      upperBack: {
-        ...currentLog.upperBack,
-        exercise: selectedUpperBack.title,
-        reps: selectedUpperBack.shortPrescription,
-        notes: `${selectedUpperBack.prescription}\n\n${selectedUpperBack.notes}`
-      },
-      accessories
     })
   }
 
@@ -607,149 +699,153 @@ function SessionRunner({ setup, logs, selected, onLogChange, onDiscard, onBack }
         </article>
       </section>
 
-      <section className="specimen-card" aria-labelledby="specimen-title">
+      <section className="panel bodybuilding-card" aria-labelledby="bodybuilding-title">
         <div className="section-title">
           <div>
-            <span className="eyebrow">Template Brian Alsruhe</span>
-            <h2 id="specimen-title">{specimen.title}</h2>
+            <span className="eyebrow">Bloque fijo y progresable</span>
+            <h2 id="bodybuilding-title">Asistencia bodybuilding</h2>
           </div>
-          <span className="status-pill">Dosis {specimen.density}</span>
+          <span className={`status-pill ${plan.deload ? 'deload' : ''}`}>
+            {plan.deload ? 'Deload: 2 series' : `${currentLog.bodybuilding.length} ejercicios`}
+          </span>
         </div>
-        <div className="template-picker">
-          <div className="template-column">
-            <span className="muted">Upper back</span>
-            {specimen.upperBackOptions.map((option) => (
-              <button
-                className={`template-option ${option.id === selectedUpperBack.id ? 'active' : ''}`}
-                key={option.id}
-                onClick={() => setSelectedUpperBackId(option.id)}
-              >
-                <strong>{option.title}</strong>
-                <span>{option.shortPrescription}</span>
-                <small>{option.sourceLabel}</small>
-              </button>
-            ))}
-          </div>
-          <div className="template-column">
-            <span className="muted">Asistencia / conditioning</span>
-            {specimen.assistanceOptions.map((option) => (
-              <button
-                className={`template-option ${option.id === selectedAssistance.id ? 'active' : ''}`}
-                key={option.id}
-                onClick={() => setSelectedAssistanceId(option.id)}
-              >
-                <strong>{option.title}</strong>
-                <span>{option.shortPrescription}</span>
-                <small>{option.sourceLabel}</small>
-              </button>
-            ))}
-          </div>
-        </div>
-        <details className="source-raw">
-          <summary>Prescripcion completa seleccionada</summary>
-          <pre>{selectedAssistance.prescription}</pre>
-        </details>
-        <p className="delta-note">{specimen.rationale.join(' ')}</p>
-        <button className="primary" onClick={applySpecimenTemplate}>
-          Aplicar templates elegidos
-        </button>
-      </section>
-
-      <section className="panel" aria-labelledby="upper-back-title">
-        <div className="section-title">
-          <h2 id="upper-back-title">Upper back</h2>
-          {latestAccessory?.upperBack?.exercise && <span>Ultimo: {latestAccessory.upperBack.exercise}</span>}
-        </div>
-        <div className="inline-fields">
-          <label>
-            Ejercicio
-            <select
-              value={currentLog.upperBack?.exercise || ''}
-              onChange={(event) =>
-                onLogChange({ ...currentLog, upperBack: { ...currentLog.upperBack, exercise: event.target.value } })
-              }
-            >
-              <option value="">Sin seleccionar</option>
-              {currentLog.upperBack?.exercise && !setup.backExercises.includes(currentLog.upperBack.exercise) && (
-                <option value={currentLog.upperBack.exercise}>{currentLog.upperBack.exercise}</option>
-              )}
-              {setup.backExercises.map((exercise) => (
-                <option key={exercise} value={exercise}>
-                  {exercise}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Carga
-            <input
-              inputMode="decimal"
-              value={currentLog.upperBack?.load || ''}
-              onChange={(event) =>
-                onLogChange({ ...currentLog, upperBack: { ...currentLog.upperBack, load: event.target.value } })
-              }
-            />
-          </label>
-          <label>
-            Series x reps
-            <input
-              value={currentLog.upperBack?.reps || ''}
-              onChange={(event) =>
-                onLogChange({ ...currentLog, upperBack: { ...currentLog.upperBack, reps: event.target.value } })
-              }
-            />
-          </label>
-          <label>
-            Notas
-            <textarea
-              rows="3"
-              value={currentLog.upperBack?.notes || ''}
-              onChange={(event) =>
-                onLogChange({ ...currentLog, upperBack: { ...currentLog.upperBack, notes: event.target.value } })
-              }
-            />
-          </label>
-        </div>
-      </section>
-
-      <section className="panel" aria-labelledby="accessory-title">
-        <div className="section-title">
-          <h2 id="accessory-title">Accesorios</h2>
-          {latestAccessory?.id && <span>Arrastre desde {latestAccessory.id}</span>}
-        </div>
-        <div className="accessory-list">
-          {currentLog.accessories.map((item, index) => (
-            <div className="accessory-row" key={index}>
-              <label>
-                Ejercicio {index + 1}
-                <input value={item.name || ''} onChange={(event) => updateAccessory(index, { name: event.target.value })} />
-              </label>
-              <div className="inline-fields">
-                <label>
-                  Carga
-                  <input inputMode="decimal" value={item.load || ''} onChange={(event) => updateAccessory(index, { load: event.target.value })} />
-                </label>
-                <label>
-                  Series
-                  <input inputMode="numeric" value={item.sets || ''} onChange={(event) => updateAccessory(index, { sets: event.target.value })} />
-                </label>
-                <label>
-                  Reps
-                  <input value={item.reps || ''} onChange={(event) => updateAccessory(index, { reps: event.target.value })} />
-                </label>
+        <p className="muted">Completa el techo del rango en todas las series para subir carga la proxima vez.</p>
+        <div className="bodybuilding-list">
+          {currentLog.bodybuilding.map((item, exerciseIndex) => (
+            <article className="bodybuilding-exercise" key={`${item.slotKey}:${item.exerciseId}`}>
+              <div className="section-title">
+                <div>
+                  <span className="eyebrow">{item.role === 'back' ? 'Espalda' : item.category.replaceAll('_', ' ')}</span>
+                  <h3>{item.name}</h3>
+                  <p>{item.targetSets}x{item.repMin}-{item.repMax}</p>
+                </div>
+                <span className={`progression-badge ${item.progressionAction}`}>
+                  {item.deload
+                    ? 'Sin progresion'
+                    : item.progressionAction === 'increase'
+                      ? 'Subir carga'
+                      : item.progressionAction === 'repeat'
+                        ? 'Repetir carga'
+                        : 'Elige carga'}
+                </span>
               </div>
-              <label className="accessory-notes">
-                Notas
-                <textarea
-                  rows="3"
-                  value={item.notes || ''}
-                  onChange={(event) => updateAccessory(index, { notes: event.target.value })}
+              {item.previousSessionId && (
+                <p className="muted">Ultima aparicion: {item.previousSessionId} · {item.previousLoad || '-'} {setup.units}</p>
+              )}
+              <label>
+                {item.loadMode === 'added_weight' ? 'Lastre' : 'Carga'}
+                <input
+                  inputMode="decimal"
+                  aria-label={`Carga ${item.name}`}
+                  value={item.load ?? ''}
+                  onChange={(event) => updateBodybuilding(exerciseIndex, { load: event.target.value })}
                 />
               </label>
-            </div>
+              <div className="bodybuilding-sets">
+                {item.sets.map((set, setIndex) => (
+                  <label className={set.done ? 'done' : ''} key={set.id}>
+                    <span>S{setIndex + 1}</span>
+                    <input
+                      inputMode="numeric"
+                      aria-label={`Reps serie ${setIndex + 1} ${item.name}`}
+                      value={set.reps}
+                      onChange={(event) => updateBodybuildingSet(exerciseIndex, setIndex, { reps: event.target.value })}
+                    />
+                    <input
+                      type="checkbox"
+                      aria-label={`Completar serie ${setIndex + 1} ${item.name}`}
+                      checked={set.done}
+                      onChange={(event) => updateBodybuildingSet(exerciseIndex, setIndex, { done: event.target.checked })}
+                    />
+                  </label>
+                ))}
+              </div>
+              <label>
+                Notas
+                <input value={item.notes || ''} onChange={(event) => updateBodybuilding(exerciseIndex, { notes: event.target.value })} />
+              </label>
+            </article>
           ))}
         </div>
       </section>
+
+      <section className="panel conditioning-card" aria-labelledby="conditioning-title">
+        <div className="section-title">
+          <div>
+            <span className="eyebrow">Brian Alsruhe · opcional</span>
+            <h2 id="conditioning-title">Conditioning que cubre huecos</h2>
+          </div>
+          <span className="status-pill">Sin cap de esfuerzo</span>
+        </div>
+        <div className="conditioning-options">
+          {conditioningOptions.map((option) => (
+            <button
+              className={`template-option ${option.id === selectedConditioningId ? 'active' : ''}`}
+              key={option.id}
+              onClick={() => chooseConditioning(option.id)}
+            >
+              <strong>{option.title}</strong>
+              <span>{option.shortPrescription}</span>
+              <small>{option.matchReason} · {option.sourceLabel}</small>
+            </button>
+          ))}
+        </div>
+        {!selectedConditioning && <p className="muted">Elige una opcion si quieres hacer conditioning; puedes guardar la sesion sin seleccionarlo.</p>}
+        {selectedConditioning && (
+          <>
+            <details className="source-raw">
+              <summary>Prescripcion completa</summary>
+              <pre>{selectedConditioning.prescription}</pre>
+            </details>
+            <SessionTimer
+              embedded
+              title="Conditioning"
+              context={selectedConditioning.title}
+              suggested={selectedConditioning.timerPreset}
+            />
+            <div className="inline-fields">
+              <label>
+                Score / resultado
+                <input
+                  aria-label="Resultado conditioning"
+                  value={currentLog.conditioning?.score || ''}
+                  onChange={(event) => updateConditioning({ score: event.target.value })}
+                />
+              </label>
+              <label>
+                Carga
+                <input
+                  inputMode="decimal"
+                  aria-label="Carga conditioning"
+                  value={currentLog.conditioning?.load || ''}
+                  onChange={(event) => updateConditioning({ load: event.target.value })}
+                />
+              </label>
+            </div>
+            <label>
+              Notas de conditioning
+              <textarea
+                rows="2"
+                value={currentLog.conditioning?.notes || ''}
+                onChange={(event) => updateConditioning({ notes: event.target.value })}
+              />
+            </label>
+            <div className="dock-actions">
+              <button onClick={() => updateConditioning({ status: 'skipped' })}>Omitido</button>
+              <button className="primary" onClick={() => updateConditioning({ status: 'completed' })}>Conditioning hecho</button>
+            </div>
+          </>
+        )}
+      </section>
+
+      {currentLog.legacyAssistance.length > 0 && (
+        <details className="panel legacy-assistance">
+          <summary>Asistencia guardada con la version anterior</summary>
+          {currentLog.legacyAssistance.map((item, index) => (
+            <p key={`${item.name}:${index}`}><strong>{item.name || item.exercise}</strong> · {item.load || '-'} · {item.sets || ''} {item.reps || ''}</p>
+          ))}
+        </details>
+      )}
 
       <label className="panel">
         Notas de sesion
@@ -788,13 +884,8 @@ function DashboardView({ setup, logs, selected, onOpen, onGoPlan, onGoAnalytics 
   const next = nextSession(template, setup, logs)
   const target = draft ? parseSessionId(draft.id) : next || selected
   const plan = buildSessionPlan(template, setup, logs, target.week, target.day)
-  const specimen = specimenTemplateForSession({
-    week: plan.week,
-    day: plan.day,
-    frequency: plan.frequency,
-    deload: plan.deload,
-    lifts: plan.lifts
-  })
+  const bodybuilding = bodybuildingForSession(setup, plan, logs)
+  const conditioning = conditioningOptionsForSession(plan, bodybuilding, logs)[0]
   const completed = Object.values(logs).filter((log) => log.status === 'completed').length
   const total = listSessions(template, setup).length
 
@@ -829,9 +920,9 @@ function DashboardView({ setup, logs, selected, onOpen, onGoPlan, onGoAnalytics 
           <button onClick={onGoAnalytics}>Ver analiticas</button>
         </article>
         <article className="panel">
-          <span className="eyebrow">Specimen</span>
-          <h2>{specimen.assistance.title}</h2>
-          <p>{specimen.assistance.emphasis}</p>
+          <span className="eyebrow">Asistencia + conditioning</span>
+          <h2>{bodybuilding.map((item) => item.name).join(' · ')}</h2>
+          <p>{conditioning ? `Opcional: ${conditioning.title}` : 'Sin conditioning seleccionado'}</p>
           <button onClick={onGoPlan}>Abrir calendario</button>
         </article>
       </section>
@@ -897,7 +988,9 @@ function AnalyticsView({ setup, logs }) {
       projection: projectTrainingMax(template, setup, logs, slotId, occurrence.week, occurrence.day)
     }
   })
-  const specimenAccepted = Object.values(logs).filter((log) => log.specimenAccepted).length
+  const bodybuildingSessions = Object.values(logs).filter((log) => log.bodybuilding?.length).length
+  const readyToIncrease = Object.values(logs).flatMap((log) => log.bodybuilding || []).filter(completedAtTop).length
+  const conditioningCompleted = Object.values(logs).filter((log) => log.conditioning?.status === 'completed').length
   const completionPct = Math.round((completedLogs.length / sessions.length) * 100)
 
   return (
@@ -909,9 +1002,9 @@ function AnalyticsView({ setup, logs }) {
           <p>{completedLogs.length} de {sessions.length} sesiones guardadas.</p>
         </div>
         <div>
-          <span className="eyebrow">Specimen</span>
-          <h2>{specimenAccepted}</h2>
-          <p>sesiones con template de asistencia aplicado.</p>
+          <span className="eyebrow">Bodybuilding</span>
+          <h2>{readyToIncrease}</h2>
+          <p>ejercicios listos para subir carga · {conditioningCompleted} conditionings hechos.</p>
         </div>
       </section>
 
@@ -940,7 +1033,7 @@ function AnalyticsView({ setup, logs }) {
             <div className="analytics-row" key={log.id}>
               <div>
                 <strong>{log.id}</strong>
-                <span>{log.specimenAccepted ? 'Specimen aplicado' : 'Sin template specimen'}</span>
+                <span>{log.bodybuilding?.length ? `${log.bodybuilding.length} accesorios` : 'Sin asistencia nueva'}</span>
               </div>
               <div>
                 <strong>{Object.keys(log.lifts || {}).length}</strong>
@@ -950,6 +1043,7 @@ function AnalyticsView({ setup, logs }) {
           ))}
           {!completedLogs.length && <p className="muted">Todavia no hay sesiones completadas.</p>}
         </div>
+        {bodybuildingSessions > 0 && <p className="muted">{bodybuildingSessions} sesiones incluyen registro bodybuilding.</p>}
       </section>
     </main>
   )
@@ -1213,6 +1307,14 @@ function SetupView({ setup, onChange, state, onImport, onReset }) {
     })
   }
 
+  function setFrequency(frequency) {
+    onChange({
+      ...setup,
+      frequency,
+      assistanceBlocks: createAssistanceBlocks(template, frequency)
+    })
+  }
+
   return (
     <main className="screen">
       <section className="panel">
@@ -1238,7 +1340,7 @@ function SetupView({ setup, onChange, state, onImport, onReset }) {
           </label>
           <label>
             Frecuencia
-            <select value={setup.frequency} onChange={(event) => onChange({ ...setup, frequency: Number(event.target.value) })}>
+            <select value={setup.frequency} onChange={(event) => setFrequency(Number(event.target.value))}>
               {template.meta.frequencies.map((frequency) => (
                 <option key={frequency} value={frequency}>{frequency}x por semana</option>
               ))}
@@ -1246,6 +1348,8 @@ function SetupView({ setup, onChange, state, onImport, onReset }) {
           </label>
         </div>
       </section>
+
+      <AssistanceBlocksEditor setup={setup} onChange={onChange} />
 
       <section className="panel">
         <h2>Lifts y maxes</h2>

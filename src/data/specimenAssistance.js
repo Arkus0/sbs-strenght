@@ -753,3 +753,11 @@ export function timerFromSpecimen(specimen) {
   if (timer.type === 'for_time') return { label: 'For time', seconds: 0, mode: 'stopwatch' }
   return { label: 'Cronometro', seconds: 0, mode: 'stopwatch' }
 }
+
+export function alsruheConditioningCatalog() {
+  return ASSISTANCE_SOURCE_BLOCKS.filter((block) => !/sled|trineo/i.test(`${block.title}\n${block.prescription}`))
+}
+
+export function timerFromConditioning(block) {
+  return timerFromSpecimen({ assistance: block })
+}
