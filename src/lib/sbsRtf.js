@@ -267,6 +267,7 @@ export function normalizeSessionLogForPlan(plan, log = {}, bodybuildingPrescript
     week: plan.week,
     day: plan.day,
     status: base.status || SESSION_STATUS.DRAFT,
+    startedAt: base.startedAt || undefined,
     completedAt: base.completedAt,
     updatedAt: base.updatedAt || new Date().toISOString(),
     lifts: Object.fromEntries(
@@ -504,6 +505,7 @@ export function createEmptySessionLog(plan, bodybuildingPrescription = []) {
     week: plan.week,
     day: plan.day,
     status: SESSION_STATUS.DRAFT,
+    startedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   }, bodybuildingPrescription)
 }

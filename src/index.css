@@ -839,6 +839,412 @@ td input {
   justify-content: end;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.simplified-runner {
+  display: grid;
+  gap: 12px;
+  padding-bottom: 36px;
+}
+
+.simplified-runner.has-rest-timer {
+  padding-bottom: 230px;
+}
+
+.simplified-runner-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  margin-bottom: 0;
+}
+
+.runner-session-title {
+  min-width: 0;
+}
+
+.runner-session-title h1 {
+  overflow: hidden;
+  font-size: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.runner-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.session-elapsed {
+  color: #f2c14e;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.finish-session-button {
+  min-height: 40px;
+  padding-inline: 12px;
+}
+
+.session-progress-panel,
+.completion-summary-card {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #d0a437;
+  border-radius: 8px;
+  background: #fffdf7;
+  padding: 12px;
+}
+
+.session-progress-panel > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.session-progress-panel progress {
+  width: 100%;
+  height: 8px;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  accent-color: #1d6b54;
+}
+
+.session-progress-panel p {
+  color: #596167;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.workout-exercise-list {
+  display: grid;
+  gap: 12px;
+}
+
+.workout-exercise-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #ded8c8;
+  border-radius: 8px;
+  background: rgba(255, 253, 247, 0.96);
+  padding: 12px;
+  box-shadow: 0 4px 18px rgba(16, 24, 32, 0.06);
+}
+
+.main-exercise-card {
+  border-color: #9fb0bb;
+}
+
+.bodybuilding-exercise-card {
+  border-color: #b8c7d9;
+  background: #f8fafc;
+}
+
+.conditioning-exercise-card {
+  border-color: #d0a437;
+  background: #fffaf0;
+}
+
+.exercise-card-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.exercise-card-header h2 {
+  margin-top: 2px;
+  font-size: 1.15rem;
+}
+
+.exercise-card-header p,
+.previous-performance {
+  margin-top: 3px;
+  color: #596167;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.exercise-progress {
+  display: inline-grid;
+  min-width: 48px;
+  min-height: 32px;
+  place-items: center;
+  border-radius: 999px;
+  background: #101820;
+  color: #f2c14e;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.set-table-head,
+.compact-set-row {
+  display: grid;
+  grid-template-columns: 44px 58px minmax(68px, 1fr) minmax(56px, 0.8fr) 44px;
+  gap: 6px;
+  align-items: center;
+}
+
+.set-table-head {
+  padding-inline: 6px;
+  color: #687178;
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.compact-set-list {
+  display: grid;
+  gap: 6px;
+}
+
+.compact-set-row {
+  border: 1px solid #ded8c8;
+  border-radius: 8px;
+  background: #fbf7ef;
+  padding: 6px;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.compact-set-row.done {
+  border-color: #8dbd99;
+  background: #edf6ef;
+}
+
+.compact-set-row.invalid {
+  border-color: #a9453b;
+}
+
+.compact-set-row > strong,
+.set-target {
+  text-align: center;
+}
+
+.compact-set-row > strong {
+  font-size: 0.78rem;
+}
+
+.set-target {
+  color: #596167;
+  font-size: 0.75rem;
+  font-weight: 850;
+}
+
+.compact-set-row label {
+  display: block;
+}
+
+.compact-set-row input {
+  min-width: 0;
+  min-height: 38px;
+  padding: 6px;
+  text-align: center;
+}
+
+.set-done-button {
+  width: 40px;
+  min-height: 40px;
+  border: 1px solid #c9c3b4;
+  background: #fffdf7;
+  color: transparent;
+  font-size: 1.15rem;
+}
+
+.set-done-button[aria-pressed="true"] {
+  border-color: #1d6b54;
+  background: #1d6b54;
+  color: #ffffff;
+}
+
+.set-row-error {
+  grid-column: 1 / -1;
+  color: #8b2f27;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.bodybuilding-head,
+.bodybuilding-row {
+  grid-template-columns: 44px 72px minmax(70px, 1fr) 44px;
+}
+
+.exercise-load-field {
+  grid-template-columns: minmax(100px, 1fr) minmax(90px, 0.75fr);
+  align-items: center;
+}
+
+.exercise-details {
+  border-top: 1px solid #ded8c8;
+  padding-top: 8px;
+}
+
+.exercise-details summary,
+.timer-settings summary,
+.session-notes-panel summary {
+  cursor: pointer;
+  color: #3e474d;
+  font-size: 0.8rem;
+  font-weight: 850;
+}
+
+.exercise-details[open] summary,
+.timer-settings[open] summary,
+.session-notes-panel[open] summary {
+  margin-bottom: 10px;
+}
+
+.compact-prescription {
+  margin-bottom: 10px;
+}
+
+.conditioning-prescription {
+  display: grid;
+  gap: 4px;
+  border-radius: 8px;
+  background: #ebe5d8;
+  padding: 10px;
+}
+
+.conditioning-prescription p,
+.conditioning-prescription small {
+  color: #596167;
+}
+
+.conditioning-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.conditioning-raw {
+  max-height: 180px;
+  overflow: auto;
+  border-radius: 8px;
+  background: #101820;
+  color: #fffaf0;
+  padding: 10px;
+  white-space: pre-wrap;
+}
+
+.status-pill.completed {
+  background: #1d6b54;
+}
+
+.session-notes-panel {
+  margin-bottom: 0;
+}
+
+.discard-session-button {
+  justify-self: start;
+  min-height: 38px;
+  background: transparent;
+  color: #8b2f27;
+  font-size: 0.8rem;
+}
+
+.rest-timer-dock {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 25;
+  width: min(940px, 100%);
+  margin: 0 auto;
+  padding: 8px 10px;
+  background: rgba(16, 24, 32, 0.98);
+  box-shadow: 0 -8px 28px rgba(16, 24, 32, 0.28);
+}
+
+.compact-timer-card {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 10px;
+}
+
+.compact-timer-card .timer-heading {
+  min-width: 0;
+}
+
+.compact-timer-card .timer-heading h2,
+.compact-timer-card .timer-context {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timer-face.compact {
+  min-width: 104px;
+  min-height: 56px;
+  padding: 8px;
+  font-size: 2rem;
+}
+
+.compact-timer-card .timer-controls,
+.compact-timer-card .timer-settings {
+  grid-column: 1 / -1;
+}
+
+.timer-controls.compact {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.timer-controls.compact button {
+  min-height: 38px;
+  padding: 6px;
+  font-size: 0.76rem;
+}
+
+.timer-settings-fields {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.completion-summary-card {
+  border-color: #1d6b54;
+  background: #edf6ef;
+}
+
+.completion-summary-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.completion-summary-stats > div {
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.completion-summary-stats span,
+.completion-summary-stats strong {
+  display: block;
+}
+
+.completion-summary-stats span {
+  color: #687178;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.completion-summary-stats strong {
+  margin-top: 3px;
+}
+
 .primary {
   background: #f2c14e;
   color: #101820;
