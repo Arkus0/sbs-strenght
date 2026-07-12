@@ -7,12 +7,14 @@ import {
   createDefaultSetup,
   createEmptySessionLog,
   listSessions,
+  normalizeSessionLogForPlan,
   projectTrainingMax,
   prescribedSetsForLift,
   roundToIncrement,
   sessionId,
   tmOverrideKey
 } from '../src/lib/sbsRtf.js'
+import { materializeSessionInputs, runnerInputKey } from '../src/lib/sessionInputs.js'
 import { specimenTemplateForSession, timerFromSpecimen } from '../src/data/specimenAssistance.js'
 import {
   accessoryCountForLiftCount,
@@ -76,6 +78,66 @@ test('new session logs include a resumable start timestamp', () => {
 
   assert.equal(log.status, 'draft')
   assert.ok(Number.isFinite(Date.parse(log.startedAt)))
+})
+
+test('runner materializes every SBS prescription except AMRAP reps and preserves manual blanks', () => {
+  const setup = readySetup(3)
+  setup.rounding = 2
+  setup.lifts.main_1.trainingMax = 100
+  setup.lifts.main_1.singleAt8Pct = 0.94
+  const plan = buildSessionPlan(template, setup, {}, 1, 1)
+  const normalized = createEmptySessionLog(plan)
+  const initial = materializeSessionInputs(plan, normalized)
+  const squat = initial.log.lifts.main_1
+  const single = squat.sets.find((set) => set.kind === 'single_at8')
+  const work = squat.sets.find((set) => set.kind === 'work')
+  const amrap = squat.sets.find((set) => set.kind === 'amrap')
+
+  assert.equal(initial.log.progressionSemanticsVersion, 2)
+  assert.equal(single.weight, '94')
+  assert.equal(single.reps, '1')
+  assert.equal(work.weight, String(plan.lifts.find((lift) => lift.slotId === 'main_1').weight))
+  assert.equal(work.reps, String(work.targetReps))
+  assert.equal(amrap.weight, String(plan.lifts.find((lift) => lift.slotId === 'main_1').weight))
+  assert.equal(amrap.reps, '')
+
+  work.weight = ''
+  initial.log.runnerInputOrigins[runnerInputKey('main_1', work.id, 'weight')] = 'manual'
+  const reopened = materializeSessionInputs(
+    plan,
+    normalizeSessionLogForPlan(plan, initial.log),
+    initial.log
+  )
+  assert.equal(reopened.log.lifts.main_1.sets.find((set) => set.id === work.id).weight, '')
+})
+
+test('single calibration refreshes prescribed weights but not manual values', () => {
+  const setup = readySetup(3)
+  setup.rounding = 2
+  setup.lifts.main_1.trainingMax = 100
+  setup.lifts.main_1.singleAt8Pct = 0.94
+  const plan = buildSessionPlan(template, setup, {}, 1, 1)
+  const initial = materializeSessionInputs(plan, createEmptySessionLog(plan)).log
+  const squat = initial.lifts.main_1
+  const single = squat.sets.find((set) => set.kind === 'single_at8')
+  const firstWork = squat.sets.find((set) => set.kind === 'work')
+  const secondWork = squat.sets.filter((set) => set.kind === 'work')[1]
+  single.weight = '96'
+  single.done = true
+  single.useForAutoregulation = true
+  initial.runnerInputOrigins[runnerInputKey('main_1', single.id, 'weight')] = 'manual'
+  secondWork.weight = ''
+  initial.runnerInputOrigins[runnerInputKey('main_1', secondWork.id, 'weight')] = 'manual'
+
+  const livePlan = buildSessionPlan(template, setup, { W1D1: initial }, 1, 1)
+  const refreshed = materializeSessionInputs(
+    livePlan,
+    normalizeSessionLogForPlan(livePlan, initial),
+    initial
+  ).log.lifts.main_1.sets
+
+  assert.equal(refreshed.find((set) => set.id === firstWork.id).weight, String(livePlan.lifts.find((lift) => lift.slotId === 'main_1').weight))
+  assert.equal(refreshed.find((set) => set.id === secondWork.id).weight, '')
 })
 
 test('single @8 updates the current session training max and load', () => {

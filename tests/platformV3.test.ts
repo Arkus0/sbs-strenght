@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { recommendAccessoryProgression } from '../src/lib/accessoryProgression'
-import { deriveAnalytics, epleyE1rm } from '../src/lib/analytics'
+import { deriveAnalytics, deriveTrainingMaxOverview, epleyE1rm, trainingMaxHistoryDisplayMode } from '../src/lib/analytics'
 import { generateSchedule, redistributeFutureSessions } from '../src/lib/schedule'
 import { exportV3State, migrateLegacyState, parseStateImport } from '../src/lib/stateV3'
-import { createDefaultSetup } from '../src/lib/sbsRtf.js'
+import { buildSessionPlan, createDefaultSetup, createEmptySessionLog } from '../src/lib/sbsRtf.js'
 import template from '../src/data/sbsRtfTemplate.json'
 
 const performed = (sessionId: string, reps: number[], load = 20) => ({
@@ -51,6 +51,34 @@ test('analytics uses only completed sets and labels Epley estimates', () => {
   assert.equal(result.conditioningCompleted, 1)
 })
 
+test('training max overview uses completed sessions for history and the next appearance for current TM', () => {
+  const setup: any = createDefaultSetup(template)
+  setup.frequency = 3
+  for (const slot of template.defaults.liftSlots) setup.lifts[slot.id].trainingMax = slot.defaultTrainingMax
+  const week1 = buildSessionPlan(template, setup, {}, 1, 1)
+  const log1 = createEmptySessionLog(week1)
+  const amrap = log1.lifts.main_1.sets.find((set: any) => set.kind === 'amrap')
+  amrap.reps = amrap.targetReps + 2
+  amrap.done = true
+  log1.status = 'completed'
+  const schedule: any[] = [
+    { id: '1', programId: 'p', code: 'W1D1', sequenceIndex: 0, week: 1, day: 1, scheduledDate: '2020-01-01', status: 'completed', deload: false, createdAt: '', updatedAt: '', version: 1 },
+    { id: '2', programId: 'p', code: 'W2D1', sequenceIndex: 3, week: 2, day: 1, scheduledDate: '2020-01-08', status: 'planned', deload: false, createdAt: '', updatedAt: '', version: 1 }
+  ]
+
+  const squat = deriveTrainingMaxOverview({ template, setup, schedule, logs: { W1D1: log1 } })
+    .find((lift) => lift.slotId === 'main_1')!
+
+  assert.equal(squat.history.length, 1)
+  assert.equal(squat.history[0].sessionId, 'W1D1')
+  assert.equal(squat.history[0].trainingMax, setup.lifts.main_1.trainingMax)
+  assert.equal(squat.currentSessionId, 'W2D1')
+  assert.ok(Number(squat.currentTrainingMax) > Number(squat.history[0].trainingMax))
+  assert.equal(trainingMaxHistoryDisplayMode(0), 'empty')
+  assert.equal(trainingMaxHistoryDisplayMode(4), 'list')
+  assert.equal(trainingMaxHistoryDisplayMode(5), 'chart')
+})
+
 test('v2 migration preserves draft logs and v3 export round-trips', () => {
   const setup: any = createDefaultSetup(template)
   setup.completedAt = '2026-01-01T00:00:00.000Z'
@@ -65,6 +93,7 @@ test('v2 migration preserves draft logs and v3 export round-trips', () => {
   assert.equal(migrated.logs.W1D1.status, 'draft')
   assert.equal(migrated.schedule.find((session) => session.code === 'W1D1')?.status, 'draft')
   assert.equal(migrated.programs[migrated.activeProgramId].setup.lifts.main_1.trainingMax, template.defaults.liftSlots[0].defaultTrainingMax)
+  migrated.measurements.push({ id: 'weight-1', kind: 'bodyweight', value: 80, unit: 'kg', measuredAt: '2026-07-01T08:00:00.000Z', createdAt: '2026-07-01T08:00:00.000Z', updatedAt: '2026-07-01T08:00:00.000Z', version: 1 })
   const restored = parseStateImport(exportV3State(migrated))
   assert.deepEqual(restored, migrated)
 })

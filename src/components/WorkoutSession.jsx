@@ -7,6 +7,7 @@ import {
   normalizeSessionLogForPlan,
   roundToIncrement
 } from '../lib/sbsRtf.js'
+import { materializeSessionInputs, runnerInputKey, RUNNER_INPUT_VERSION } from '../lib/sessionInputs.js'
 import { primeTimerAudio } from '../lib/timerAudio.js'
 import SessionTimer from './SessionTimer.jsx'
 
@@ -95,7 +96,7 @@ function completedCount(sets) {
   return (sets || []).filter((set) => set.done).length
 }
 
-function MainLiftCard({ lift, liftLog, units, rowError, onSetChange, onToggleSet, onLiftChange, onSingleAutoregulation }) {
+function MainLiftCard({ lift, liftLog, units, rowError, pendingSingleCalibration, onSetChange, onToggleSet, onLiftChange, onApplySingleCalibration, onDismissSingleCalibration }) {
   const sets = liftLog.sets || []
   const singleSet = sets.find((set) => set.kind === 'single_at8')
   return (
@@ -129,7 +130,6 @@ function MainLiftCard({ lift, liftLog, units, rowError, onSetChange, onToggleSet
                   inputMode="decimal"
                   aria-label={`Peso ${set.label} ${lift.name}`}
                   value={numberValue(recordedSetWeight(set))}
-                  placeholder={set.kind === 'single_at8' ? 'Peso real' : `Prescrito ${set.prescribedWeight}`}
                   onChange={(event) => onSetChange(lift.slotId, set.id, { weight: event.target.value })}
                 />
               </label>
@@ -139,7 +139,6 @@ function MainLiftCard({ lift, liftLog, units, rowError, onSetChange, onToggleSet
                   inputMode="numeric"
                   aria-label={`Reps ${set.label} ${lift.name}`}
                   value={numberValue(recordedSetReps(set))}
-                  placeholder={set.kind === 'work' ? `Prescritas ${set.targetReps}` : ''}
                   onChange={(event) => onSetChange(lift.slotId, set.id, { reps: event.target.value })}
                 />
               </label>
@@ -157,22 +156,16 @@ function MainLiftCard({ lift, liftLog, units, rowError, onSetChange, onToggleSet
         })}
       </div>
 
-      {singleSet && (
-        <div className="single-autoregulation-control">
-          <label>
-            <input
-              type="checkbox"
-              checked={Boolean(singleSet.useForAutoregulation)}
-              disabled={!singleSet.done || !(Number(singleSet.weight) > 0)}
-              onChange={(event) => onSingleAutoregulation(lift, singleSet, event.target.checked)}
-            />
-            Usar esta single para autorregular {lift.name}
-          </label>
-          <small>
-            {singleSet.useForAutoregulation
-              ? `${singleSet.weight} ${units} ÷ ${Math.round(lift.singleAt8Pct * 10000) / 100}% → TM ${lift.projection.trainingMax}`
-              : `Opcional. Porcentaje configurado: ${Math.round(lift.singleAt8Pct * 10000) / 100}%. Registrar la single no cambia el TM.`}
-          </small>
+      {singleSet?.done && !singleSet.useForAutoregulation && pendingSingleCalibration === `${lift.slotId}:${singleSet.id}` && (
+        <div className="single-calibration-prompt" role="region" aria-label={`Calibrar el TM de ${lift.name}`}>
+          <div>
+            <strong>¿Calibrar el TM con esta single?</strong>
+            <small>{singleSet.weight} {units} al {Math.round(lift.singleAt8Pct * 10000) / 100}%.</small>
+          </div>
+          <div>
+            <button autoFocus className="primary" onClick={() => onApplySingleCalibration(lift, singleSet)}>Calibrar TM</button>
+            <button onClick={onDismissSingleCalibration}>Mantener TM</button>
+          </div>
         </div>
       )}
 
@@ -410,11 +403,12 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
     bodybuildingPrescription
   )
   const storedLog = logs[plan.id] || {}
+  const materializedInputs = materializeSessionInputs(plan, normalizedLog, logs[plan.id] || null)
   const currentLog = {
-    ...normalizedLog,
+    ...materializedInputs.log,
     lifts: Object.fromEntries(plan.lifts.map((lift) => [
       lift.slotId,
-      { ...normalizedLog.lifts[lift.slotId], singleRpe: storedLog.lifts?.[lift.slotId]?.singleRpe || '' }
+      { ...materializedInputs.log.lifts[lift.slotId], singleRpe: storedLog.lifts?.[lift.slotId]?.singleRpe || '' }
     ])),
     activeSeconds: Number(storedLog.activeSeconds || 0),
     lastActiveAt: storedLog.lastActiveAt,
@@ -428,6 +422,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
   const [restTimer, setRestTimer] = useState(null)
   const [conditioningTimerKey, setConditioningTimerKey] = useState(null)
   const [rowError, setRowError] = useState('')
+  const [pendingSingleCalibration, setPendingSingleCalibration] = useState('')
   const [now, setNow] = useState(Date.now())
   const [resumeNotice, setResumeNotice] = useState(false)
   const activeSecondsRef = useRef(Number(currentLog.activeSeconds || 0))
@@ -442,7 +437,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
 
   useEffect(() => {
     const stored = logs[plan.id]
-    if (!stored) {
+    if (!stored || materializedInputs.needsSync) {
       onLogChange(currentLog)
       return
     }
@@ -460,6 +455,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
     setRestTimer(null)
     setConditioningTimerKey(null)
     setRowError('')
+    setPendingSingleCalibration('')
     setResumeNotice(false)
     const storedSeconds = Number(logs[plan.id]?.activeSeconds || 0)
     const startedAt = Date.parse(logs[plan.id]?.startedAt || '')
@@ -533,10 +529,12 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
   const elapsedSeconds = currentLog.status === 'completed'
     ? Number(currentLog.activeSeconds || currentLog.completionSummary?.durationSeconds || 0)
     : activeSecondsRef.current + (hiddenAtRef.current ? 0 : Math.max(0, (now - activeStartedAtRef.current) / 1000))
+  const restTimerVisible = Boolean(restTimer && !pendingSingleCalibration)
 
-  function updateLift(slotId, patch) {
+  function updateLift(slotId, patch, logPatch = {}) {
     onLogChange({
       ...currentLog,
+      ...logPatch,
       updatedAt: new Date().toISOString(),
       status: currentLog.status || 'draft',
       lifts: updateNested(currentLog.lifts, slotId, patch)
@@ -546,8 +544,10 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
   function updateSet(slotId, setId, patch) {
     const liftLog = currentLog.lifts[slotId] || { sets: [] }
     let changed = null
+    let previous = null
     const sets = liftLog.sets.map((set) => {
       if (set.id !== setId) return set
+      previous = set
       const normalizedPatch = { ...patch }
       if (Object.hasOwn(patch, 'weight') && patch.weight === '') {
         normalizedPatch.done = false
@@ -560,29 +560,44 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
     const derived = {}
     if (changed?.kind === 'single_at8' && Object.hasOwn(patch, 'weight')) derived.singleAt8 = ''
     if (changed?.kind === 'amrap' && Object.hasOwn(patch, 'reps')) derived.lastSetReps = ''
-    updateLift(slotId, { sets, ...derived })
+    const origins = { ...(currentLog.runnerInputOrigins || {}) }
+    for (const field of ['weight', 'reps']) {
+      if (Object.hasOwn(patch, field) && String(previous?.[field] ?? '') !== String(patch[field] ?? '')) {
+        origins[runnerInputKey(slotId, setId, field)] = 'manual'
+      }
+    }
+    updateLift(slotId, { sets, ...derived }, {
+      runnerInputVersion: RUNNER_INPUT_VERSION,
+      runnerInputOrigins: origins
+    })
   }
 
   function setSingleAutoregulation(lift, singleSet, enabled) {
     if (!enabled) {
       updateSet(lift.slotId, singleSet.id, { useForAutoregulation: false })
-      return
+      return true
     }
     const weight = Number(singleSet.weight)
     const percentage = Number(lift.singleAt8Pct)
-    if (!(weight > 0 && percentage > 0)) return
+    if (!(weight > 0 && percentage > 0)) return false
     const workStarted = currentLog.lifts[lift.slotId]?.sets?.some((set) => set.kind !== 'single_at8' && set.done)
     const nextTm = weight / percentage
     const nextWeight = roundToIncrement(nextTm * Number(lift.intensity), setup.rounding)
     const message = `Esta single sustituirá el TM de ${lift.projection.trainingMax} por ${Math.round(nextTm * 1000) / 1000} y la carga de trabajo por ${nextWeight} ${setup.units}. ¿Aplicar?`
-    if ((workStarted || nextWeight !== lift.weight) && !window.confirm(message)) return
+    if (workStarted && !window.confirm(message)) return false
     updateSet(lift.slotId, singleSet.id, { useForAutoregulation: true })
+    return true
+  }
+
+  function applySingleCalibration(lift, singleSet) {
+    if (setSingleAutoregulation(lift, singleSet, true)) setPendingSingleCalibration('')
   }
 
   function toggleLiftSet(lift, set) {
     const errorKey = `${lift.slotId}:${set.id}`
     if (set.done) {
       setRowError('')
+      if (set.kind === 'single_at8') setPendingSingleCalibration('')
       updateSet(lift.slotId, set.id, set.kind === 'single_at8' ? { done: false, useForAutoregulation: false } : { done: false })
       return
     }
@@ -602,6 +617,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
       weight,
       reps
     })
+    if (set.kind === 'single_at8') setPendingSingleCalibration(errorKey)
     setRestTimer({
       key: `${plan.id}:${lift.slotId}:${set.id}:${Date.now()}`,
       suggested: restPreset(set, lift),
@@ -683,7 +699,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
   }
 
   return (
-    <main className={`screen runner-screen simplified-runner ${restTimer ? 'has-rest-timer' : ''}`}>
+    <main className={`screen runner-screen simplified-runner ${restTimerVisible ? 'has-rest-timer' : ''}`}>
       <header className="runner-header simplified-runner-header">
         <button onClick={onBack} aria-label="Volver al inicio">Volver</button>
         <div className="runner-session-title">
@@ -725,10 +741,12 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
             liftLog={currentLog.lifts[lift.slotId] || { sets: [] }}
             units={setup.units}
             rowError={rowError}
+            pendingSingleCalibration={pendingSingleCalibration}
             onSetChange={updateSet}
             onToggleSet={toggleLiftSet}
             onLiftChange={updateLift}
-            onSingleAutoregulation={setSingleAutoregulation}
+            onApplySingleCalibration={applySingleCalibration}
+            onDismissSingleCalibration={() => setPendingSingleCalibration('')}
           />
         ))}
 
@@ -792,7 +810,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
         <button className="discard-session-button" onClick={() => { endingRef.current = true; onDiscard(plan.id) }}>Descartar sesion</button>
       )}
 
-      {restTimer && (
+      {restTimerVisible && (
         <aside className="rest-timer-dock" aria-label="Descanso activo">
           <SessionTimer
             key={restTimer.key}
