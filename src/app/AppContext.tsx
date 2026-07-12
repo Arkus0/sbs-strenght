@@ -3,8 +3,8 @@ import template from '../data/sbsRtfTemplate.json'
 import { buildSessionPlan, isSetupComplete, listSessions, parseSessionId } from '../lib/sbsRtf.js'
 import { loadStateV3, resetV3, saveStateV3 } from '../lib/repository'
 import { generateSchedule, isoLocalDate, reprogramSession, redistributeFutureSessions } from '../lib/schedule'
-import { makeId, parseStateImport } from '../lib/stateV3'
-import type { AppStateV3, CompletionSummary, Measurement, ScheduledSession } from '../types/domain'
+import { parseStateImport } from '../lib/stateV3'
+import type { AppStateV3, CompletionSummary, ScheduledSession } from '../types/domain'
 
 interface AppContextValue {
   state: AppStateV3
@@ -19,7 +19,6 @@ interface AppContextValue {
   reprogram: (id: string, date: string) => void
   redistribute: (fromSequence: number, date: string, weekdays?: number[]) => void
   skipSession: (id: string, reason: string) => void
-  addBodyweight: (value: number) => void
   dismissSummary: () => void
   importState: (text: string) => void
   resetAll: () => Promise<void>
@@ -166,16 +165,6 @@ export function AppStateProvider({ children }: PropsWithChildren): JSX.Element {
       setState(nextState)
     }
 
-    function addBodyweight(value: number): void {
-      if (!(value > 0)) return
-      const now = new Date().toISOString()
-      const measurement: Measurement = {
-        id: makeId(), kind: 'bodyweight', value, unit: setup.units === 'lb' ? 'lb' : 'kg', measuredAt: now,
-        createdAt: now, updatedAt: now, version: 1
-      }
-      setState((current) => current ? { ...current, measurements: [...current.measurements, measurement] } : current)
-    }
-
     return {
       state,
       setup,
@@ -205,7 +194,6 @@ export function AppStateProvider({ children }: PropsWithChildren): JSX.Element {
             : session)
         } : current)
       },
-      addBodyweight,
       dismissSummary() { setState((current) => current ? { ...current, completionSummary: null } : current) },
       importState(text) { setState(parseStateImport(text)) },
       async resetAll() { setState(await resetV3()) },

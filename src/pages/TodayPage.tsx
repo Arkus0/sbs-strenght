@@ -1,5 +1,4 @@
-import { ArrowRight, CalendarClock, Scale, Sparkles, Trophy } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowRight, CalendarClock, Sparkles, Trophy } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAppState } from '../app/AppContext'
 import { bodybuildingForSession, conditioningOptionsForSession } from '../lib/assistanceProgram.js'
@@ -15,8 +14,7 @@ function formatDuration(seconds: number | null): string {
 }
 
 export function TodayPage(): JSX.Element {
-  const { state, setup, addBodyweight, dismissSummary } = useAppState()
-  const [weight, setWeight] = useState('')
+  const { state, setup, dismissSummary } = useAppState()
   const today = isoLocalDate(new Date())
   const target = state.schedule.find((session) => session.status === 'draft') || state.schedule.find((session) => session.status === 'planned')
   const parsed = target ? parseSessionId(target.code) : null
@@ -25,7 +23,7 @@ export function TodayPage(): JSX.Element {
   const conditioning = plan ? conditioningOptionsForSession(plan, bodybuilding, state.logs)[0] : null
   const overdue = state.schedule.filter((session) => ['planned', 'draft'].includes(session.status) && session.scheduledDate < today)
   const thisWeek = state.schedule.filter((session) => sameIsoWeek(session.scheduledDate, today))
-  const analytics = deriveAnalytics({ schedule: state.schedule, logs: state.logs, measurements: state.measurements, liftNames: Object.fromEntries(Object.entries<any>(setup.lifts).map(([id, lift]) => [id, lift.name])) })
+  const analytics = deriveAnalytics({ schedule: state.schedule, logs: state.logs, liftNames: Object.fromEntries(Object.entries<any>(setup.lifts).map(([id, lift]) => [id, lift.name])) })
   const pendingProgressions = bodybuilding.filter((item: any) => ['increase', 'reduce'].includes(item.progressionAction))
   const latestRecord = analytics.records[0]
 
@@ -74,8 +72,6 @@ export function TodayPage(): JSX.Element {
         <article className="action-card"><div className="icon-tile"><Sparkles size={20} /></div><div><span>Próximas progresiones</span><h3>{pendingProgressions.length ? pendingProgressions.map((item: any) => item.name).join(' · ') : 'Sin cambios de carga pendientes'}</h3><p>{pendingProgressions[0]?.recommendation?.reason || 'Las recomendaciones aparecerán cuando haya historial válido.'}</p></div></article>
         <article className="action-card"><div className="icon-tile"><Trophy size={20} /></div><div><span>Último logro</span><h3>{latestRecord ? `${latestRecord.exercise} · ${latestRecord.value}` : 'Aún no hay récords'}</h3><p>{latestRecord ? `${latestRecord.kind.toUpperCase()} en ${latestRecord.sessionId}` : 'Completa sesiones para construir tu historial.'}</p></div></article>
       </section>
-
-      <section className="quick-entry-card"><div className="icon-tile"><Scale size={20} /></div><div><h2>Peso corporal</h2><p>Opcional · ayuda a contextualizar el progreso.</p></div><label><span className="sr-only">Peso corporal</span><input inputMode="decimal" placeholder={`Peso (${setup.units})`} value={weight} onChange={(event) => setWeight(event.target.value)} /></label><button onClick={() => { addBodyweight(Number(weight)); setWeight('') }} disabled={!(Number(weight) > 0)}>Guardar</button></section>
     </main>
   )
 }

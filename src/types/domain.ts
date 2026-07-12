@@ -116,3 +116,19 @@ export interface AnalyticsSnapshot {
   accessorySeries: Record<string, Array<{ sessionId: string; name: string; load: number | null; totalReps: number; atTop: boolean }>>
   records: Array<{ id: string; kind: 'e1rm' | 'load' | 'reps'; exercise: string; value: number; sessionId: string }>
 }
+
+export interface TrainingMaxHistoryPoint {
+  sessionId: string
+  week: number
+  day: number
+  trainingMax: number | null
+}
+
+export interface TrainingMaxOverview {
+  slotId: string
+  name: string
+  label: string
+  currentTrainingMax: number | null
+  currentSessionId: string | null
+  history: TrainingMaxHistoryPoint[]
+}

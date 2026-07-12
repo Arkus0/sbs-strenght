@@ -1,4 +1,5 @@
-import type { AnalyticsSnapshot, Measurement, ScheduledSession } from '../types/domain'
+import type { AnalyticsSnapshot, Measurement, ScheduledSession, TrainingMaxOverview } from '../types/domain'
+import { buildSessionPlan, parseSessionId, projectTrainingMax, requiredSlotIds } from './sbsRtf.js'
 
 export function epleyE1rm(weight: unknown, reps: unknown): number | null {
   const w = Number(weight)
@@ -114,4 +115,70 @@ export function deriveAnalytics({
     accessorySeries,
     records: records.slice(-20).reverse()
   }
+}
+
+export function deriveTrainingMaxOverview({
+  template,
+  setup,
+  schedule,
+  logs
+}: {
+  template: any
+  setup: Record<string, any>
+  schedule: ScheduledSession[]
+  logs: Record<string, any>
+}): TrainingMaxOverview[] {
+  const slotIds = requiredSlotIds(template, setup)
+  const orderedSchedule = [...schedule].sort((a, b) => a.sequenceIndex - b.sequenceIndex)
+
+  return slotIds.map((slotId: string) => {
+    const history = orderedSchedule.flatMap((session) => {
+      if (logs[session.code]?.status !== 'completed') return []
+      const parsed = parseSessionId(session.code)
+      if (!parsed) return []
+      const lift = buildSessionPlan(template, setup, logs, parsed.week, parsed.day)?.lifts
+        .find((entry: any) => entry.slotId === slotId)
+      if (!lift) return []
+      return [{
+        sessionId: session.code,
+        week: session.week,
+        day: session.day,
+        trainingMax: Number(lift.projection?.trainingMax) || null
+      }]
+    })
+
+    let currentTrainingMax: number | null = null
+    let currentSessionId: string | null = null
+    for (const session of orderedSchedule) {
+      if (session.status === 'completed' || session.status === 'skipped' || logs[session.code]?.status === 'completed') continue
+      const parsed = parseSessionId(session.code)
+      if (!parsed) continue
+      const lift = buildSessionPlan(template, setup, logs, parsed.week, parsed.day)?.lifts
+        .find((entry: any) => entry.slotId === slotId)
+      if (!lift) continue
+      currentTrainingMax = Number(lift.projection?.trainingMax) || null
+      currentSessionId = session.code
+      break
+    }
+
+    if (currentSessionId === null) {
+      const finalProjection = projectTrainingMax(template, setup, logs, slotId, Number.MAX_SAFE_INTEGER, 0)
+      currentTrainingMax = Number(finalProjection.trainingMax) || null
+    }
+
+    const liftSetup = setup.lifts[slotId] || {}
+    return {
+      slotId,
+      name: liftSetup.name || slotId,
+      label: liftSetup.label || '',
+      currentTrainingMax,
+      currentSessionId,
+      history
+    }
+  })
+}
+
+export function trainingMaxHistoryDisplayMode(count: number): 'empty' | 'list' | 'chart' {
+  if (count <= 0) return 'empty'
+  return count <= 4 ? 'list' : 'chart'
 }
