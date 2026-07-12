@@ -5,7 +5,7 @@ import { bodybuildingForSession } from '../src/lib/assistanceProgram.js'
 import { deriveAnalytics, deriveTrainingMaxOverview, epleyE1rm, trainingMaxHistoryDisplayMode } from '../src/lib/analytics'
 import { deriveCompletionImpact } from '../src/lib/sessionImpact'
 import { generateSchedule, redistributeFutureSessions } from '../src/lib/schedule'
-import { exportV3State, migrateLegacyState, parseStateImport } from '../src/lib/stateV3'
+import { createFreshState, exportV3State, migrateLegacyState, normalizeV3State, parseStateImport } from '../src/lib/stateV3'
 import { buildSessionPlan, createDefaultSetup, createEmptySessionLog, listSessions } from '../src/lib/sbsRtf.js'
 import template from '../src/data/sbsRtfTemplate.json'
 
@@ -186,6 +186,19 @@ test('v2 migration preserves draft logs and v3 export round-trips', () => {
   migrated.measurements.push({ id: 'weight-1', kind: 'bodyweight', value: 80, unit: 'kg', measuredAt: '2026-07-01T08:00:00.000Z', createdAt: '2026-07-01T08:00:00.000Z', updatedAt: '2026-07-01T08:00:00.000Z', version: 1 })
   const restored = parseStateImport(exportV3State(migrated))
   assert.deepEqual(restored, migrated)
+})
+
+test('existing v3 profiles receive local timer feedback defaults without a schema bump', () => {
+  const existing = createFreshState() as any
+  delete existing.profile.timerPreferences
+  const normalized = normalizeV3State(existing)
+  assert.deepEqual(normalized.profile.timerPreferences, {
+    soundEnabled: true,
+    volume: 1,
+    vibrationEnabled: true,
+    visualAlertEnabled: true
+  })
+  assert.equal(normalized.schemaVersion, 3)
 })
 
 test('completed legacy progression entries are upgraded once without losing values', () => {

@@ -27,7 +27,7 @@ function RouteScrollReset(): null {
 function WorkoutRoute(): JSX.Element {
   const { sessionId = '' } = useParams()
   const navigate = useNavigate()
-  const { state, setup, updateLog, completeLog, discardLog } = useAppState()
+  const { state, setup, updateLog, completeLog, discardLog, setTimerPreferences } = useAppState()
   const scheduled = state.schedule.find((session) => session.id === sessionId || session.code === sessionId)
   const selected = parseSessionId(scheduled?.code || '')
   if (!scheduled || !selected) return <Navigate to="/calendario" replace />
@@ -38,6 +38,8 @@ function WorkoutRoute(): JSX.Element {
       setup={setup}
       logs={state.logs}
       selected={selected}
+      timerPreferences={state.profile.timerPreferences}
+      onTimerPreferencesChange={setTimerPreferences}
       onLogChange={updateLog}
       onDiscard={async (code: string) => {
         if (!window.confirm('¿Descartar la sesión en curso? Se perderá el borrador local.')) return

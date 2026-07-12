@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { nextTimerCue, timerCueSchedule } from '../src/lib/timerAudio.js'
+import { nextTimerCue, timerAudioPlan, timerCueSchedule } from '../src/lib/timerAudio.js'
 
 test('countdown timers schedule halfway, warning, countdown and final cues', () => {
   assert.deepEqual(
@@ -37,4 +37,22 @@ test('timer cues fire once when their threshold is crossed', () => {
 
 test('a throttled timer jumping to zero emits only the final cue', () => {
   assert.equal(nextTimerCue(120, 65, 0, new Set()).id, 'final')
+})
+
+test('audio cues are scheduled from the audio clock and skip consumed thresholds', () => {
+  assert.deepEqual(
+    timerAudioPlan(120, 65, new Set()).map((cue) => [cue.id, cue.delaySeconds]),
+    [
+      ['halfway', 5],
+      ['warning-10', 55],
+      ['countdown-3', 62],
+      ['countdown-2', 63],
+      ['countdown-1', 64],
+      ['final', 65]
+    ]
+  )
+  assert.deepEqual(
+    timerAudioPlan(120, 9, new Set(['halfway', 'warning-10'])).map((cue) => cue.id),
+    ['countdown-3', 'countdown-2', 'countdown-1', 'final']
+  )
 })

@@ -9,6 +9,8 @@ import {
 } from '../lib/sbsRtf.js'
 import { materializeSessionInputs, runnerInputKey, RUNNER_INPUT_VERSION } from '../lib/sessionInputs.js'
 import { primeTimerAudio } from '../lib/timerAudio.js'
+import { createActiveRestTimer, normalizeActiveRestTimer } from '../lib/timerState.js'
+import { useScreenWakeLock } from '../hooks/useScreenWakeLock.ts'
 import SessionTimer from './SessionTimer.jsx'
 
 function numberValue(value) {
@@ -312,7 +314,9 @@ function ConditioningCard({
   onStart,
   onSkip,
   onComplete,
-  onUpdate
+  onUpdate,
+  timerPreferences,
+  onTimerPreferencesChange
 }) {
   const selected = options.find((option) => option.id === selectedId) || options[0] || null
   if (!selected) return null
@@ -359,6 +363,8 @@ function ConditioningCard({
               context={selected.title}
               suggested={selected.timerPreset}
               autoStartKey={timerKey}
+              preferences={timerPreferences}
+              onPreferencesChange={onTimerPreferencesChange}
             />
           )}
           <div className="inline-fields">
@@ -391,7 +397,7 @@ function ConditioningCard({
   )
 }
 
-export default function WorkoutSession({ setup, logs, selected, onLogChange, onDiscard, onBack, onComplete }) {
+export default function WorkoutSession({ setup, logs, selected, timerPreferences, onTimerPreferencesChange, onLogChange, onDiscard, onBack, onComplete }) {
   const plan = buildSessionPlan(template, setup, logs, selected.week, selected.day)
   const generatedBodybuilding = bodybuildingForSession(setup, plan, logs)
   const bodybuildingPrescription = logs[plan.id]?.status === 'completed' && logs[plan.id]?.bodybuilding?.length
@@ -413,13 +419,14 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
     activeSeconds: Number(storedLog.activeSeconds || 0),
     lastActiveAt: storedLog.lastActiveAt,
     sessionRpe: storedLog.sessionRpe || '',
-    completionSummary: storedLog.completionSummary
+    completionSummary: storedLog.completionSummary,
+    activeRestTimer: normalizeActiveRestTimer(storedLog.activeRestTimer)
   }
   const conditioningOptions = conditioningOptionsForSession(plan, bodybuildingPrescription, logs)
   const savedConditioningId = currentLog.conditioning?.optionId || ''
   const firstConditioningId = conditioningOptions[0]?.id || ''
   const [selectedConditioningId, setSelectedConditioningId] = useState(savedConditioningId || firstConditioningId)
-  const [restTimer, setRestTimer] = useState(null)
+  const [restTimer, setRestTimer] = useState(() => normalizeActiveRestTimer(storedLog.activeRestTimer))
   const [conditioningTimerKey, setConditioningTimerKey] = useState(null)
   const [rowError, setRowError] = useState('')
   const [pendingSingleCalibration, setPendingSingleCalibration] = useState('')
@@ -431,6 +438,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
   const endingRef = useRef(false)
   const logRef = useRef(currentLog)
   const onLogChangeRef = useRef(onLogChange)
+  const wakeLock = useScreenWakeLock(currentLog.status !== 'completed')
 
   useEffect(() => { logRef.current = currentLog })
   useEffect(() => { onLogChangeRef.current = onLogChange }, [onLogChange])
@@ -452,7 +460,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
   }, [firstConditioningId, plan.id, savedConditioningId])
 
   useEffect(() => {
-    setRestTimer(null)
+    setRestTimer(normalizeActiveRestTimer(logs[plan.id]?.activeRestTimer))
     setConditioningTimerKey(null)
     setRowError('')
     setPendingSingleCalibration('')
@@ -541,7 +549,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
     })
   }
 
-  function updateSet(slotId, setId, patch) {
+  function updateSet(slotId, setId, patch, logPatch = {}) {
     const liftLog = currentLog.lifts[slotId] || { sets: [] }
     let changed = null
     let previous = null
@@ -567,6 +575,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
       }
     }
     updateLift(slotId, { sets, ...derived }, {
+      ...logPatch,
       runnerInputVersion: RUNNER_INPUT_VERSION,
       runnerInputOrigins: origins
     })
@@ -611,31 +620,35 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
       return
     }
     setRowError('')
-    primeTimerAudio()
+    primeTimerAudio(timerPreferences.volume)
+    const suggestedRest = restPreset(set, lift)
+    const timer = createActiveRestTimer({
+      id: `${plan.id}:${lift.slotId}:${set.id}:${Date.now()}`,
+      label: suggestedRest.label,
+      context: `${lift.name} · ${set.label}`,
+      mode: suggestedRest.mode,
+      durationSeconds: suggestedRest.seconds
+    })
     updateSet(lift.slotId, set.id, {
       done: true,
       weight,
       reps
-    })
+    }, { activeRestTimer: timer })
     if (set.kind === 'single_at8') setPendingSingleCalibration(errorKey)
-    setRestTimer({
-      key: `${plan.id}:${lift.slotId}:${set.id}:${Date.now()}`,
-      suggested: restPreset(set, lift),
-      context: `${lift.name} · ${set.label}`
-    })
+    setRestTimer(timer)
   }
 
-  function updateBodybuilding(exerciseIndex, patch) {
+  function updateBodybuilding(exerciseIndex, patch, logPatch = {}) {
     const bodybuilding = [...currentLog.bodybuilding]
     bodybuilding[exerciseIndex] = { ...bodybuilding[exerciseIndex], ...patch }
-    onLogChange({ ...currentLog, bodybuilding, updatedAt: new Date().toISOString() })
+    onLogChange({ ...currentLog, ...logPatch, bodybuilding, updatedAt: new Date().toISOString() })
   }
 
-  function updateBodybuildingSet(exerciseIndex, setIndex, patch) {
+  function updateBodybuildingSet(exerciseIndex, setIndex, patch, logPatch = {}) {
     const item = currentLog.bodybuilding[exerciseIndex]
     const sets = [...item.sets]
     sets[setIndex] = { ...sets[setIndex], ...patch }
-    updateBodybuilding(exerciseIndex, { sets })
+    updateBodybuilding(exerciseIndex, { sets }, logPatch)
   }
 
   function toggleBodybuildingSet(exerciseIndex, setIndex) {
@@ -652,13 +665,15 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
       return
     }
     setRowError('')
-    primeTimerAudio()
-    updateBodybuildingSet(exerciseIndex, setIndex, { done: true })
-    setRestTimer({
-      key: `${plan.id}:${item.slotKey}:${set.id}:${Date.now()}`,
-      suggested: { label: 'Descanso bodybuilding 2:00', seconds: 120, mode: 'countdown' },
-      context: `${item.name} · Serie ${setIndex + 1}`
+    primeTimerAudio(timerPreferences.volume)
+    const timer = createActiveRestTimer({
+      id: `${plan.id}:${item.slotKey}:${set.id}:${Date.now()}`,
+      label: 'Descanso bodybuilding 2:00',
+      context: `${item.name} · Serie ${setIndex + 1}`,
+      durationSeconds: 120
     })
+    updateBodybuildingSet(exerciseIndex, setIndex, { done: true }, { activeRestTimer: timer })
+    setRestTimer(timer)
   }
 
   function updateConditioning(patch) {
@@ -670,7 +685,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
   }
 
   function startConditioning(option) {
-    primeTimerAudio()
+    primeTimerAudio(timerPreferences.volume)
     setSelectedConditioningId(option.id)
     updateConditioning({ optionId: option.id, status: 'selected' })
     setConditioningTimerKey(`${plan.id}:conditioning:${Date.now()}`)
@@ -685,6 +700,7 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
     const completedLog = {
       ...currentLog,
       status: 'completed',
+      activeRestTimer: null,
       activeSeconds: finalActiveSeconds,
       completedAt,
       updatedAt: completedAt
@@ -697,6 +713,26 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
       exerciseCount: plan.lifts.length + currentLog.bodybuilding.length + (currentLog.conditioning.status === 'completed' ? 1 : 0)
     })
   }
+
+  function persistRestTimer(activeRestTimer) {
+    const timestamp = new Date().toISOString()
+    const nextLog = { ...logRef.current, activeRestTimer, updatedAt: timestamp }
+    logRef.current = nextLog
+    onLogChangeRef.current(nextLog)
+  }
+
+  function clearRestTimer() {
+    setRestTimer(null)
+    persistRestTimer(null)
+  }
+
+  const wakeLockLabel = {
+    active: 'Pantalla activa',
+    requesting: 'Activando pantalla siempre encendida',
+    released: 'Pantalla temporalmente liberada',
+    unsupported: 'Wake lock no compatible',
+    error: 'Wake lock no disponible'
+  }[wakeLock.status]
 
   return (
     <main className={`screen runner-screen simplified-runner ${restTimerVisible ? 'has-rest-timer' : ''}`}>
@@ -711,6 +747,14 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
             {elapsedSeconds === null ? '--:--' : formatDuration(elapsedSeconds)}
           </span>
           <span className="autosave-state" title="Guardado local automático">Guardado</span>
+          <span
+            className={`wake-lock-status ${wakeLock.status}`}
+            role="status"
+            aria-label={wakeLockLabel}
+            title={wakeLock.status === 'active' ? 'La pantalla se mantendrá encendida' : wakeLockLabel}
+          >
+            {wakeLock.status === 'active' ? 'Pantalla activa' : 'Pantalla…'}
+          </span>
           <button className="primary finish-session-button" disabled={currentLog.status === 'completed'} onClick={finishSession}>
             {currentLog.status === 'completed' ? 'Completada' : 'Finalizar'}
           </button>
@@ -725,6 +769,13 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
         <progress max="100" value={progressPct}>{progressPct}%</progress>
         <p>{plan.deload ? 'Deload' : 'RTF'} · Los singles y el conditioning son opcionales.</p>
       </section>
+
+      {(wakeLock.status === 'error' || wakeLock.status === 'unsupported') && (
+        <div className="wake-lock-warning" role="alert">
+          <span>{wakeLock.status === 'unsupported' ? 'Este navegador no permite mantener la pantalla encendida.' : 'No se pudo mantener la pantalla encendida; puede deberse al ahorro de batería.'}</span>
+          {wakeLock.status === 'error' && <button onClick={() => void wakeLock.retry()}>Reintentar</button>}
+        </div>
+      )}
 
       {resumeNotice && (
         <div className="resume-notice" role="status">
@@ -773,6 +824,8 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
           onSkip={() => updateConditioning({ optionId: selectedConditioningId, status: 'skipped' })}
           onComplete={() => updateConditioning({ optionId: selectedConditioningId, status: 'completed' })}
           onUpdate={updateConditioning}
+          timerPreferences={timerPreferences}
+          onTimerPreferencesChange={onTimerPreferencesChange}
         />
       </section>
 
@@ -813,14 +866,17 @@ export default function WorkoutSession({ setup, logs, selected, onLogChange, onD
       {restTimerVisible && (
         <aside className="rest-timer-dock" aria-label="Descanso activo">
           <SessionTimer
-            key={restTimer.key}
+            key={restTimer.id}
             embedded
             compact
             title="Descanso"
             context={restTimer.context}
-            suggested={restTimer.suggested}
-            autoStartKey={restTimer.key}
-            onSkip={() => setRestTimer(null)}
+            suggested={{ label: restTimer.label, seconds: restTimer.durationSeconds, mode: restTimer.mode }}
+            initialState={restTimer}
+            preferences={timerPreferences}
+            onPreferencesChange={onTimerPreferencesChange}
+            onStateChange={persistRestTimer}
+            onSkip={clearRestTimer}
           />
         </aside>
       )}

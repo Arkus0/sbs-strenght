@@ -7,6 +7,13 @@ import type { AppStateV3, Profile, Program, ScheduledSession } from '../types/do
 export const V3_DB_NAME = 'sbs-strength-v3'
 export const V3_SCHEMA_VERSION = 3 as const
 
+export const DEFAULT_TIMER_PREFERENCES = {
+  soundEnabled: true,
+  volume: 1,
+  vibrationEnabled: true,
+  visualAlertEnabled: true
+} as const
+
 const syncSchema = z.object({
   enabled: z.boolean(),
   userId: z.string().nullable(),
@@ -26,6 +33,12 @@ export const appStateV3Schema = z.object({
     timezone: z.string(),
     weekStartsOn: z.literal(1),
     theme: z.enum(['system', 'light', 'dark']),
+    timerPreferences: z.object({
+      soundEnabled: z.boolean(),
+      volume: z.number().min(0).max(1),
+      vibrationEnabled: z.boolean(),
+      visualAlertEnabled: z.boolean()
+    }).default(DEFAULT_TIMER_PREFERENCES),
     preferredWeekdays: z.array(z.number().int().min(0).max(6)),
     createdAt: z.string(),
     updatedAt: z.string(),
@@ -111,6 +124,7 @@ export function createFreshState(): AppStateV3 {
     timezone: timezone(),
     weekStartsOn: 1,
     theme: 'system',
+    timerPreferences: { ...DEFAULT_TIMER_PREFERENCES },
     preferredWeekdays,
     createdAt: now,
     updatedAt: now,
@@ -246,6 +260,7 @@ export function migrateLegacyState(input: unknown): AppStateV3 {
     timezone: timezone(),
     weekStartsOn: 1,
     theme: 'system',
+    timerPreferences: { ...DEFAULT_TIMER_PREFERENCES },
     preferredWeekdays,
     createdAt: now,
     updatedAt: now,

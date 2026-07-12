@@ -1,5 +1,12 @@
 let audioContext = null
 let masterGain = null
+let compressor = null
+let resumePromise = null
+
+function clampVolume(value) {
+  const number = Number(value)
+  return Number.isFinite(number) ? Math.min(1, Math.max(0, number)) : 1
+}
 
 function timerAudioContext() {
   if (typeof window === 'undefined') return null
@@ -8,77 +15,136 @@ function timerAudioContext() {
   if (!audioContext) {
     audioContext = new AudioContext()
     masterGain = audioContext.createGain()
-    masterGain.gain.value = 0.72
-    masterGain.connect(audioContext.destination)
+    compressor = audioContext.createDynamicsCompressor()
+    compressor.threshold.value = -18
+    compressor.knee.value = 18
+    compressor.ratio.value = 8
+    compressor.attack.value = 0.003
+    compressor.release.value = 0.2
+    masterGain.gain.value = 1
+    masterGain.connect(compressor)
+    compressor.connect(audioContext.destination)
   }
   return audioContext
 }
 
-export function primeTimerAudio() {
+function setMasterVolume(volume) {
+  if (masterGain) masterGain.gain.value = clampVolume(volume)
+}
+
+export async function primeTimerAudio(volume = 1) {
   try {
     const context = timerAudioContext()
-    if (!context) return
-    if (context.state === 'suspended') context.resume().catch(() => {})
+    if (!context) return null
+    setMasterVolume(volume)
+    if (context.state === 'suspended') {
+      resumePromise ||= context.resume()
+        .catch(() => null)
+        .finally(() => { resumePromise = null })
+      await resumePromise
+    }
+    return context.state === 'running' ? context : null
   } catch {
-    // Audio and vibration are best-effort in browser/PWA mode.
+    return null
   }
 }
 
-function tone(context, { at = 0, duration = 0.12, frequency, volume = 0.5, type = 'square' }) {
+export function timerAudioContextState() {
+  try {
+    return timerAudioContext()?.state || 'unavailable'
+  } catch {
+    return 'unavailable'
+  }
+}
+
+function tone(context, { startAt, duration = 0.18, frequency, volume = 0.7, type = 'square' }) {
   const oscillator = context.createOscillator()
   const gain = context.createGain()
-  const startAt = context.currentTime + at
   const endAt = startAt + duration
   oscillator.type = type
   oscillator.frequency.setValueAtTime(frequency, startAt)
   gain.gain.setValueAtTime(0.001, startAt)
-  gain.gain.exponentialRampToValueAtTime(volume, startAt + 0.012)
+  gain.gain.exponentialRampToValueAtTime(Math.max(0.01, volume), startAt + 0.014)
+  gain.gain.setValueAtTime(Math.max(0.01, volume), Math.max(startAt + 0.015, endAt - 0.045))
   gain.gain.exponentialRampToValueAtTime(0.001, endAt)
   oscillator.connect(gain)
   gain.connect(masterGain)
   oscillator.start(startAt)
-  oscillator.stop(endAt + 0.02)
+  oscillator.stop(endAt + 0.025)
+  return oscillator
 }
 
 const CUES = {
   halfway: {
     tones: [
-      { frequency: 660, duration: 0.11, volume: 0.46 },
-      { frequency: 880, at: 0.15, duration: 0.11, volume: 0.5 }
+      { frequency: 720, duration: 0.18, volume: 0.62, type: 'triangle' },
+      { frequency: 980, at: 0.2, duration: 0.2, volume: 0.68 }
     ],
-    vibration: [70, 55, 70]
+    vibration: [90, 60, 90]
   },
   warning: {
     tones: [
-      { frequency: 780, duration: 0.13, volume: 0.52 },
-      { frequency: 780, at: 0.18, duration: 0.13, volume: 0.52 }
+      { frequency: 880, duration: 0.2, volume: 0.7 },
+      { frequency: 880, at: 0.26, duration: 0.2, volume: 0.7 }
     ],
-    vibration: [90, 70, 90]
+    vibration: [120, 80, 120]
   },
   countdown: {
-    tones: [{ frequency: 940, duration: 0.14, volume: 0.58 }],
-    vibration: [100]
+    tones: [
+      { frequency: 1050, duration: 0.22, volume: 0.76 },
+      { frequency: 1550, duration: 0.16, volume: 0.42, type: 'triangle' }
+    ],
+    vibration: [130]
   },
   final: {
     tones: [
-      { frequency: 1040, duration: 0.2, volume: 0.66 },
-      { frequency: 1320, at: 0.24, duration: 0.32, volume: 0.72 }
+      { frequency: 980, duration: 0.28, volume: 0.82 },
+      { frequency: 1480, duration: 0.25, volume: 0.62, type: 'triangle' },
+      { frequency: 1180, at: 0.34, duration: 0.3, volume: 0.86 },
+      { frequency: 1760, at: 0.34, duration: 0.27, volume: 0.66, type: 'triangle' },
+      { frequency: 1380, at: 0.72, duration: 0.42, volume: 0.9 },
+      { frequency: 1960, at: 0.72, duration: 0.36, volume: 0.7, type: 'triangle' }
     ],
-    vibration: [220, 90, 220, 90, 360]
+    vibration: [320, 110, 320, 110, 520]
   }
 }
 
-export function playTimerCue(type) {
+function scheduleCue(context, type, delaySeconds, nodes) {
+  const cue = CUES[type]
+  if (!cue) return
+  const base = context.currentTime + Math.max(0.025, delaySeconds)
+  for (const definition of cue.tones) {
+    nodes.push(tone(context, { ...definition, startAt: base + (definition.at || 0) }))
+  }
+}
+
+export function playTimerVibration(type, enabled = true) {
   try {
+    if (!enabled) return
     const cue = CUES[type]
-    const context = timerAudioContext()
-    if (!cue || !context) return
-    const play = () => cue.tones.forEach((definition) => tone(context, definition))
-    if (context.state === 'suspended') context.resume().then(play).catch(() => {})
-    else play()
-    navigator.vibrate?.(cue.vibration)
+    if (cue) navigator.vibrate?.(cue.vibration)
   } catch {
-    // Audio and vibration are best-effort in browser/PWA mode.
+    // Vibration is best-effort in browser/PWA mode.
+  }
+}
+
+export function playTimerCue(type, { soundEnabled = true, volume = 1 } = {}) {
+  const nodes = []
+  let cancelled = false
+  const ready = soundEnabled
+    ? primeTimerAudio(volume).then((context) => {
+        if (!context || cancelled) return
+        scheduleCue(context, type, 0, nodes)
+      })
+    : Promise.resolve()
+  return {
+    ready,
+    cancel() {
+      cancelled = true
+      for (const node of nodes) {
+        try { node.stop() } catch { /* It may already have ended. */ }
+      }
+    }
   }
 }
 
@@ -96,6 +162,35 @@ export function timerCueSchedule(duration) {
   }
   schedule.push({ id: 'final', at: 0, type: 'final' })
   return schedule.sort((a, b) => b.at - a.at)
+}
+
+export function timerAudioPlan(duration, remaining, firedCueIds = new Set()) {
+  const fired = firedCueIds instanceof Set ? firedCueIds : new Set(firedCueIds)
+  return timerCueSchedule(duration)
+    .filter((cue) => !fired.has(cue.id) && remaining > cue.at)
+    .map((cue) => ({ ...cue, delaySeconds: remaining - cue.at }))
+}
+
+export function scheduleTimerAudio({ duration, remaining, firedCueIds = new Set(), soundEnabled = true, volume = 1 }) {
+  const nodes = []
+  let cancelled = false
+  const plan = timerAudioPlan(duration, remaining, firedCueIds)
+  const ready = soundEnabled
+    ? primeTimerAudio(volume).then((context) => {
+        if (!context || cancelled) return
+        for (const cue of plan) scheduleCue(context, cue.type, cue.delaySeconds, nodes)
+      })
+    : Promise.resolve()
+  return {
+    plan,
+    ready,
+    cancel() {
+      cancelled = true
+      for (const node of nodes) {
+        try { node.stop() } catch { /* It may already have ended. */ }
+      }
+    }
+  }
 }
 
 export function nextTimerCue(duration, previousRemaining, remaining, firedCueIds = new Set()) {

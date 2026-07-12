@@ -5,7 +5,7 @@ import { loadStateV3, resetV3, saveStateV3 } from '../lib/repository'
 import { generateSchedule, isoLocalDate, reprogramSession, redistributeFutureSessions } from '../lib/schedule'
 import { parseStateImport } from '../lib/stateV3'
 import { deriveCompletionImpact } from '../lib/sessionImpact'
-import type { AppStateV3, CompletionSummary, ScheduledSession } from '../types/domain'
+import type { AppStateV3, CompletionSummary, ScheduledSession, TimerPreferences } from '../types/domain'
 
 interface AppContextValue {
   state: AppStateV3
@@ -24,6 +24,7 @@ interface AppContextValue {
   importState: (text: string) => void
   resetAll: () => Promise<void>
   setTheme: (theme: AppStateV3['profile']['theme']) => void
+  setTimerPreferences: (preferences: TimerPreferences) => void
   setPreferredWeekdays: (weekdays: number[]) => void
   replaceState: (state: AppStateV3) => void
   patchSync: (patch: Partial<AppStateV3['sync']>) => void
@@ -209,6 +210,17 @@ export function AppStateProvider({ children }: PropsWithChildren): JSX.Element {
       async resetAll() { setState(await resetV3()) },
       setTheme(theme) {
         setState((current) => current ? { ...current, profile: { ...current.profile, theme, updatedAt: new Date().toISOString(), version: current.profile.version + 1 } } : current)
+      },
+      setTimerPreferences(timerPreferences) {
+        setState((current) => current ? {
+          ...current,
+          profile: {
+            ...current.profile,
+            timerPreferences,
+            updatedAt: new Date().toISOString(),
+            version: current.profile.version + 1
+          }
+        } : current)
       },
       setPreferredWeekdays(weekdays) {
         setState((current) => current ? { ...current, profile: { ...current.profile, preferredWeekdays: weekdays, updatedAt: new Date().toISOString(), version: current.profile.version + 1 } } : current)

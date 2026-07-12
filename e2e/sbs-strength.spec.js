@@ -82,6 +82,31 @@ async function logFor(page, code) {
   }, code)
 }
 
+async function installWakeLockMock(page) {
+  await page.evaluate(() => {
+    window.__wakeLockEvents = []
+    Object.defineProperty(navigator, 'wakeLock', {
+      configurable: true,
+      value: {
+        async request() {
+          window.__wakeLockEvents.push('request')
+          const listeners = []
+          return {
+            released: false,
+            addEventListener(type, listener) { if (type === 'release') listeners.push(listener) },
+            async release() {
+              if (this.released) return
+              this.released = true
+              window.__wakeLockEvents.push('release')
+              for (const listener of listeners) listener()
+            }
+          }
+        }
+      }
+    })
+  })
+}
+
 test.beforeEach(async ({ page }) => clearApp(page))
 
 test('dev server renders meaningful content without browser errors', async ({ page }) => {
@@ -133,6 +158,41 @@ test('autosaves main lifts, bodybuilding and conditioning in IndexedDB', async (
   await expect(page.getByLabel('Reps Serie 5 AMRAP Squat')).toHaveValue('12')
   await expect(page.locator('.bodybuilding-exercise-card').first().getByLabel(/Carga|Lastre/)).toHaveValue('50')
   await expect(page.getByLabel('Resultado conditioning')).toHaveValue('5 rondas')
+})
+
+test('rest timer survives reload and persists feedback preferences', async ({ page }) => {
+  await completeOnboarding(page)
+  await openNextSession(page)
+  await page.getByRole('button', { name: 'Completar Serie 1 Squat' }).click()
+  await expect(page.getByLabel('Descanso activo')).toBeVisible()
+  await expect(page.getByRole('timer')).toContainText('02:')
+  await page.getByText('Ajustes del timer').click()
+  await page.getByLabel('Volumen de avisos').fill('65')
+  await page.waitForTimeout(300)
+
+  const beforeReload = await logFor(page, 'W1D1')
+  expect(beforeReload.activeRestTimer.phase).toBe('running')
+  expect(beforeReload.activeRestTimer.deadlineAt).toBeTruthy()
+  await page.reload()
+
+  await expect(page.getByLabel('Descanso activo')).toBeVisible()
+  await expect(page.getByRole('timer')).toContainText('02:')
+  await page.getByText('Ajustes del timer').click()
+  await expect(page.getByLabel('Volumen de avisos')).toHaveValue('65')
+  await page.getByLabel('Descanso activo').getByRole('button', { name: 'Omitir' }).click()
+  await page.waitForTimeout(250)
+  expect((await logFor(page, 'W1D1')).activeRestTimer).toBeNull()
+})
+
+test('wake lock is acquired for the session and released when leaving it', async ({ page }) => {
+  await completeOnboarding(page)
+  await installWakeLockMock(page)
+  await openNextSession(page)
+  await expect(page.getByText('Pantalla activa', { exact: true })).toBeVisible()
+  await expect.poll(() => page.evaluate(() => window.__wakeLockEvents)).toContain('request')
+  await page.getByRole('button', { name: 'Volver al inicio' }).click()
+  await expect(page.getByRole('heading', { name: 'Hoy' })).toBeVisible()
+  await expect.poll(() => page.evaluate(() => window.__wakeLockEvents)).toContain('release')
 })
 
 test('accessory engine explains and applies an increase after reaching the top', async ({ page }) => {

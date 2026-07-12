@@ -1,6 +1,28 @@
 export type ThemePreference = 'system' | 'light' | 'dark'
 export type SessionStatus = 'planned' | 'draft' | 'completed' | 'skipped'
 
+export interface TimerPreferences {
+  soundEnabled: boolean
+  volume: number
+  vibrationEnabled: boolean
+  visualAlertEnabled: boolean
+}
+
+export interface ActiveRestTimer {
+  version: 1
+  id: string
+  presetId: string
+  label: string
+  context: string
+  mode: 'countdown' | 'emom' | 'stopwatch'
+  phase: 'running' | 'paused' | 'done'
+  durationSeconds: number
+  deadlineAt: string | null
+  remainingSeconds: number
+  firedCueIds: string[]
+  updatedAt: string
+}
+
 export interface Profile {
   id: string
   units: 'kg' | 'lb'
@@ -8,6 +30,7 @@ export interface Profile {
   timezone: string
   weekStartsOn: 1
   theme: ThemePreference
+  timerPreferences: TimerPreferences
   preferredWeekdays: number[]
   createdAt: string
   updatedAt: string
