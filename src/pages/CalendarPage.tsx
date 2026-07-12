@@ -9,6 +9,10 @@ function statusLabel(session: ScheduledSession): string {
   return { completed: 'Hecha', draft: 'En curso', skipped: 'Omitida', planned: session.deload ? 'Deload' : 'RTF' }[session.status]
 }
 
+function sessionHref(session: ScheduledSession): string {
+  return session.status === 'completed' ? `/resumen/${session.id}` : `/sesion/${session.id}`
+}
+
 function downloadIcs(schedule: ScheduledSession[]): void {
   const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//SBS Strength//RTF//ES', 'CALSCALE:GREGORIAN']
   for (const session of schedule.filter((item) => item.status === 'planned' || item.status === 'draft')) {
@@ -30,7 +34,7 @@ function SessionCalendarCard({ session }: { session: ScheduledSession }): JSX.El
   const [reason, setReason] = useState('Viaje o agenda')
   return (
     <article className={`calendar-session ${session.status} ${session.scheduledDate === isoLocalDate(new Date()) ? 'today' : ''}`}>
-      <Link to={`/sesion/${session.id}`} className="calendar-session-main"><span>{session.code}</span><strong>Semana {session.week} · D{session.day}</strong><small>{statusLabel(session)} · {session.scheduledDate}</small></Link>
+      <Link to={sessionHref(session)} className="calendar-session-main"><span>{session.code}</span><strong>Semana {session.week} · D{session.day}</strong><small>{statusLabel(session)} · {session.scheduledDate}</small></Link>
       {session.status !== 'completed' && session.status !== 'skipped' && (
         <details><summary>Programar</summary><label>Nueva fecha<input type="date" value={date} onChange={(event) => setDate(event.target.value)} /></label><button onClick={() => reprogram(session.id, date)}>Mover sesión</button><label>Motivo al omitir<select value={reason} onChange={(event) => setReason(event.target.value)}><option>Viaje o agenda</option><option>Enfermedad</option><option>Dolor o lesión</option><option>Recuperación insuficiente</option></select></label><button className="text-danger" onClick={() => skipSession(session.id, reason)}>Marcar omitida</button></details>
       )}
@@ -67,7 +71,7 @@ export function CalendarPage(): JSX.Element {
       ) : (
         <section className="month-grid-v3">
           {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day) => <strong key={day}>{day}</strong>)}
-          {monthCells.map((date) => <div key={date} className={date === today ? 'today' : ''}><span>{parseLocalDate(date).getDate()}</span>{state.schedule.filter((session) => session.scheduledDate === date).map((session) => <Link key={session.id} to={`/sesion/${session.id}`} className={session.status}>{session.code}</Link>)}</div>)}
+          {monthCells.map((date) => <div key={date} className={date === today ? 'today' : ''}><span>{parseLocalDate(date).getDate()}</span>{state.schedule.filter((session) => session.scheduledDate === date).map((session) => <Link key={session.id} to={sessionHref(session)} className={session.status}>{session.code}</Link>)}</div>)}
         </section>
       )}
     </main>

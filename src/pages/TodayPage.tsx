@@ -14,7 +14,7 @@ function formatDuration(seconds: number | null): string {
 }
 
 export function TodayPage(): JSX.Element {
-  const { state, setup, dismissSummary } = useAppState()
+  const { state, setup } = useAppState()
   const today = isoLocalDate(new Date())
   const target = state.schedule.find((session) => session.status === 'draft') || state.schedule.find((session) => session.status === 'planned')
   const parsed = target ? parseSessionId(target.code) : null
@@ -33,14 +33,6 @@ export function TodayPage(): JSX.Element {
         <div><span>{new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())}</span><h1>Hoy</h1></div>
         {overdue.length > 0 && <Link className="alert-chip" to="/calendario"><CalendarClock size={16} />{overdue.length} atrasada{overdue.length > 1 ? 's' : ''}</Link>}
       </header>
-
-      {state.completionSummary && (
-        <section className="result-banner">
-          <div><span>Sesión completada</span><h2>{state.completionSummary.id}</h2></div>
-          <div className="result-stats"><strong>{formatDuration(state.completionSummary.durationSeconds)}</strong><span>{state.completionSummary.completedSets}/{state.completionSummary.totalSets} series</span></div>
-          <button aria-label="Cerrar resumen" onClick={dismissSummary}>Cerrar</button>
-        </section>
-      )}
 
       {setup.singlePctReviewRequired && (
         <section className="result-banner setup-review-banner">

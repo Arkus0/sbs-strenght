@@ -4,6 +4,7 @@ import { buildSessionPlan, isSetupComplete, listSessions, parseSessionId } from 
 import { loadStateV3, resetV3, saveStateV3 } from '../lib/repository'
 import { generateSchedule, isoLocalDate, reprogramSession, redistributeFutureSessions } from '../lib/schedule'
 import { parseStateImport } from '../lib/stateV3'
+import { deriveCompletionImpact } from '../lib/sessionImpact'
 import type { AppStateV3, CompletionSummary, ScheduledSession } from '../types/domain'
 
 interface AppContextValue {
@@ -133,8 +134,17 @@ export function AppStateProvider({ children }: PropsWithChildren): JSX.Element {
     }
 
     async function completeLog(log: any, summary: CompletionSummary): Promise<void> {
-      const enriched = { ...log, completionSummary: summary, activeSeconds: log.activeSeconds ?? summary.durationSeconds }
       const current = state as AppStateV3
+      const completedLog = { ...log, activeSeconds: log.activeSeconds ?? summary.durationSeconds }
+      const completionSummary = deriveCompletionImpact({
+        template,
+        setup,
+        schedule: current.schedule,
+        logs: current.logs,
+        completedLog,
+        summary
+      })
+      const enriched = { ...completedLog, completionSummary }
       const schedule = current.schedule.map((session) => session.code === log.id
           ? { ...session, status: 'completed' as const, updatedAt: log.completedAt, version: session.version + 1 }
           : session)
@@ -144,7 +154,7 @@ export function AppStateProvider({ children }: PropsWithChildren): JSX.Element {
         logs: { ...current.logs, [log.id]: enriched },
         schedule,
         selectedSessionId: next?.code || current.selectedSessionId,
-        completionSummary: summary
+        completionSummary
       }
       await saveStateV3(nextState)
       setState(nextState)
