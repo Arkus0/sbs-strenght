@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { recommendAccessoryProgression } from '../src/lib/accessoryProgression'
+import { bodybuildingForSession } from '../src/lib/assistanceProgram.js'
 import { deriveAnalytics, deriveTrainingMaxOverview, epleyE1rm, trainingMaxHistoryDisplayMode } from '../src/lib/analytics'
+import { deriveCompletionImpact } from '../src/lib/sessionImpact'
 import { generateSchedule, redistributeFutureSessions } from '../src/lib/schedule'
 import { exportV3State, migrateLegacyState, parseStateImport } from '../src/lib/stateV3'
-import { buildSessionPlan, createDefaultSetup, createEmptySessionLog } from '../src/lib/sbsRtf.js'
+import { buildSessionPlan, createDefaultSetup, createEmptySessionLog, listSessions } from '../src/lib/sbsRtf.js'
 import template from '../src/data/sbsRtfTemplate.json'
 
 const performed = (sessionId: string, reps: number[], load = 20) => ({
@@ -16,6 +18,18 @@ const performed = (sessionId: string, reps: number[], load = 20) => ({
   status: 'performed' as const,
   sets: reps.map((value) => ({ done: true, reps: value }))
 })
+
+function completeSetup(frequency = 3): any {
+  const setup: any = createDefaultSetup(template)
+  setup.frequency = frequency
+  for (const slot of template.defaults.liftSlots) setup.lifts[slot.id].trainingMax = slot.defaultTrainingMax
+  return setup
+}
+
+function fullSchedule(setup: any): any[] {
+  let index = 0
+  return generateSchedule(listSessions(template, setup), 'program', '2026-07-13', [1, 3, 5], () => `session-${++index}`)
+}
 
 test('calendar generation preserves sequence and weekdays across DST-safe local dates', () => {
   const sessions = Array.from({ length: 6 }, (_, index) => ({ id: `W1D${index + 1}`, week: 1, day: index + 1, deload: false }))
@@ -77,6 +91,82 @@ test('training max overview uses completed sessions for history and the next app
   assert.equal(trainingMaxHistoryDisplayMode(0), 'empty')
   assert.equal(trainingMaxHistoryDisplayMode(4), 'list')
   assert.equal(trainingMaxHistoryDisplayMode(5), 'chart')
+})
+
+test('completion impact compares the frozen TM with the next appearance and persists bodybuilding increases', () => {
+  const setup = completeSetup()
+  const schedule = fullSchedule(setup)
+  const plan = buildSessionPlan(template, setup, {}, 1, 1)
+  const bodybuilding = bodybuildingForSession(setup, plan, {})
+  const log: any = createEmptySessionLog(plan, bodybuilding)
+  const squatAmrap = log.lifts.main_1.sets.find((set: any) => set.kind === 'amrap')
+  squatAmrap.reps = squatAmrap.targetReps + 2
+  squatAmrap.done = true
+  const sumoAmrap = log.lifts.aux_5.sets.find((set: any) => set.kind === 'amrap')
+  sumoAmrap.reps = sumoAmrap.targetReps - 2
+  sumoAmrap.done = true
+  const accessory = log.bodybuilding[0]
+  accessory.load = 20
+  accessory.sets = accessory.sets.map((set: any) => ({ ...set, reps: accessory.repMax, done: true }))
+  log.status = 'completed'
+  schedule[0].prescriptionSnapshot = structuredClone(plan)
+
+  const summary = deriveCompletionImpact({
+    template,
+    setup,
+    schedule,
+    logs: {},
+    completedLog: log,
+    summary: { id: 'W1D1', durationSeconds: 3600, completedSets: 8, totalSets: 8, exerciseCount: 6 }
+  })
+
+  const squat = summary.trainingMaxImpact?.find((impact) => impact.slotId === 'main_1')
+  const sumo = summary.trainingMaxImpact?.find((impact) => impact.slotId === 'aux_5')
+  assert.equal(summary.impactVersion, 1)
+  assert.equal(squat?.before, setup.lifts.main_1.trainingMax)
+  assert.equal(squat?.direction, 'increase')
+  assert.equal(squat?.nextSessionCode, 'W2D1')
+  assert.ok(Number(squat?.after) > Number(squat?.before))
+  assert.equal(sumo?.direction, 'decrease')
+  assert.ok(Number(sumo?.after) < Number(sumo?.before))
+  assert.deepEqual(summary.bodybuildingImpact?.map((impact) => ({ action: impact.action, before: impact.before, after: impact.after, next: impact.nextSessionCode })), [
+    { action: 'increase', before: 20, after: 22.5, next: 'W2D1' }
+  ])
+})
+
+test('completion impact reports a bodybuilding reduction only after the second failed exposure', () => {
+  const setup = completeSetup()
+  const schedule = fullSchedule(setup)
+  const plan1 = buildSessionPlan(template, setup, {}, 1, 1)
+  const bodybuilding1 = bodybuildingForSession(setup, plan1, {})
+  const log1: any = createEmptySessionLog(plan1, bodybuilding1)
+  log1.bodybuilding[0].load = 20
+  log1.bodybuilding[0].sets = log1.bodybuilding[0].sets.map((set: any) => ({ ...set, reps: 7, done: true }))
+  log1.status = 'completed'
+
+  const logs = { W1D1: log1 }
+  const plan2 = buildSessionPlan(template, setup, logs, 2, 1)
+  const bodybuilding2 = bodybuildingForSession(setup, plan2, logs)
+  const log2: any = createEmptySessionLog(plan2, bodybuilding2)
+  log2.bodybuilding[0].load = 20
+  log2.bodybuilding[0].sets = log2.bodybuilding[0].sets.map((set: any) => ({ ...set, reps: 7, done: true }))
+  log2.status = 'completed'
+  schedule[0].status = 'completed'
+  schedule[3].status = 'completed'
+  schedule[3].prescriptionSnapshot = structuredClone(plan2)
+
+  const summary = deriveCompletionImpact({
+    template,
+    setup,
+    schedule,
+    logs,
+    completedLog: log2,
+    summary: { id: 'W2D1', durationSeconds: 3000, completedSets: 0, totalSets: 0, exerciseCount: 1 }
+  })
+
+  assert.deepEqual(summary.bodybuildingImpact?.map((impact) => ({ action: impact.action, before: impact.before, after: impact.after, next: impact.nextSessionCode })), [
+    { action: 'reduce', before: 20, after: 17.5, next: 'W3D1' }
+  ])
 })
 
 test('v2 migration preserves draft logs and v3 export round-trips', () => {

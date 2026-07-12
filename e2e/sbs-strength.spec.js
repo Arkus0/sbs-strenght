@@ -147,6 +147,9 @@ test('accessory engine explains and applies an increase after reaching the top',
   }
   page.once('dialog', (dialog) => dialog.accept())
   await page.getByRole('button', { name: 'Finalizar' }).click()
+  await expect(page.getByRole('heading', { name: 'Cambios de carga' })).toBeVisible()
+  await expect(page.getByText('50', { exact: true })).toBeVisible()
+  await expect(page.getByText('52,5', { exact: false })).toBeVisible()
   const id = await sessionIdFor(page, 'W2D1')
   await page.goto(`/sesion/${id}`)
   await expect(page.locator('.bodybuilding-exercise-card').first().getByText('Subir carga')).toBeVisible()
@@ -226,11 +229,22 @@ test('completion stores reliable active time and a persistent summary', async ({
   page.once('dialog', (dialog) => dialog.accept())
   await page.getByRole('button', { name: 'Finalizar' }).click()
   await expect(page.getByText('Sesión completada')).toBeVisible()
-  await expect(page.getByText('0/24 series')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Próximos training maxes' })).toBeVisible()
+  await expect(page.getByText('0/24')).toBeVisible()
+  await expect(page).toHaveURL(/\/resumen\//)
+  const summaryAccessibility = await new AxeBuilder({ page }).analyze()
+  expect(summaryAccessibility.violations.filter((violation) => ['serious', 'critical'].includes(violation.impact))).toEqual([])
   const log = await logFor(page, 'W1D1')
   expect(log.status).toBe('completed')
   expect(log.activeSeconds).toBeGreaterThanOrEqual(1)
   expect(log.activeSeconds).toBeLessThan(30)
+  expect(log.completionSummary.impactVersion).toBe(1)
+  expect(log.completionSummary.trainingMaxImpact).toHaveLength(3)
+
+  await page.getByRole('link', { name: 'Calendario' }).click()
+  await page.getByRole('button', { name: 'Semana siguiente' }).click()
+  await page.getByRole('link', { name: /W1D1/ }).first().click()
+  await expect(page.getByRole('heading', { name: 'W1D1 · impacto futuro' })).toBeVisible()
 })
 
 test('calendar reprograms without changing the SBS code and exports ICS', async ({ page }) => {

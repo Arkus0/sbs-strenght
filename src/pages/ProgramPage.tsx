@@ -12,7 +12,7 @@ export function ProgramPage(): JSX.Element {
       <section className="roadmap-grid">
         {Array.from({ length: 21 }, (_, index) => index + 1).map((week) => {
           const sessions = state.schedule.filter((session) => session.week === week)
-          return <article key={week} className={sessions[0]?.deload ? 'deload' : ''}><header><span>Semana</span><strong>{week}</strong>{sessions[0]?.deload && <small>DELOAD</small>}</header><div>{sessions.map((session) => <Link key={session.id} to={`/sesion/${session.id}`} className={session.status}><b>D{session.day}</b><span>{session.status === 'completed' ? '✓' : session.status === 'skipped' ? '—' : session.scheduledDate.slice(5)}</span></Link>)}</div></article>
+          return <article key={week} className={sessions[0]?.deload ? 'deload' : ''}><header><span>Semana</span><strong>{week}</strong>{sessions[0]?.deload && <small>DELOAD</small>}</header><div>{sessions.map((session) => <Link key={session.id} to={session.status === 'completed' ? `/resumen/${session.id}` : `/sesion/${session.id}`} className={session.status}><b>D{session.day}</b><span>{session.status === 'completed' ? '✓' : session.status === 'skipped' ? '—' : session.scheduledDate.slice(5)}</span></Link>)}</div></article>
         })}
       </section>
     </main>

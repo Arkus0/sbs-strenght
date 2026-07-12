@@ -59,6 +59,34 @@ export interface CompletionSummary {
   completedSets: number
   totalSets: number
   exerciseCount: number
+  impactVersion?: 1
+  trainingMaxImpact?: TrainingMaxImpact[]
+  bodybuildingImpact?: BodybuildingImpact[]
+}
+
+export interface TrainingMaxImpact {
+  slotId: string
+  name: string
+  label: string
+  before: number | null
+  after: number | null
+  delta: number | null
+  direction: 'increase' | 'decrease' | 'same'
+  nextSessionCode: string | null
+  nextScheduledDate: string | null
+  timing: 'next_session' | 'cycle_end'
+}
+
+export interface BodybuildingImpact {
+  slotKey: string
+  exerciseId: string
+  name: string
+  action: 'increase' | 'reduce'
+  before: number
+  after: number
+  delta: number
+  nextSessionCode: string
+  nextScheduledDate: string
 }
 
 export interface SyncState {
