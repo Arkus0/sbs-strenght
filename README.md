@@ -25,22 +25,23 @@ npm run test:unit
 npm run build
 npm run test:e2e:list
 npm run test:e2e
+npm run android:apk
 ```
 
 El desarrollo se sirve en `http://127.0.0.1:5173/`.
 
 ## Probar en movil
 
-La via mas rapida es desplegar la app como PWA en Vercel. No necesita backend:
-todo queda en `localStorage` del navegador, con export/import JSON para copia de
-seguridad.
+La vía más rápida es desplegar la app como PWA en Vercel. No necesita backend:
+IndexedDB conserva los datos localmente, con `localStorage` como backup de la
+versión anterior y export/import JSON para copias de seguridad.
 
 ```bash
 npm run build
 npx vercel --prod
 ```
 
-Configuracion esperada en Vercel:
+Configuración esperada en Vercel:
 
 ```text
 Framework: Vite
@@ -49,8 +50,19 @@ Output directory: dist
 ```
 
 En Android o iOS, abre la URL de Vercel en el navegador y usa "Añadir a pantalla
-de inicio". Para una APK nativa habría que añadir Capacitor/Android en otro
-corte; no es necesario para probarla.
+de inicio".
+
+## APK Android
+
+El proyecto Capacitor incluido genera una APK debug firmada e instalable. Requiere
+Node.js 22 o posterior, JDK 21 y Android SDK 36:
+
+```bash
+npm run android:apk
+```
+
+El resultado se copia a `artifacts/SBS-Strength-v0.1.0-debug.apk`. Para publicar
+en Google Play se debe configurar una clave de firma de producción separada.
 
 ## Sincronización opcional
 

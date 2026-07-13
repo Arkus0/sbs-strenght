@@ -68,7 +68,7 @@ a { color: inherit; }
 .hero-heading { align-items: end; }
 .alert-chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; background: #f4dfda; color: var(--v3-danger); padding: 7px 10px; text-decoration: none; font-size: 0.75rem; font-weight: 850; }
 
-.result-banner, .next-workout-card, .metric-card, .action-card, .empty-state, .calendar-session, .settings-section, .tm-card, .tm-history-card { border: 1px solid var(--v3-line); border-radius: var(--v3-radius); background: var(--v3-surface); box-shadow: var(--v3-shadow); }
+.result-banner, .next-workout-card, .metric-card, .action-card, .empty-state, .calendar-session, .settings-section, .tm-picker-card, .tm-history-card { border: 1px solid var(--v3-line); border-radius: var(--v3-radius); background: var(--v3-surface); box-shadow: var(--v3-shadow); }
 .result-banner { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 14px; margin-bottom: 16px; padding: 16px; border-color: var(--v3-green); background: var(--v3-green-soft); }
 .result-banner span { color: var(--v3-muted); font-size: 0.74rem; font-weight: 800; }
 .result-banner h2 { margin-top: 3px; }
@@ -178,15 +178,14 @@ a { color: inherit; }
 .roadmap-grid a { display: grid; justify-items: center; border-radius: 8px; background: var(--v3-soft); padding: 8px 4px; text-decoration: none; }
 .roadmap-grid a.completed { background: var(--v3-green-soft); color: var(--v3-green); }
 
-.tm-overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 12px; }
-.tm-card { display: grid; min-width: 0; min-height: 150px; align-content: start; gap: 4px; padding: 16px; color: var(--v3-ink); text-align: left; }
-.tm-card:hover, .tm-card.active { border-color: var(--v3-green); background: var(--v3-green-soft); }
-.tm-card:focus-visible { outline: 3px solid var(--v3-accent-strong); outline-offset: 2px; }
-.tm-card > span, .tm-history-card header span, .settings-section header span { color: var(--v3-muted); font-size: 0.7rem; font-weight: 900; letter-spacing: 0.07em; text-transform: uppercase; }
-.tm-card h2 { overflow: hidden; margin: 2px 0 7px; font-size: 1rem; text-overflow: ellipsis; white-space: nowrap; }
-.tm-card > strong { color: var(--v3-green); font-size: clamp(1.55rem, 3vw, 2rem); }
-.tm-card > strong small, .tm-history-list > article > strong small { color: inherit; font-size: 0.75rem; }
-.tm-card > small { margin-top: auto; color: var(--v3-muted); font-size: 0.72rem; }
+.tm-picker-card { display: grid; grid-template-columns: minmax(190px, 0.7fr) minmax(0, 1.3fr); align-items: end; gap: 16px; margin-bottom: 12px; padding: 16px; }
+.tm-current-value { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 3px 14px; border-radius: 10px; background: var(--v3-green-soft); padding: 13px; }
+.tm-current-value > div { min-width: 0; }
+.tm-current-value span, .tm-history-card header span, .settings-section header span { color: var(--v3-muted); font-size: 0.7rem; font-weight: 900; letter-spacing: 0.07em; text-transform: uppercase; }
+.tm-current-value h2 { overflow: hidden; margin-top: 2px; font-size: 1rem; text-overflow: ellipsis; white-space: nowrap; }
+.tm-current-value > strong { color: var(--v3-green); font-size: clamp(1.55rem, 3vw, 2rem); }
+.tm-current-value > strong small, .tm-history-list > article > strong small { color: inherit; font-size: 0.75rem; }
+.tm-current-value > small { grid-column: 1 / -1; color: var(--v3-muted); font-size: 0.72rem; }
 .tm-history-card { padding: 16px; }
 .tm-history-card > header, .settings-section > header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
 .tm-history-card > header > strong { color: var(--v3-muted); font-size: 0.78rem; }
@@ -196,9 +195,20 @@ a { color: inherit; }
 .tm-history-list article span { color: var(--v3-muted); font-size: 0.72rem; }
 .tm-history-list article > strong { color: var(--v3-green); font-size: 1.1rem; }
 .tm-history-empty { display: grid; min-height: 130px; place-items: center; color: var(--v3-muted); text-align: center; }
-.tm-chart { height: 300px; }
+.tm-chart { min-height: 250px; overflow: hidden; }
+.tm-chart svg { display: block; width: 100%; height: auto; }
+.tm-chart-grid { stroke: var(--v3-line); stroke-dasharray: 4 5; }
+.tm-chart-line { fill: none; stroke: var(--v3-green); stroke-linecap: round; stroke-linejoin: round; stroke-width: 4; }
+.tm-chart-point { fill: var(--v3-surface); stroke: var(--v3-green); stroke-width: 4; }
+.tm-chart-axis-label, .tm-chart-session-label { fill: var(--v3-muted); font-size: 12px; font-weight: 700; }
 
 .settings-page-v3 { display: grid; gap: 14px; }
+.settings-categories { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.settings-categories button { display: grid; min-width: 0; min-height: 68px; align-content: center; gap: 3px; border: 1px solid var(--v3-line); border-radius: 11px; background: var(--v3-surface); color: var(--v3-ink); padding: 10px 12px; text-align: left; }
+.settings-categories button span { overflow: hidden; color: var(--v3-muted); font-size: 0.68rem; text-overflow: ellipsis; white-space: nowrap; }
+.settings-categories button.active { border-color: var(--v3-accent-strong); background: var(--v3-accent); color: #101820; }
+.settings-categories button.active span { color: #344047; }
+.settings-category-panel { display: grid; gap: 14px; }
 .settings-section { padding: 16px; }
 .settings-section p { color: var(--v3-muted); font-size: 0.82rem; }
 .settings-form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
@@ -279,6 +289,7 @@ a { color: inherit; }
   .result-banner button { grid-column: 2; grid-row: 1 / 3; }
   .summary-hero { grid-template-columns: 1fr 1fr; }
   .summary-hero > div:first-child { grid-column: 1 / -1; }
+  .tm-picker-card { grid-template-columns: 1fr; }
   .impact-row { grid-template-columns: 1fr auto; gap: 10px 12px; }
   .impact-description { grid-column: 1 / -1; }
   .impact-delta { justify-self: end; }
@@ -297,6 +308,5 @@ a { color: inherit; }
   .calendar-toolbar > button:last-child { grid-column: 1 / -1; }
   .today-grid { grid-template-columns: 1fr; }
   .today-grid .metric-card:last-child { grid-column: auto; }
-  .tm-overview-grid { grid-template-columns: 1fr 1fr; }
-  .tm-card { min-height: 138px; padding: 13px; }
+  .settings-categories { grid-template-columns: 1fr 1fr; }
 }
