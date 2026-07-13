@@ -130,52 +130,59 @@ export function deriveTrainingMaxOverview({
 }): TrainingMaxOverview[] {
   const slotIds = requiredSlotIds(template, setup)
   const orderedSchedule = [...schedule].sort((a, b) => a.sequenceIndex - b.sequenceIndex)
+  const overviews = new Map<string, TrainingMaxOverview>(slotIds.map((slotId: string) => {
+    const liftSetup = setup.lifts[slotId] || {}
+    return [slotId, {
+      slotId,
+      name: liftSetup.name || slotId,
+      label: liftSetup.label || '',
+      currentTrainingMax: null,
+      currentSessionId: null,
+      history: []
+    }]
+  }))
 
-  return slotIds.map((slotId: string) => {
-    const history = orderedSchedule.flatMap((session) => {
-      if (logs[session.code]?.status !== 'completed') return []
-      const parsed = parseSessionId(session.code)
-      if (!parsed) return []
-      const lift = buildSessionPlan(template, setup, logs, parsed.week, parsed.day)?.lifts
-        .find((entry: any) => entry.slotId === slotId)
-      if (!lift) return []
-      return [{
+  for (const session of orderedSchedule) {
+    if (logs[session.code]?.status !== 'completed') continue
+    const parsed = parseSessionId(session.code)
+    if (!parsed) continue
+    const plan = buildSessionPlan(template, setup, logs, parsed.week, parsed.day)
+    for (const lift of plan?.lifts || []) {
+      const overview = overviews.get(lift.slotId)
+      if (!overview) continue
+      overview.history.push({
         sessionId: session.code,
         week: session.week,
         day: session.day,
         trainingMax: Number(lift.projection?.trainingMax) || null
-      }]
-    })
-
-    let currentTrainingMax: number | null = null
-    let currentSessionId: string | null = null
-    for (const session of orderedSchedule) {
-      if (session.status === 'completed' || session.status === 'skipped' || logs[session.code]?.status === 'completed') continue
-      const parsed = parseSessionId(session.code)
-      if (!parsed) continue
-      const lift = buildSessionPlan(template, setup, logs, parsed.week, parsed.day)?.lifts
-        .find((entry: any) => entry.slotId === slotId)
-      if (!lift) continue
-      currentTrainingMax = Number(lift.projection?.trainingMax) || null
-      currentSessionId = session.code
-      break
+      })
     }
+  }
 
-    if (currentSessionId === null) {
-      const finalProjection = projectTrainingMax(template, setup, logs, slotId, Number.MAX_SAFE_INTEGER, 0)
-      currentTrainingMax = Number(finalProjection.trainingMax) || null
+  let unresolved = new Set(slotIds)
+  for (const session of orderedSchedule) {
+    if (!unresolved.size) break
+    if (session.status === 'completed' || session.status === 'skipped' || logs[session.code]?.status === 'completed') continue
+    const parsed = parseSessionId(session.code)
+    if (!parsed) continue
+    const plan = buildSessionPlan(template, setup, logs, parsed.week, parsed.day)
+    for (const lift of plan?.lifts || []) {
+      if (!unresolved.has(lift.slotId)) continue
+      const overview = overviews.get(lift.slotId)
+      if (!overview) continue
+      overview.currentTrainingMax = Number(lift.projection?.trainingMax) || null
+      overview.currentSessionId = session.code
+      unresolved.delete(lift.slotId)
     }
+  }
 
-    const liftSetup = setup.lifts[slotId] || {}
-    return {
-      slotId,
-      name: liftSetup.name || slotId,
-      label: liftSetup.label || '',
-      currentTrainingMax,
-      currentSessionId,
-      history
-    }
-  })
+  for (const slotId of unresolved) {
+    const finalProjection = projectTrainingMax(template, setup, logs, slotId, Number.MAX_SAFE_INTEGER, 0)
+    const overview = overviews.get(slotId)
+    if (overview) overview.currentTrainingMax = Number(finalProjection.trainingMax) || null
+  }
+
+  return slotIds.map((slotId: string) => overviews.get(slotId)!)
 }
 
 export function trainingMaxHistoryDisplayMode(count: number): 'empty' | 'list' | 'chart' {

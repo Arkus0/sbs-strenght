@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import template from '../data/sbsRtfTemplate.json'
 import { bodybuildingForSession, conditioningOptionsForSession } from '../lib/assistanceProgram.js'
 import {
@@ -94,8 +94,46 @@ function formatDuration(seconds) {
   return `${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`
 }
 
+const SessionElapsed = memo(function SessionElapsed({ status, completedSeconds, activeSecondsRef, activeStartedAtRef, hiddenAtRef }) {
+  const [now, setNow] = useState(Date.now())
+
+  useEffect(() => {
+    if (status === 'completed') return undefined
+    const interval = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => window.clearInterval(interval)
+  }, [status])
+
+  const elapsedSeconds = status === 'completed'
+    ? Number(completedSeconds || 0)
+    : activeSecondsRef.current + (hiddenAtRef.current ? 0 : Math.max(0, (now - activeStartedAtRef.current) / 1000))
+
+  return (
+    <span className="session-elapsed" aria-label="Duracion de la sesion">
+      {formatDuration(elapsedSeconds)}
+    </span>
+  )
+})
+
 function completedCount(sets) {
   return (sets || []).filter((set) => set.done).length
+}
+
+function projectionInputSignature(logs) {
+  return JSON.stringify(Object.entries(logs || {}).map(([sessionId, log]) => [
+    sessionId,
+    log?.status,
+    Object.entries(log?.lifts || {}).map(([slotId, lift]) => {
+      const single = lift?.sets?.find((set) => set?.kind === 'single_at8')
+      const amrap = lift?.sets?.filter((set) => set?.kind === 'amrap').at(-1)
+      return [slotId, single?.done, single?.useForAutoregulation, single?.weight, amrap?.done, amrap?.reps, lift?.singleAt8, lift?.lastSetReps]
+    })
+  ]))
+}
+
+function assistanceHistorySignature(logs, currentSessionId) {
+  return JSON.stringify(Object.entries(logs || {})
+    .filter(([sessionId]) => sessionId !== currentSessionId)
+    .map(([sessionId, log]) => [sessionId, log?.status, log?.bodybuilding, log?.conditioning?.optionId]))
 }
 
 function MainLiftCard({ lift, liftLog, units, rowError, pendingSingleCalibration, onSetChange, onToggleSet, onLiftChange, onApplySingleCalibration, onDismissSingleCalibration }) {
@@ -398,8 +436,17 @@ function ConditioningCard({
 }
 
 export default function WorkoutSession({ setup, logs, selected, timerPreferences, onTimerPreferencesChange, onLogChange, onDiscard, onBack, onComplete }) {
-  const plan = buildSessionPlan(template, setup, logs, selected.week, selected.day)
-  const generatedBodybuilding = bodybuildingForSession(setup, plan, logs)
+  const projectionSignature = projectionInputSignature(logs)
+  const plan = useMemo(
+    () => buildSessionPlan(template, setup, logs, selected.week, selected.day),
+    [projectionSignature, selected.day, selected.week, setup]
+  )
+  const historySignature = assistanceHistorySignature(logs, plan.id)
+  const historicalLogs = useMemo(
+    () => Object.fromEntries(Object.entries(logs).filter(([sessionId]) => sessionId !== plan.id)),
+    [historySignature, plan.id]
+  )
+  const generatedBodybuilding = useMemo(() => bodybuildingForSession(setup, plan, historicalLogs), [historicalLogs, plan, setup])
   const bodybuildingPrescription = logs[plan.id]?.status === 'completed' && logs[plan.id]?.bodybuilding?.length
     ? logs[plan.id].bodybuilding
     : generatedBodybuilding
@@ -422,7 +469,10 @@ export default function WorkoutSession({ setup, logs, selected, timerPreferences
     completionSummary: storedLog.completionSummary,
     activeRestTimer: normalizeActiveRestTimer(storedLog.activeRestTimer)
   }
-  const conditioningOptions = conditioningOptionsForSession(plan, bodybuildingPrescription, logs)
+  const conditioningOptions = useMemo(
+    () => conditioningOptionsForSession(plan, bodybuildingPrescription, historicalLogs),
+    [bodybuildingPrescription, historicalLogs, plan]
+  )
   const savedConditioningId = currentLog.conditioning?.optionId || ''
   const firstConditioningId = conditioningOptions[0]?.id || ''
   const [selectedConditioningId, setSelectedConditioningId] = useState(savedConditioningId || firstConditioningId)
@@ -430,7 +480,6 @@ export default function WorkoutSession({ setup, logs, selected, timerPreferences
   const [conditioningTimerKey, setConditioningTimerKey] = useState(null)
   const [rowError, setRowError] = useState('')
   const [pendingSingleCalibration, setPendingSingleCalibration] = useState('')
-  const [now, setNow] = useState(Date.now())
   const [resumeNotice, setResumeNotice] = useState(false)
   const activeSecondsRef = useRef(Number(currentLog.activeSeconds || 0))
   const activeStartedAtRef = useRef(Date.now())
@@ -522,21 +571,12 @@ export default function WorkoutSession({ setup, logs, selected, timerPreferences
     }
   }, [currentLog.status, plan.id])
 
-  useEffect(() => {
-    if (currentLog.status === 'completed' || !currentLog.startedAt) return undefined
-    const interval = window.setInterval(() => setNow(Date.now()), 1000)
-    return () => window.clearInterval(interval)
-  }, [currentLog.startedAt, currentLog.status])
-
   const requiredMainSets = plan.lifts.flatMap((lift) => (currentLog.lifts[lift.slotId]?.sets || []).filter((set) => !set.optional))
   const bodybuildingSets = currentLog.bodybuilding.flatMap((item) => item.sets || [])
   const requiredSets = [...requiredMainSets, ...bodybuildingSets]
   const completedSets = requiredSets.filter((set) => set.done).length
   const totalSets = requiredSets.length
   const progressPct = totalSets ? Math.round((completedSets / totalSets) * 100) : 0
-  const elapsedSeconds = currentLog.status === 'completed'
-    ? Number(currentLog.activeSeconds || currentLog.completionSummary?.durationSeconds || 0)
-    : activeSecondsRef.current + (hiddenAtRef.current ? 0 : Math.max(0, (now - activeStartedAtRef.current) / 1000))
   const restTimerVisible = Boolean(restTimer && !pendingSingleCalibration)
 
   function updateLift(slotId, patch, logPatch = {}) {
@@ -743,9 +783,13 @@ export default function WorkoutSession({ setup, logs, selected, timerPreferences
           <h1>Semana {plan.week} · D{plan.day}</h1>
         </div>
         <div className="runner-header-actions">
-          <span className="session-elapsed" aria-label="Duracion de la sesion">
-            {elapsedSeconds === null ? '--:--' : formatDuration(elapsedSeconds)}
-          </span>
+          <SessionElapsed
+            status={currentLog.status}
+            completedSeconds={currentLog.activeSeconds || currentLog.completionSummary?.durationSeconds}
+            activeSecondsRef={activeSecondsRef}
+            activeStartedAtRef={activeStartedAtRef}
+            hiddenAtRef={hiddenAtRef}
+          />
           <span className="autosave-state" title="Guardado local automático">Guardado</span>
           <span
             className={`wake-lock-status ${wakeLock.status}`}

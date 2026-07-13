@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useAppState } from '../app/AppContext'
+import { TrainingMaxChart } from '../components/TrainingMaxChart'
 import template from '../data/sbsRtfTemplate.json'
 import { deriveTrainingMaxOverview, trainingMaxHistoryDisplayMode } from '../lib/analytics'
 
@@ -27,21 +27,20 @@ export function AnalyticsPage(): JSX.Element {
         <div><span>Training max</span><h1>Analíticas</h1></div>
       </header>
 
-      <section className="tm-overview-grid" aria-label="Training maxes actuales">
-        {overviews.map((lift) => (
-          <button
-            className={`tm-card ${selected?.slotId === lift.slotId ? 'active' : ''}`}
-            key={lift.slotId}
-            aria-label={`Ver histórico de ${lift.name}`}
-            aria-pressed={selected?.slotId === lift.slotId}
-            onClick={() => setSelectedSlotId(lift.slotId)}
-          >
-            <span>{lift.label}</span>
-            <h2>{lift.name}</h2>
-            <strong>{formatTrainingMax(lift.currentTrainingMax)} <small>{setup.units}</small></strong>
-            <small>{lift.currentSessionId ? `Próxima aparición · ${lift.currentSessionId}` : 'TM al cierre del ciclo'}</small>
-          </button>
-        ))}
+      <section className="tm-picker-card" aria-label="Training max actual">
+        <label>
+          Seleccionar lift
+          <select value={selected?.slotId || ''} onChange={(event) => setSelectedSlotId(event.target.value)}>
+            {overviews.map((lift) => <option key={lift.slotId} value={lift.slotId}>{lift.name}</option>)}
+          </select>
+        </label>
+        {selected && (
+          <div className="tm-current-value">
+            <div><span>{selected.label}</span><h2>{selected.name}</h2></div>
+            <strong>{formatTrainingMax(selected.currentTrainingMax)} <small>{setup.units}</small></strong>
+            <small>{selected.currentSessionId ? `Próxima aparición · ${selected.currentSessionId}` : 'TM al cierre del ciclo'}</small>
+          </div>
+        )}
       </section>
 
       {selected && (
@@ -65,17 +64,7 @@ export function AnalyticsPage(): JSX.Element {
           )}
 
           {historyMode === 'chart' && (
-            <div className="tm-chart" role="img" aria-label={`Gráfica del histórico de TM de ${selected.name}`}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={selected.history}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="sessionId" />
-                  <YAxis domain={['auto', 'auto']} />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="trainingMax" name={`TM (${setup.units})`} stroke="#0f766e" strokeWidth={3} dot />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <TrainingMaxChart history={selected.history} liftName={selected.name} units={setup.units} />
           )}
         </section>
       )}

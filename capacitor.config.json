@@ -1,0 +1,11 @@
+{
+  "appId": "com.arkus.sbsstrength",
+  "appName": "SBS Strength",
+  "webDir": "dist",
+  "android": {
+    "backgroundColor": "#f5f1e8"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}
